@@ -4,10 +4,6 @@ import Award from "./AwardMd.js";
 export const create = catchAsync(async (req, res, next) => {
   const { title, rank, description, winners } = req.body;
 
-  if (!title || !rank || !description) {
-    return next(new HandleERROR("عنوان، مقام و توضیحات الزامی هستند", 400));
-  }
-
   const newAward = await Award.create({ title, rank, description, winners });
 
   return res.status(201).json({

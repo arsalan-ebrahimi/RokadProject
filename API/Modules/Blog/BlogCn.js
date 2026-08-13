@@ -4,10 +4,6 @@ import Blog from "./BlogMd.js";
 export const create = catchAsync(async (req, res, next) => {
   const { title, description, img, date } = req.body;
 
-  if (!title || !description || !img || !date) {
-    return next(new HandleERROR("عنوان، توضیحات، تصویر و تاریخ الزامی هستند", 400));
-  }
-
   const existingBlog = await Blog.findOne({ title });
   if (existingBlog) {
     return next(new HandleERROR("مقاله‌ای با این عنوان قبلاً ثبت شده است", 400));
