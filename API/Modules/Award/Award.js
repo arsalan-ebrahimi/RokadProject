@@ -1,17 +1,20 @@
 import { Router } from "express";
 import { getAll, getOne, update, remove, create } from "./AwardCn.js";
-import { IsLogin, IsAdmin } from "./authMiddlewares.js"; 
+import IsLogin from "../../Middleware/IsLogin.js";
+import IsAdmin from "../../Middleware/IsAdmin.js";
+import { validateRequest } from "../../Utils/validateRequest.js";
+import { createAwardValidator, updateAwardValidator } from "./AwardValidation.js";
 
 const awardRouter = Router();
 
 awardRouter.route("/")
-  .get(getAll) 
-  .post(IsLogin, IsAdmin, create); 
+  .get(getAll)
+  .post(IsLogin, IsAdmin, validateRequest(createAwardValidator), create);
 
 awardRouter.route("/:id")
-  .get(getOne) 
-  .patch(IsLogin, IsAdmin, update) 
-  .delete(IsLogin, IsAdmin, remove); 
+  .get(getOne)
+  .patch(IsLogin, IsAdmin, validateRequest(updateAwardValidator), update)
+  .delete(IsLogin, IsAdmin, remove);
 
 export default awardRouter;
 

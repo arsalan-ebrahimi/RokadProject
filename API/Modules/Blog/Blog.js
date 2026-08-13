@@ -1,16 +1,19 @@
 import { Router } from "express";
 import { create, getAll, getOne, remove, update } from "./BlogCn.js";
-import { IsLogin, IsAdmin } from "./authMiddlewares.js";
+import IsLogin from "../../Middleware/IsLogin.js";
+import IsAdmin from "../../Middleware/IsAdmin.js";
+import { validateRequest } from "../../Utils/validateRequest.js";
+import { createBlogValidator, updateBlogValidator } from "./BlogValidation.js";
 
 const blogRouter = Router();
 
 blogRouter.route("/")
   .get(getAll)
-  .post(IsLogin, IsAdmin, create);
+  .post(IsLogin, IsAdmin, validateRequest(createBlogValidator), create);
 
 blogRouter.route("/:id")
   .get(getOne)
-  .patch(IsLogin, IsAdmin, update)
+  .patch(IsLogin, IsAdmin, validateRequest(updateBlogValidator), update)
   .delete(IsLogin, IsAdmin, remove);
 
 export default blogRouter;
