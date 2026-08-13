@@ -3,20 +3,20 @@ import mongoose from "mongoose";
 const blogSchema = new mongoose.Schema({
   img: {
     type: String,
-    required: [true, "Image is requierd"],
-   },
+    required: [true, "وارد کردن تصویر مقاله الزامی است"],
+  },
   title: {
     type: String,
-    unique  : true,
-    required: [true, "Title is requierd"],
+    unique: true,
+    required: [true, "وارد کردن عنوان مقاله الزامی است"],
   },
   date: {
     type: String,
-    required: [true, "date is requierd"],
+    required: [true, "وارد کردن تاریخ مقاله الزامی است"],
   },
   description: {
     type: String,
-    required: [true, "description is requierd"],
+    required: [true, "نوشتن توضیحات مقاله الزامی است"],
   },
 });
 

@@ -1,10 +1,17 @@
 import { Router } from "express";
 import { create, getAll, getOne, remove, update } from "./BlogCn.js";
+import { IsLogin, IsAdmin } from "./authMiddlewares.js";
 
 const blogRouter = Router();
 
-blogRouter.route("/").get(getAll).post(create);
-blogRouter.route("/:id").patch(update).delete(remove).get(getOne);
+blogRouter.route("/")
+  .get(getAll)
+  .post(IsLogin, IsAdmin, create);
+
+blogRouter.route("/:id")
+  .get(getOne)
+  .patch(IsLogin, IsAdmin, update)
+  .delete(IsLogin, IsAdmin, remove);
 
 export default blogRouter;
 
