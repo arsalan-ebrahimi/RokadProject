@@ -2,21 +2,17 @@ import ApiFeatures, { catchAsync, HandleERROR } from "vanta-api";
 import Award from "./AwardMd.js";
 
 export const create = catchAsync(async (req, res, next) => {
-  if (!["admin", "superAdmin"].includes(req.role)) {
-    return next(new HandleERROR("You are not authorized to perform this action", 403));
+  const { title, rank, description, winners } = req.body;
+
+  if (!title || !rank || !description) {
+    return next(new HandleERROR("عنوان، مقام و توضیحات الزامی هستند", 400));
   }
 
-  const { title } = req.body;
-
-  if (!title) {
-    return next(new HandleERROR("Title is required", 400));
-  }
-
-  const newAward = await Award.create({ title });
+  const newAward = await Award.create({ title, rank, description, winners });
 
   return res.status(201).json({
     success: true,
-    message: "Award created successfully",
+    message: "جایزه با موفقیت ایجاد شد",
     data: newAward,
   });
 });
@@ -45,18 +41,14 @@ export const getOne = catchAsync(async (req, res, next) => {
   const result = await features.execute();
 
   if (!result || (Array.isArray(result) && result.length === 0)) {
-    return next(new HandleERROR("Award not found", 404));
+    return next(new HandleERROR("جایزه یافت نشد", 404));
   }
 
   return res.status(200).json(result);
 });
 
 export const update = catchAsync(async (req, res, next) => {
-  if (!["admin", "superAdmin"].includes(req.role)) {
-    return next(new HandleERROR("You are not authorized to perform this action", 403));
-  }
-
-  const allowedUpdates = ["title"];
+  const allowedUpdates = ["title", "rank", "description", "winners"];
   const updates = {};
 
   Object.keys(req.body).forEach((el) => {
@@ -69,30 +61,26 @@ export const update = catchAsync(async (req, res, next) => {
   });
 
   if (!updatedAward) {
-    return next(new HandleERROR("Award not found", 404));
+    return next(new HandleERROR("جایزه یافت نشد", 404));
   }
 
   return res.status(200).json({
     success: true,
-    message: "Award updated successfully",
+    message: "جایزه با موفقیت بروزرسانی شد",
     data: updatedAward,
   });
 });
 
 export const remove = catchAsync(async (req, res, next) => {
-  if (!["admin", "superAdmin"].includes(req.role)) {
-    return next(new HandleERROR("You are not authorized to perform this action", 403));
-  }
-
   const deleteAward = await Award.findByIdAndDelete(req.params.id);
 
   if (!deleteAward) {
-    return next(new HandleERROR("Award not found", 404));
+    return next(new HandleERROR("جایزه یافت نشد", 404));
   }
 
   return res.status(200).json({
     success: true,
-    message: "Award deleted successfully",
+    message: "جایزه با موفقیت حذف شد",
     data: null,
   });
 });

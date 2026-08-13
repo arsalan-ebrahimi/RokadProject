@@ -1,10 +1,17 @@
 import { Router } from "express";
 import { getAll, getOne, update, remove, create } from "./AwardCn.js";
+import { IsLogin, IsAdmin } from "./authMiddlewares.js"; 
 
 const awardRouter = Router();
 
-awardRouter.route("/").get(getAll).post(create);
-awardRouter.route("/:id").get(getOne).patch(update).delete(remove);
+awardRouter.route("/")
+  .get(getAll) 
+  .post(IsLogin, IsAdmin, create); 
+
+awardRouter.route("/:id")
+  .get(getOne) 
+  .patch(IsLogin, IsAdmin, update) 
+  .delete(IsLogin, IsAdmin, remove); 
 
 export default awardRouter;
 

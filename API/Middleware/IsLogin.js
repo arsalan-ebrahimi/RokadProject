@@ -1,10 +1,9 @@
-const IsLogin = (req, res, next) => {
-  if (!req.role  || !req.userId) {
-    return res.status(403).json({
+export const IsLogin = (req, res, next) => {
+  if (!req.role || !req.userId) {
+    return res.status(401).json({
       success: false,
-      message: "You are not authorized to access this resource"
+      message: "لطفا ابتدا وارد حساب کاربری خود شوید"
     });
   }
   next();
 };
-export default IsLogin;
