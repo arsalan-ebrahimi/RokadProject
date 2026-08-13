@@ -2,10 +2,19 @@ import { Router } from "express";
 import { getAll, getOne, update } from "./UserCn.js";
 import IsAdmin from "../../Middleware/IsAdmin.js";
 import IsLogin from "../../Middleware/IsLogin.js";
+import { validateRequest } from "../../Utils/validateRequest.js";
+import { updateUserValidator } from "./UserValidation.js";
+
 const userRouter = Router();
-userRouter.route('/').get(IsAdmin,getAll)
-userRouter.route('/:id').get(IsLogin,getOne).patch(IsLogin,update)
-export default userRouter
+
+userRouter.route('/')
+  .get(IsAdmin, getAll);
+  
+userRouter.route('/:id')
+  .get(IsLogin, getOne)
+  .patch(IsLogin, validateRequest(updateUserValidator), update);
+
+export default userRouter;
 
 /**
  * @swagger

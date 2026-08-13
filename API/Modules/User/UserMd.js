@@ -8,21 +8,29 @@ const userSchema = new mongoose.Schema({
   },
   phoneNumber: {
     type: String,
-    required: true,
+    required: [true, "وارد کردن شماره موبایل الزامی است"],
     trim: true,
     unique: true,
     match: [
       /^(\+98|0)?9\d{9}$/,
-      "Please enter a valid Iranian phone number",
+      "فرمت شماره موبایل نامعتبر است",
     ],
   },
   password: {
     type: String,
     trim: true,
   },
+  birthDate: {
+    type: String,
+    trim: true,
+    default: "",
+  },
   role: {
     type: String,
-    enum: ["user", "admin", "superAdmin"],
+    enum: {
+      values: ["user", "admin", "superAdmin"],
+      message: "نقش کاربر نامعتبر است"
+    },
     default: "user",
   },
 });
