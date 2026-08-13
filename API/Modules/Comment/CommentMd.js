@@ -3,28 +3,20 @@ import mongoose from "mongoose";
 const commentSchema = new mongoose.Schema({
   author: {
     type: String,
-    required: [true, "Author name is required"],
+    required: [true, "وارد کردن نام نویسنده الزامی است"],
     trim: true,
   },
   content: {
     type: String,
-    required: [true, "Comment content is required"],
+    required: [true, "وارد کردن متن نظر الزامی است"],
   },
   role: {
     type: String,
-    required: [true, "Author role is required"],
-    enum: {
-      values: ["دانش آموز", "اولیا", "معلم"],
-      message: "Role must be either: student, parent, or teacher",
-    },
+    required: [true, "وارد کردن نقش الزامی است"],
   },
-  gender: {
+  img: {
     type: String,
-    required: [true, "Gender is required"],
-    enum: {
-      values: ["مرد", "زن"],
-      message: "Gender must be either male or female",
-    },
+    required: [true, "ارسال تصویر یا آیکون الزامی است"],
   },
   createdAt: {
     type: Date,
@@ -32,6 +24,5 @@ const commentSchema = new mongoose.Schema({
   },
 });
 
-const Comment =new mongoose.model("Comment", commentSchema);
-
+const Comment = mongoose.model("Comment", commentSchema);
 export default Comment;

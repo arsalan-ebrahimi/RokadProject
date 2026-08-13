@@ -1,11 +1,20 @@
 import { Router } from "express";
 import { create, getAll, getOne, update, remove } from "./CommentCn.js";
+import { IsLogin } from "../../Middleware/IsLogin.js";
+import { IsAdmin } from "../../Middleware/IsAdmin.js";
+import { validateRequest } from "../../Utils/validateRequest.js";
+import { createCommentValidator, updateCommentValidator } from "./CommentValidation.js";
 
 const commentRouter = Router();
 
-commentRouter.route("/").get(getAll).post(create);
+commentRouter.route("/")
+  .get(getAll)
+  .post(IsLogin, IsAdmin, validateRequest(createCommentValidator), create);
 
-commentRouter.route("/:id").get(getOne).patch(update).delete(remove);
+commentRouter.route("/:id")
+  .get(getOne)
+  .patch(IsLogin, IsAdmin, validateRequest(updateCommentValidator), update)
+  .delete(IsLogin, IsAdmin, remove);
 
 export default commentRouter;
 /**
