@@ -17,7 +17,7 @@ import enrollmentRouter from "./Modules/Enrollment/Enrollment.js";
 import uploadRouter from "./Modules/Upload/Upload.js";
 import commentRouter from "./Modules/Comment/Comment.js";
 import awardRouter from "./Modules/Award/Award.js";
-import studentRouter from "./Modules/Student/StudentRouter.js"; 
+import studentRouter from "./Modules/Student/Student.js"; 
 
 const app = express();
 

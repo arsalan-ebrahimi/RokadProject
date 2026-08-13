@@ -1,4 +1,4 @@
-export const IsAdmin = (req, res, next) => {
+const IsAdmin = (req, res, next) => {
   if (req.role !== "admin" && req.role !== "superAdmin") {
     return res.status(403).json({
       success: false,
@@ -7,3 +7,5 @@ export const IsAdmin = (req, res, next) => {
   }
   next();
 };
+
+export default IsAdmin;
