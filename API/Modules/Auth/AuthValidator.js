@@ -1,60 +1,70 @@
-import { body } from "express-validator";
+import Joi from "joi";
 
-export const authValidator = [
-  body("phoneNumber")
-    .matches(/^(\+98|0)?9\d{9}$/)
-    .withMessage("Invalid phone number format"),
-];
-export const loginWithPasswordValidator = [
-  body("phoneNumber")
-    .notEmpty()
-    .withMessage("Phone number is required")
-    .matches(/^(\+98|0)?9\d{9}$/)
-    .withMessage("Invalid phone number format"),
-  body("password")
-    .notEmpty()
-    .withMessage("Password is required")
-    .isLength({ min: 6 })
-    .withMessage("Password must be at least 6 characters long"),
-];
-export const loginWithOtpValidator = [
-  body("phoneNumber")
-    .notEmpty()
-    .withMessage("Phone number is required")
-    .matches(/^(\+98|0)?9\d{9}$/)
-    .withMessage("Invalid phone number format"),
-  body("code")
-    .notEmpty()
-    .withMessage("Code is required")
-    .isLength({ min: 5, max: 6 })
-    .withMessage("Code must be exactly 5-6 digits")
-    .isNumeric()
-    .withMessage("Code must be numeric"),
-];
-export const resendCodeValidator = [
-  body("phoneNumber")
-    .notEmpty()
-    .withMessage("Phone number is required")
-    .matches(/^(\+98|0)?9\d{9}$/)
-    .withMessage("Invalid phone number format"),
-];
+const phoneRegex = /^(\+98|0)?9\d{9}$/;
 
-export const forgetPasswordValidator = [
-  body("phoneNumber")
-    .notEmpty()
-    .withMessage("Phone number is required")
-    .matches(/^(\+98|0)?9\d{9}$/)
-    .withMessage("Invalid phone number format"),
-  body("code")
-    .notEmpty()
-    .withMessage("Code is required")
-    .isLength({ min: 5, max: 6 })
-    .withMessage("Code must be exactly 5-6 digits")
-    .isNumeric()
-    .withMessage("Code must be numeric"),
-  body("newPassword")
-    .notEmpty()
-    .withMessage("New password is required")
-    .isLength({ min: 8 })
-    .withMessage("Password must be at least 8 characters long"),
-];
+export const authValidator = Joi.object({
+  phoneNumber: Joi.string().pattern(phoneRegex).required().messages({
+    "string.empty": "شماره موبایل نمی‌تواند خالی باشد",
+    "string.pattern.base": "فرمت شماره موبایل نامعتبر است",
+    "any.required": "وارد کردن شماره موبایل الزامی است",
+  }),
+});
+
+export const loginWithPasswordValidator = Joi.object({
+  phoneNumber: Joi.string().pattern(phoneRegex).required().messages({
+    "string.empty": "شماره موبایل نمی‌تواند خالی باشد",
+    "string.pattern.base": "فرمت شماره موبایل نامعتبر است",
+    "any.required": "وارد کردن شماره موبایل الزامی است",
+  }),
+  password: Joi.string().min(6).required().messages({
+    "string.empty": "رمز عبور نمی‌تواند خالی باشد",
+    "string.min": "رمز عبور باید حداقل ۶ کاراکتر باشد",
+    "any.required": "وارد کردن رمز عبور الزامی است",
+  }),
+});
+
+export const loginWithOtpValidator = Joi.object({
+  phoneNumber: Joi.string().pattern(phoneRegex).required().messages({
+    "string.empty": "شماره موبایل نمی‌تواند خالی باشد",
+    "string.pattern.base": "فرمت شماره موبایل نامعتبر است",
+    "any.required": "وارد کردن شماره موبایل الزامی است",
+  }),
+  code: Joi.string().min(5).max(6).pattern(/^[0-9]+$/).required().messages({
+    "string.empty": "کد تایید نمی‌تواند خالی باشد",
+    "string.min": "کد تایید نامعتبر است",
+    "string.max": "کد تایید نامعتبر است",
+    "string.pattern.base": "کد تایید باید فقط شامل اعداد باشد",
+    "any.required": "وارد کردن کد تایید الزامی است",
+  }),
+  password: Joi.string().min(6).optional().messages({
+    "string.min": "رمز عبور باید حداقل ۶ کاراکتر باشد",
+  }),
+});
+
+export const resendCodeValidator = Joi.object({
+  phoneNumber: Joi.string().pattern(phoneRegex).required().messages({
+    "string.empty": "شماره موبایل نمی‌تواند خالی باشد",
+    "string.pattern.base": "فرمت شماره موبایل نامعتبر است",
+    "any.required": "وارد کردن شماره موبایل الزامی است",
+  }),
+});
+
+export const forgetPasswordValidator = Joi.object({
+  phoneNumber: Joi.string().pattern(phoneRegex).required().messages({
+    "string.empty": "شماره موبایل نمی‌تواند خالی باشد",
+    "string.pattern.base": "فرمت شماره موبایل نامعتبر است",
+    "any.required": "وارد کردن شماره موبایل الزامی است",
+  }),
+  code: Joi.string().min(5).max(6).pattern(/^[0-9]+$/).required().messages({
+    "string.empty": "کد تایید نمی‌تواند خالی باشد",
+    "string.min": "کد تایید نامعتبر است",
+    "string.max": "کد تایید نامعتبر است",
+    "string.pattern.base": "کد تایید باید فقط شامل اعداد باشد",
+    "any.required": "وارد کردن کد تایید الزامی است",
+  }),
+  newPassword: Joi.string().min(8).required().messages({
+    "string.empty": "رمز عبور جدید نمی‌تواند خالی باشد",
+    "string.min": "رمز عبور جدید باید حداقل ۸ کاراکتر باشد",
+    "any.required": "وارد کردن رمز عبور جدید الزامی است",
+  }),
+});

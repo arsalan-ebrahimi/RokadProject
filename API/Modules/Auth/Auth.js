@@ -6,14 +6,22 @@ import {
   loginWithPassword,
   resendCode,
 } from "./AuthCn.js";
-import { handleValidationErrors } from "../../Utils/handleValidationError.js";
-import { authValidator, forgetPasswordValidator, loginWithOtpValidator, loginWithPasswordValidator, resendCodeValidator } from "./AuthValidator.js";
+import { validateRequest } from "../../Utils/validateRequest.js";
+import {
+  authValidator,
+  forgetPasswordValidator,
+  loginWithOtpValidator,
+  loginWithPasswordValidator,
+  resendCodeValidator,
+} from "./AuthValidation.js";
+
 const authRouter = Router();
-authRouter.route("/").post(authValidator, handleValidationErrors, auth);
-authRouter.route("/login-password").post(loginWithPasswordValidator, handleValidationErrors, loginWithPassword);
-authRouter.route("/login-otp").post(loginWithOtpValidator, handleValidationErrors, loginWithOtp);
-authRouter.route("/resend-code").post(resendCodeValidator, handleValidationErrors, resendCode);
-authRouter.route("/forget-password").post(forgetPasswordValidator, handleValidationErrors, forgetPassword);
+
+authRouter.route("/").post(validateRequest(authValidator), auth);
+authRouter.route("/login-password").post(validateRequest(loginWithPasswordValidator), loginWithPassword);
+authRouter.route("/login-otp").post(validateRequest(loginWithOtpValidator), loginWithOtp);
+authRouter.route("/resend-code").post(validateRequest(resendCodeValidator), resendCode);
+authRouter.route("/forget-password").post(validateRequest(forgetPasswordValidator), forgetPassword);
 
 export default authRouter;
 /**
