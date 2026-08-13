@@ -18,10 +18,18 @@ const awardSchema = new mongoose.Schema({
     type: String,
     required: [true, "نوشتن توضیحات الزامی است"],
   },
-  winners: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Student"
-  }]
+  winners: {
+    type: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Student"
+    }],
+    validate: {
+      validator: function(v) {
+        return v && v.length > 0;
+      },
+      message: "حداقل یک برنده باید انتخاب شود"
+    }
+  }
 });
 
 const Award = mongoose.model("Award", awardSchema);

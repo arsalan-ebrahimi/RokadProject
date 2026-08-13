@@ -16,8 +16,10 @@ export const createAwardValidator = Joi.object({
     "string.empty": "توضیحات نمی‌تواند خالی باشد",
     "any.required": "فیلد توضیحات الزامی است",
   }),
-  winners: Joi.array().items(Joi.string().hex().length(24)).optional().messages({
+  winners: Joi.array().items(Joi.string().hex().length(24)).min(1).required().messages({
     "array.base": "برندگان باید به صورت آرایه ارسال شوند",
+    "array.min": "حداقل یک برنده باید انتخاب شود",
+    "any.required": "انتخاب حداقل یک برنده الزامی است",
     "string.hex": "آیدی دانش‌آموز نامعتبر است",
     "string.length": "آیدی دانش‌آموز نامعتبر است"
   })
@@ -36,8 +38,9 @@ export const updateAwardValidator = Joi.object({
     "string.base": "توضیحات باید یک متن باشد",
     "string.empty": "توضیحات نمی‌تواند خالی باشد",
   }),
-  winners: Joi.array().items(Joi.string().hex().length(24)).optional().messages({
+  winners: Joi.array().items(Joi.string().hex().length(24)).min(1).messages({
     "array.base": "برندگان باید به صورت آرایه ارسال شوند",
+    "array.min": "حداقل یک برنده باید انتخاب شود",
     "string.hex": "آیدی دانش‌آموز نامعتبر است",
     "string.length": "آیدی دانش‌آموز نامعتبر است"
   })
