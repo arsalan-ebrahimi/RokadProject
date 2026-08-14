@@ -1,16 +1,23 @@
+// ==========================================
+// Dependencies & Icons
+// ==========================================
 import React from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 
+// ==========================================
+// Component: AwardCard
+// Description: Renders individual award details and action buttons
+// ==========================================
 export default function AwardCard({ award, onEdit, onDelete }) {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center justify-between hover:shadow-md transition-shadow mb-4">
       
-      {/* Award Information display */}
+      {/* Award Information Display */}
       <div className="flex items-center gap-4">
         
-        {/* Visual decoration icon */}
+        {/* Visual Decoration Icon */}
         <div className="p-2 bg-yellow-50 text-yellow-600 rounded-full">
             <EmojiEventsIcon />
         </div>
@@ -22,10 +29,9 @@ export default function AwardCard({ award, onEdit, onDelete }) {
             {award.title}
           </h2>
         </div>
-
       </div>
 
-      {/* Action buttons: Edit and Delete */}
+      {/* Action Buttons: Edit and Delete */}
       <div className="flex items-center gap-2">
         <button
           onClick={() => onEdit(award._id)}

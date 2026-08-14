@@ -1,18 +1,34 @@
+// ==========================================
+// Dependencies & Libraries
+// ==========================================
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+
+// ==========================================
+// Utilities
+// ==========================================
 import fetchData from "../../../Utils/fetchData";
 import Notify from "../../../Utils/notify";
 
-// Validation schema for creating a new award
+// ----------------------------------------
+// Validation Schema
+// ----------------------------------------
 const awardValidationSchema = Yup.object({
   title: Yup.string().required("عنوان جایزه الزامی است"),
 });
 
+// ==========================================
+// Component: CreateAward
+// Description: Form to create a new award
+// ==========================================
 export default function CreateAward() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // ----------------------------------------
+  // Formik Configuration
+  // ----------------------------------------
   const formik = useFormik({
     initialValues: {
       title: "",
@@ -21,15 +37,16 @@ export default function CreateAward() {
     onSubmit: async (values) => {
       setIsSubmitting(true);
       
-      // Perform POST request to create award
+      // Execute POST request to create award
       const response = await fetchData("award", {
         method: "POST",
         body: JSON.stringify(values),
       });
 
+      // Handle response
       if (response && response.success !== false) {
         Notify("success", "جایزه با موفقیت ثبت شد!");
-        window.history.back();
+        window.history.back(); // Return to previous page
       } else {
         Notify("error", response?.message || "ثبت جایزه با خطا مواجه شد");
       }
@@ -40,7 +57,8 @@ export default function CreateAward() {
 
   return (
     <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
-      {/* Header section with back button */}
+      
+      {/* Header Section with Back Button */}
       <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
         <h1 className="text-2xl font-bold text-[#1b234d]">افزودن جایزه جدید</h1>
         <button
@@ -53,9 +71,11 @@ export default function CreateAward() {
         </button>
       </div>
 
-      {/* Main form container */}
+      {/* Main Form Container */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 max-w-4xl mx-auto">
         <form onSubmit={formik.handleSubmit} className="flex flex-col gap-6">
+          
+          {/* Title Input Field */}
           <div className="flex flex-col gap-2">
             <label htmlFor="title" className="text-sm font-semibold text-gray-700">عنوان جایزه</label>
             <input
@@ -72,6 +92,7 @@ export default function CreateAward() {
             )}
           </div>
 
+          {/* Submit Action */}
           <div className="flex justify-end mt-4">
             <button
               type="submit"

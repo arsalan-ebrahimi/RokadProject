@@ -1,22 +1,37 @@
+// ==========================================
+// Dependencies & Libraries
+// ==========================================
 import React, { useState, useEffect } from "react";
-import fetchData from "../../../Utils/fetchData"; 
-import AwardCard from "../AwardCard"; 
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
-import Notify from "../../../Utils/notify";
 
+// ==========================================
+// Components & Utilities
+// ==========================================
+import fetchData from "../../../Utils/fetchData"; 
+import AwardCard from "../AwardCard"; 
+import Notify from "../../../Utils/notify";
+import Confirm from "../../../Utils/Confirm"; // Custom SweetAlert2 Confirm
+
+// ==========================================
+// Component: AwardPage
+// Description: Manages and lists all awards
+// ==========================================
 export default function AwardPage() {
   const navigate = useNavigate();
   const [awards, setAwards] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Load all awards from server
+  // ----------------------------------------
+  // Fetch Awards Data on Component Mount
+  // ----------------------------------------
   useEffect(() => {
     const getAwards = async () => {
       setLoading(true);
       
       const data = await fetchData("award");
       
+      // Update state if data is successfully fetched
       if (data && data.success !== false) { 
         setAwards(Array.isArray(data) ? data : data.data || []);
       } else {
@@ -28,29 +43,40 @@ export default function AwardPage() {
     getAwards();
   }, []);
 
-  // Handle redirection to update page
+  // ----------------------------------------
+  // Action Handlers
+  // ----------------------------------------
+  
+  // Navigate to update page
   const handleEditAward = (id) => {
     if (id) {
       navigate(`update/${id}`); 
     }
   };
 
-  // Handle redirection to creation page
+  // Navigate to creation page
   const handleAddAward = () => {
     navigate("create");
   };
 
-  // Handle award deletion with confirmation
+  // Handle award deletion using custom SweetAlert2 Confirm
   const handleDeleteAward = async (id) => {
-    const isConfirmed = window.confirm("آیا از حذف این جایزه اطمینان دارید؟ این عمل غیرقابل بازگشت است.");
+    const isConfirmed = await Confirm(
+      "آیا از حذف این جایزه اطمینان دارید؟",
+      "این عمل غیرقابل بازگشت است.",
+      "بله، حذف کن"
+    );
     
+    // Stop execution if user cancels
     if (!isConfirmed) return; 
 
+    // Execute DELETE request
     const deleteData = await fetchData(`award/${id}`, {
       method: "DELETE",
     });
 
     if (deleteData && deleteData.success !== false) {
+      // Remove deleted item from local state
       setAwards((prevAwards) => prevAwards.filter((item) => item._id !== id));
       Notify("success", "جایزه با موفقیت حذف شد.");
     } else {
@@ -58,7 +84,10 @@ export default function AwardPage() {
     }
   };
   
-  // Render list of AwardCard components in reverse order
+  // ----------------------------------------
+  // Render Components
+  // ----------------------------------------
+  // Render list of AwardCard components in reverse order (newest first)
   const renderedAwardCards = [...awards].reverse().map((award) => (
     <AwardCard 
       key={award._id} 
@@ -91,7 +120,7 @@ export default function AwardPage() {
           {renderedAwardCards}
 
           {/* Empty state message */}
-          {awards.length === 0  && (
+          {awards.length === 0 && (
             <div className="text-center text-gray-500 py-10">
               هیچ جایزه‌ای یافت نشد.
             </div>

@@ -1,27 +1,43 @@
+// ==========================================
+// Dependencies & Libraries
+// ==========================================
 import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import fetchData from "../../../Utils/fetchData";
 import { useNavigate, useParams } from "react-router-dom";
+
+// ==========================================
+// Utilities
+// ==========================================
+import fetchData from "../../../Utils/fetchData";
 import Notify from "../../../Utils/notify";
 
-// Validation schema for updating awards
+// ----------------------------------------
+// Validation Schema
+// ----------------------------------------
 const awardUpdateSchema = Yup.object({
   title: Yup.string().required("عنوان جایزه الزامی است"),
 });
 
+// ==========================================
+// Component: UpdateAward
+// Description: Form to update an existing award
+// ==========================================
 export default function UpdateAward() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Initial form values state
   const [initialValues, setInitialValues] = useState({
     title: "",
   });
 
-  // Fetch award data on component mount
+  // ----------------------------------------
+  // Fetch Award Data on Component Mount
+  // ----------------------------------------
   useEffect(() => {
     const getAwardData = async () => {
       setLoading(true);
@@ -35,6 +51,7 @@ export default function UpdateAward() {
         awardData = response[0];
       }
 
+      // Populate form with existing data
       if (awardData) {
         setInitialValues({
           title: awardData.title || "",
@@ -44,11 +61,12 @@ export default function UpdateAward() {
       setLoading(false);
     };
 
-    if (id) {
-      getAwardData();
-    }
+    if (id) getAwardData();
   }, [id, navigate]);
 
+  // ----------------------------------------
+  // Formik Configuration
+  // ----------------------------------------
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialValues,
@@ -56,12 +74,13 @@ export default function UpdateAward() {
     onSubmit: async (values) => {
       setIsSubmitting(true);
 
-      // Perform PATCH request to update award
+      // Execute PATCH request to update award
       const response = await fetchData(`award/${id}`, {
         method: "PATCH", 
         body: JSON.stringify(values),
       });
 
+      // Handle response
       if (response && (response.success || response.status === "success")) {
         Notify("success", "جایزه با موفقیت ویرایش شد!");
         navigate("/award");
@@ -73,7 +92,9 @@ export default function UpdateAward() {
     },
   });
 
-  // Render loading state
+  // ----------------------------------------
+  // Loading State
+  // ----------------------------------------
   if (loading) {
     return (
       <div dir="rtl" className="flex justify-center items-center min-h-screen bg-gray-50">
@@ -82,8 +103,13 @@ export default function UpdateAward() {
     );
   }
 
+  // ----------------------------------------
+  // Render Component
+  // ----------------------------------------
   return (
     <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
+      
+      {/* Header Section with Back Button */}
       <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
         <h1 className="text-2xl font-bold text-[#1b234d]">ویرایش جایزه</h1>
         <button
@@ -96,8 +122,11 @@ export default function UpdateAward() {
         </button>
       </div>
 
+      {/* Main Form Container */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 max-w-4xl mx-auto">
         <form onSubmit={formik.handleSubmit} className="flex flex-col gap-6">
+          
+          {/* Title Input Field */}
           <div className="flex flex-col gap-2">
             <label htmlFor="title" className="text-sm font-semibold text-gray-700">عنوان جایزه</label>
             <input
@@ -113,6 +142,7 @@ export default function UpdateAward() {
             )}
           </div>
 
+          {/* Submit Action */}
           <div className="flex justify-end mt-4">
             <button
               type="submit"
