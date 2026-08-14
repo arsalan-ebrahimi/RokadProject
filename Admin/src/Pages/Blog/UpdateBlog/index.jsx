@@ -1,13 +1,22 @@
+// ==========================================
+// Dependencies & Libraries
+// ==========================================
 import React, { useState, useEffect, useRef } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { useNavigate, useParams } from "react-router-dom";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+
+// ==========================================
+// Utilities
+// ==========================================
 import fetchData from "../../../Utils/fetchData";
-import { useNavigate, useParams } from "react-router-dom";
 import Notify from "../../../Utils/notify";
 
-// Validation schema for blog updates
+// ----------------------------------------
+// Validation Schema for Formik
+// ----------------------------------------
 const blogUpdateSchema = Yup.object({
   title: Yup.string().required("وارد کردن عنوان بلاگ الزامی است"),
   date: Yup.string().required("انتخاب تاریخ انتشار الزامی است"),
@@ -16,10 +25,15 @@ const blogUpdateSchema = Yup.object({
     .required("وارد کردن توضیحات الزامی است"),
 });
 
+// ==========================================
+// Component: UpdateBlog
+// Description: Form to update an existing blog and handle image replacement
+// ==========================================
 export default function UpdateBlog() {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  // Local state for UI feedback
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -27,6 +41,7 @@ export default function UpdateBlog() {
   // Reference to store the old image name to prevent loss during re-renders
   const oldImageRef = useRef(null);
 
+  // Initial form values state
   const [initialValues, setInitialValues] = useState({
     title: "",
     date: "",
@@ -34,7 +49,9 @@ export default function UpdateBlog() {
     img: null,
   });
 
-  // Fetch existing blog data
+  // ----------------------------------------
+  // Fetch Existing Blog Data
+  // ----------------------------------------
   useEffect(() => {
     const getBlogData = async () => {
       setLoading(true);
@@ -47,6 +64,7 @@ export default function UpdateBlog() {
            blogData = response[0];
       }
 
+      // Populate form and handle existing image
       if (blogData) {
         setInitialValues({
           title: blogData.title || "",
@@ -58,7 +76,7 @@ export default function UpdateBlog() {
         if (blogData.img) {
           // Store original image filename in ref
           oldImageRef.current = blogData.img;
-          const baseUrl = import.meta.env.VITE_FILE_URL || "http://localhost:5000";
+          const baseUrl = import.meta.env.VITE_FILE_URL || "http://localhost:1337";
           setImagePreview(`${baseUrl}/${blogData.img}`);
         }
       }
@@ -70,6 +88,9 @@ export default function UpdateBlog() {
     }
   }, [id, navigate]);
 
+  // ----------------------------------------
+  // Formik Setup
+  // ----------------------------------------
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialValues,
@@ -82,7 +103,7 @@ export default function UpdateBlog() {
       if (values.img instanceof File) {
         const oldImageName = oldImageRef.current;
 
-        // Cleanup: remove old image from server
+        // Cleanup: remove old image from server storage
         if (oldImageName && typeof oldImageName === "string") {
             await fetchData("upload/remove", {
               method: "POST", 
@@ -100,6 +121,7 @@ export default function UpdateBlog() {
           body: formData,
         });
 
+        // Abort if upload fails
         if (!uploadData || !uploadData.success) {
           Notify("error", uploadData?.message || "آپلود تصویر با خطا مواجه شد");
           setIsSubmitting(false);
@@ -108,7 +130,7 @@ export default function UpdateBlog() {
         finalImageName = uploadData.data;
       }
 
-      // Update blog details in database
+      // Prepare payload to update blog details in database
       const blogPayload = {
         title: values.title,
         date: values.date,
@@ -116,14 +138,16 @@ export default function UpdateBlog() {
         img: finalImageName,
       };
 
+      // Execute PATCH request
       const blogData = await fetchData(`blog/${id}`, {
         method: "PATCH", 
         body: JSON.stringify(blogPayload),
       });
 
+      // Handle response
       if (blogData && (blogData.success || blogData.status === "success")) {
         Notify("success", "بلاگ با موفقیت ویرایش شد!");
-        navigate("/blog");
+        navigate("/blog"); // Redirect to blogs list
       } else {
         Notify("error", blogData?.message || "ویرایش با خطا مواجه شد");
       }
@@ -132,14 +156,20 @@ export default function UpdateBlog() {
     },
   });
 
+  // ----------------------------------------
+  // Handlers
+  // ----------------------------------------
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       formik.setFieldValue("img", file);
-      setImagePreview(URL.createObjectURL(file));
+      setImagePreview(URL.createObjectURL(file)); // Show local preview immediately
     }
   };
 
+  // ----------------------------------------
+  // Loading State
+  // ----------------------------------------
   if (loading) {
     return (
       <div dir="rtl" className="flex justify-center items-center min-h-screen bg-gray-50">
@@ -148,8 +178,13 @@ export default function UpdateBlog() {
     );
   }
 
+  // ----------------------------------------
+  // Render Component
+  // ----------------------------------------
   return (
     <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
+      
+      {/* Header Section */}
       <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
         <h1 className="text-2xl font-bold text-[#1b234d]">ویرایش بلاگ</h1>
         <button
@@ -162,9 +197,12 @@ export default function UpdateBlog() {
         </button>
       </div>
 
+      {/* Main Form Container */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 max-w-4xl mx-auto">
         <form onSubmit={formik.handleSubmit} className="flex flex-col gap-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Title Input Field */}
             <div className="flex flex-col gap-2">
               <label htmlFor="title" className="text-sm font-semibold text-gray-700">عنوان بلاگ</label>
               <input
@@ -180,6 +218,7 @@ export default function UpdateBlog() {
               )}
             </div>
 
+            {/* Date Input Field */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold text-gray-700">تاریخ انتشار</label>
               <input
@@ -196,6 +235,7 @@ export default function UpdateBlog() {
             </div>
           </div>
 
+          {/* Description Input Field */}
           <div className="flex flex-col gap-2">
             <label htmlFor="description" className="text-sm font-semibold text-gray-700">توضیحات و متن مقاله</label>
             <textarea
@@ -211,6 +251,7 @@ export default function UpdateBlog() {
             )}
           </div>
 
+          {/* Image Upload Input */}
           <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-gray-700">تصویر شاخص</label>
             <div className="w-full h-48 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-3 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer relative overflow-hidden">
@@ -235,6 +276,7 @@ export default function UpdateBlog() {
             </div>
           </div>
 
+          {/* Submit Action */}
           <div className="flex justify-end mt-4">
             <button
               type="submit"

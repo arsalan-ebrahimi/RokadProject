@@ -1,12 +1,21 @@
+// ==========================================
+// Dependencies & Icons
+// ==========================================
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+
+// ==========================================
+// Utilities
+// ==========================================
 import fetchData from "../../../Utils/fetchData";
 import Notify from "../../../Utils/notify";
 
-// Validation rules for new blog entry
+// ----------------------------------------
+// Validation Schema for Formik
+// ----------------------------------------
 const blogValidationSchema = Yup.object({
   title: Yup.string().required("وارد کردن عنوان بلاگ الزامی است"),
   date: Yup.string().required("انتخاب تاریخ انتشار الزامی است"),
@@ -16,10 +25,17 @@ const blogValidationSchema = Yup.object({
   img: Yup.mixed().required("انتخاب تصویر شاخص الزامی است"),
 });
 
+// ==========================================
+// Component: CreateBlog
+// Description: Form to create a new blog and upload its thumbnail
+// ==========================================
 export default function CreateBlog() {
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // ----------------------------------------
+  // Formik Setup
+  // ----------------------------------------
   const formik = useFormik({
     initialValues: {
       title: "",
@@ -31,7 +47,7 @@ export default function CreateBlog() {
     onSubmit: async (values) => {
       setIsSubmitting(true);
       try {
-        // Step 1: Upload image file
+        // Step 1: Upload image to the server
         const formData = new FormData();
         formData.append("file", values.img);
 
@@ -40,13 +56,14 @@ export default function CreateBlog() {
           body: formData,
         });
 
+        // Abort if image upload fails
         if (!uploadData || !uploadData.success) {
           throw new Error(uploadData?.message || "آپلود عکس با خطا مواجه شد");
         }
 
         const uploadedFilename = uploadData.data;
 
-        // Step 2: Create blog post with image filename
+        // Step 2: Save the blog entry with the returned filename
         const blogPayload = {
           title: values.title,
           date: values.date,
@@ -61,7 +78,7 @@ export default function CreateBlog() {
 
         if (blogData && blogData.success) {
           Notify("success", "بلاگ با موفقیت ثبت شد!");
-          window.history.back();
+          window.history.back(); // Redirect back to blog list
         } else {
           throw new Error(blogData?.message || "ثبت بلاگ با خطا مواجه شد");
         }
@@ -73,16 +90,24 @@ export default function CreateBlog() {
     },
   });
 
+  // ----------------------------------------
+  // Handlers
+  // ----------------------------------------
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       formik.setFieldValue("img", file);
-      setImagePreview(URL.createObjectURL(file)); 
+      setImagePreview(URL.createObjectURL(file)); // Generate local preview URL
     }
   };
 
+  // ----------------------------------------
+  // Render Component
+  // ----------------------------------------
   return (
     <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
+      
+      {/* Header Section */}
       <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
         <h1 className="text-2xl font-bold text-[#1b234d]">افزودن بلاگ جدید</h1>
         <button
@@ -95,9 +120,12 @@ export default function CreateBlog() {
         </button>
       </div>
 
+      {/* Main Form Container */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 max-w-4xl mx-auto">
         <form onSubmit={formik.handleSubmit} className="flex flex-col gap-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Title Input */}
             <div className="flex flex-col gap-2">
               <label htmlFor="title" className="text-sm font-semibold text-gray-700">عنوان بلاگ</label>
               <input
@@ -114,6 +142,7 @@ export default function CreateBlog() {
               )}
             </div>
 
+            {/* Date Input */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold text-gray-700">تاریخ انتشار</label>
               <input
@@ -130,6 +159,7 @@ export default function CreateBlog() {
             </div>
           </div>
 
+          {/* Description Input */}
           <div className="flex flex-col gap-2">
             <label htmlFor="description" className="text-sm font-semibold text-gray-700">توضیحات و متن مقاله</label>
             <textarea
@@ -146,6 +176,7 @@ export default function CreateBlog() {
             )}
           </div>
 
+          {/* Image Upload Input */}
           <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-gray-700">تصویر شاخص</label>
             <div className="w-full h-48 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-3 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer relative overflow-hidden">
@@ -173,6 +204,7 @@ export default function CreateBlog() {
             )}
           </div>
 
+          {/* Submit Button */}
           <div className="flex justify-end mt-4">
             <button
               type="submit"
