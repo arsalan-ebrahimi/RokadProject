@@ -1,37 +1,55 @@
+// ==========================================
+// Dependencies & Libraries
+// ==========================================
 import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import fetchData from "../../../Utils/fetchData"; 
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useNavigate, useParams } from "react-router-dom";
-import Notify from "../../../Utils/notify";
 
-// Validation schema for updating comments
+// ==========================================
+// Utilities & Constants
+// ==========================================
+import fetchData from "../../../Utils/fetchData"; 
+import Notify from "../../../Utils/notify";
+import { DEFAULT_AVATARS } from "../../../Constants/defaultAvatars";
+import { getImageUrl } from "../../../Utils/getImageUrl";
+
+// ----------------------------------------
+// Validation Schema
+// ----------------------------------------
 const commentUpdateSchema = Yup.object({
   author: Yup.string().required("نام نویسنده الزامی است"),
   content: Yup.string().required("متن نظر الزامی است"),
   role: Yup.string().required("نقش نویسنده الزامی است"),
-  gender: Yup.string().required("جنسیت الزامی است"),
 });
 
+// ==========================================
+// Component: UpdateComment
+// Description: Form to update an existing comment (handles both text and image updates)
+// ==========================================
 export default function UpdateComment() {
   const { id } = useParams();
   const navigate = useNavigate();
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [imagePreview, setImagePreview] = useState(null);
 
   const [initialValues, setInitialValues] = useState({
     author: "",
     content: "",
     role: "",
-    gender: "",
+    img: null,
   });
 
-  // Fetch comment data on component mount
+  // ----------------------------------------
+  // Fetch Data on Mount
+  // ----------------------------------------
   useEffect(() => {
     const getCommentData = async () => {
       setLoading(true);
-      
       const response = await fetchData(`comment/${id}`);
       
       let data = null;
@@ -46,48 +64,97 @@ export default function UpdateComment() {
           author: data.author || "",
           content: data.content || "",
           role: data.role || "",
-          gender: data.gender || "",
+          img: data.img || null,
         });
+
+        // Set initial preview using helper
+        setImagePreview(getImageUrl(data.img));
       }
-      
       setLoading(false);
     };
 
-    if (id) {
-      getCommentData();
-    }
+    if (id) getCommentData();
   }, [id]);
 
+  // ----------------------------------------
+  // Formik Setup
+  // ----------------------------------------
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialValues,
     validationSchema: commentUpdateSchema,
     onSubmit: async (values) => {
       setIsSubmitting(true);
+      try {
+        let finalImageName = values.img;
 
-      // Submit updated data via PATCH
-      const response = await fetchData(`comment/${id}`, {
-        method: "PATCH", 
-        body: JSON.stringify(values),
-      });
+        // If user selected a new custom file
+        if (values.img instanceof File) {
+          const formData = new FormData();
+          formData.append("file", values.img);
 
-      if (response && (response.success || response.status === "success")) {
-        Notify("success", "نظر با موفقیت ویرایش شد!");
-        navigate("/comment");
-      } else {
-        Notify("error", response?.message || "ویرایش با خطا مواجه شد");
+          const uploadData = await fetchData("upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!uploadData || !uploadData.success) {
+            throw new Error(uploadData?.message || "آپلود تصویر با خطا مواجه شد");
+          }
+          finalImageName = uploadData.data;
+        }
+
+        // Submit updated data via PATCH. (Backend handles deletion of old image if needed)
+        const payload = {
+          author: values.author,
+          content: values.content,
+          role: values.role,
+          img: finalImageName,
+        };
+
+        const response = await fetchData(`comment/${id}`, {
+          method: "PATCH", 
+          body: JSON.stringify(payload),
+        });
+
+        if (response && (response.success || response.status === "success")) {
+          Notify("success", "نظر با موفقیت ویرایش شد!");
+          navigate("/comment");
+        } else {
+          throw new Error(response?.message || "ویرایش با خطا مواجه شد");
+        }
+      } catch (error) {
+        Notify("error", error.message);
+      } finally {
+        setIsSubmitting(false);
       }
-
-      setIsSubmitting(false);
     },
   });
 
-  // Dynamic input styling based on error state
+  // ----------------------------------------
+  // Handlers
+  // ----------------------------------------
+  const handleCustomImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      formik.setFieldValue("img", file);
+      setImagePreview(URL.createObjectURL(file)); 
+    }
+  };
+
+  const handleSelectDefaultAvatar = (filename) => {
+    formik.setFieldValue("img", filename);
+    setImagePreview(`/default-avatars/${filename}`);
+  };
+
   const inputClass = (error) =>
     `w-full border rounded-lg px-4 py-2.5 outline-none transition-all ${
       error ? "border-red-500" : "border-gray-300 focus:border-[#51b5a5]"
     }`;
 
+  // ----------------------------------------
+  // Render Component
+  // ----------------------------------------
   if (loading) {
     return (
       <div dir="rtl" className="flex justify-center items-center min-h-screen bg-gray-50">
@@ -138,18 +205,6 @@ export default function UpdateComment() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-700">جنسیت</label>
-            <select
-              {...formik.getFieldProps("gender")}
-              className={`bg-white w-full md:w-1/2 ${inputClass(formik.touched.gender && formik.errors.gender)}`}
-            >
-              <option value="">انتخاب کنید</option>
-              <option value="مرد">مرد</option>
-              <option value="زن">زن</option>
-            </select>
-          </div>
-
-          <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-gray-700">متن نظر</label>
             <textarea
               rows="4"
@@ -158,6 +213,45 @@ export default function UpdateComment() {
                 formik.touched.content && formik.errors.content ? "border-red-500" : "border-gray-300 focus:border-[#51b5a5]"
               }`}
             ></textarea>
+          </div>
+
+          {/* Avatar Selection Area */}
+          <div className="flex flex-col gap-4 border-t pt-4">
+            <label className="text-sm font-semibold text-gray-700">تغییر آواتار یا آپلود تصویر جدید</label>
+            
+            <div className="flex gap-4 flex-wrap">
+              {DEFAULT_AVATARS.map((avatar) => (
+                <img 
+                  key={avatar.id}
+                  src={`/default-avatars/${avatar.filename}`} 
+                  alt={avatar.alt}
+                  onClick={() => handleSelectDefaultAvatar(avatar.filename)}
+                  className={`w-14 h-14 object-cover rounded-full cursor-pointer transition-all hover:scale-105 border-2 ${
+                    formik.values.img === avatar.filename ? "border-[#51b5a5] shadow-md" : "border-transparent"
+                  }`}
+                />
+              ))}
+            </div>
+
+            <span className="text-xs text-gray-400 font-bold my-1">یا</span>
+
+            <div className="w-full md:w-1/2 h-32 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer relative overflow-hidden">
+              <input
+                id="custom-img"
+                type="file"
+                accept="image/*"
+                onChange={handleCustomImageChange}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+              />
+              {imagePreview && (formik.values.img instanceof File || (typeof formik.values.img === "string" && !formik.values.img.startsWith("default-"))) ? (
+                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+              ) : (
+                <>
+                  <CloudUploadIcon className="text-gray-400" />
+                  <p className="text-xs font-medium text-gray-600">آپلود عکس جدید</p>
+                </>
+              )}
+            </div>
           </div>
 
           <div className="flex justify-end mt-4">

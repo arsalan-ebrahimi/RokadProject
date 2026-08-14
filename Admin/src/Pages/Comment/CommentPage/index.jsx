@@ -1,20 +1,33 @@
+// ==========================================
+// Dependencies & Icons
+// ==========================================
 import React, { useState, useEffect } from "react";
-import fetchData from "../../../Utils/fetchData"; 
-import CommentCard from "../CommentCard"; 
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
-import Notify from "../../../Utils/notify";
 
+// ==========================================
+// Utilities & Components
+// ==========================================
+import fetchData from "../../../Utils/fetchData"; 
+import CommentCard from "../CommentCard"; 
+import Notify from "../../../Utils/notify";
+import Confirm from "../../../Utils/Confirm"; // Custom SweetAlert2
+
+// ==========================================
+// Component: CommentPage
+// Description: Lists all comments and handles global actions
+// ==========================================
 export default function CommentPage() {
   const navigate = useNavigate();
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Initialize comment list from server
+  // ----------------------------------------
+  // Fetch Comments on Mount
+  // ----------------------------------------
   useEffect(() => {
     const getComments = async () => {
       setLoading(true);
-      
       const data = await fetchData("comment");
       
       if (data && data.success !== false) { 
@@ -28,22 +41,27 @@ export default function CommentPage() {
     getComments();
   }, []);
 
+  // ----------------------------------------
+  // Action Handlers
+  // ----------------------------------------
   const handleEditComment = (id) => {
-    if (id) {
-      navigate(`update/${id}`); 
-    }
+    if (id) navigate(`update/${id}`); 
   };
 
   const handleAddComment = () => {
     navigate("create");
   };
 
-  // Delete comment by ID with confirmation
   const handleDeleteComment = async (id) => {
-    const isConfirmed = window.confirm("آیا از حذف این نظر اطمینان دارید؟");
+    const isConfirmed = await Confirm(
+      "آیا از حذف این نظر اطمینان دارید؟",
+      "این عمل غیرقابل بازگشت است.",
+      "بله، حذف کن"
+    );
     
     if (!isConfirmed) return; 
 
+    // Execute DELETE request (Backend will automatically handle image removal)
     const deleteData = await fetchData(`comment/${id}`, {
       method: "DELETE",
     });
@@ -56,7 +74,9 @@ export default function CommentPage() {
     }
   };
   
-  // Create comment cards list (reversed to show newest first)
+  // ----------------------------------------
+  // Render Components
+  // ----------------------------------------
   const renderedCommentCards = [...comments].reverse().map((comment) => (
     <CommentCard 
       key={comment._id} 
@@ -86,7 +106,7 @@ export default function CommentPage() {
         <div className="flex flex-col gap-4">
           {renderedCommentCards}
 
-          {comments.length === 0  && (
+          {comments.length === 0 && (
             <div className="text-center text-gray-500 py-10">
               هیچ نظری یافت نشد.
             </div>

@@ -1,54 +1,120 @@
+// ==========================================
+// Dependencies & Libraries
+// ==========================================
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+
+// ==========================================
+// Utilities & Constants
+// ==========================================
 import fetchData from "../../../Utils/fetchData";
 import Notify from "../../../Utils/notify";
+import { DEFAULT_AVATARS } from "../../../Constants/defaultAvatars";
 
-// Validation rules for submitting a new comment
+// ----------------------------------------
+// Validation Schema
+// ----------------------------------------
 const commentValidationSchema = Yup.object({
   author: Yup.string().required("نام نویسنده الزامی است"),
   content: Yup.string().required("متن نظر الزامی است"),
   role: Yup.string().required("نقش نویسنده الزامی است"),
-  gender: Yup.string().required("جنسیت الزامی است"),
+  img: Yup.mixed().required("انتخاب تصویر الزامی است"),
 });
 
+// ==========================================
+// Component: CreateComment
+// Description: Form to create a new comment with custom or default avatars
+// ==========================================
 export default function CreateComment() {
+  const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // ----------------------------------------
+  // Formik Setup
+  // ----------------------------------------
   const formik = useFormik({
     initialValues: {
       author: "",
       content: "",
       role: "",
-      gender: "",
+      img: null,
     },
     validationSchema: commentValidationSchema,
     onSubmit: async (values) => {
       setIsSubmitting(true);
-      
-      // Submit new comment via POST
-      const response = await fetchData("comment", {
-        method: "POST",
-        body: JSON.stringify(values),
-      });
+      try {
+        let finalImageName = values.img;
 
-      if (response && response.success !== false) {
-        Notify("success", "نظر با موفقیت ثبت شد!");
-        window.history.back();
-      } else {
-        Notify("error", response?.message || "ثبت نظر با خطا مواجه شد");
+        // Step 1: Check if 'img' is a custom File object that needs uploading
+        if (values.img instanceof File) {
+          const formData = new FormData();
+          formData.append("file", values.img);
+
+          const uploadData = await fetchData("upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!uploadData || !uploadData.success) {
+            throw new Error(uploadData?.message || "آپلود عکس با خطا مواجه شد");
+          }
+          finalImageName = uploadData.data;
+        }
+
+        // Step 2: Create comment with correct filename
+        const payload = {
+          author: values.author,
+          content: values.content,
+          role: values.role,
+          img: finalImageName,
+        };
+
+        const response = await fetchData("comment", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+
+        if (response && response.success !== false) {
+          Notify("success", "نظر با موفقیت ثبت شد!");
+          window.history.back();
+        } else {
+          throw new Error(response?.message || "ثبت نظر با خطا مواجه شد");
+        }
+      } catch (error) {
+        Notify("error", error.message);
+      } finally {
+        setIsSubmitting(false);
       }
-      
-      setIsSubmitting(false);
     },
   });
+
+  // ----------------------------------------
+  // Handlers
+  // ----------------------------------------
+  const handleCustomImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      formik.setFieldValue("img", file);
+      setImagePreview(URL.createObjectURL(file)); 
+    }
+  };
+
+  const handleSelectDefaultAvatar = (filename) => {
+    formik.setFieldValue("img", filename);
+    setImagePreview(`/default-avatars/${filename}`);
+  };
 
   const inputClass = (error) =>
     `w-full border rounded-lg px-4 py-2.5 outline-none transition-all ${
       error ? "border-red-500" : "border-gray-300 focus:border-[#51b5a5]"
     }`;
 
+  // ----------------------------------------
+  // Render Component
+  // ----------------------------------------
   return (
     <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
       <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
@@ -97,21 +163,6 @@ export default function CreateComment() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-700">جنسیت</label>
-            <select
-              {...formik.getFieldProps("gender")}
-              className={`bg-white w-full md:w-1/2 ${inputClass(formik.touched.gender && formik.errors.gender)}`}
-            >
-              <option value="">انتخاب کنید</option>
-              <option value="مرد">مرد</option>
-              <option value="زن">زن</option>
-            </select>
-            {formik.touched.gender && formik.errors.gender && (
-              <div className="text-red-500 text-xs mt-1">{formik.errors.gender}</div>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-gray-700">متن نظر</label>
             <textarea
               rows="4"
@@ -122,6 +173,50 @@ export default function CreateComment() {
             ></textarea>
             {formik.touched.content && formik.errors.content && (
               <div className="text-red-500 text-xs mt-1">{formik.errors.content}</div>
+            )}
+          </div>
+
+          {/* Avatar Selection Area */}
+          <div className="flex flex-col gap-4 border-t pt-4">
+            <label className="text-sm font-semibold text-gray-700">انتخاب آواتار یا آپلود تصویر شخصی</label>
+            
+            {/* Display Default Avatars */}
+            <div className="flex gap-4 flex-wrap">
+              {DEFAULT_AVATARS.map((avatar) => (
+                <img 
+                  key={avatar.id}
+                  src={`/default-avatars/${avatar.filename}`} 
+                  alt={avatar.alt}
+                  onClick={() => handleSelectDefaultAvatar(avatar.filename)}
+                  className={`w-14 h-14 object-cover rounded-full cursor-pointer transition-all hover:scale-105 border-2 ${
+                    formik.values.img === avatar.filename ? "border-[#51b5a5] shadow-md" : "border-transparent"
+                  }`}
+                />
+              ))}
+            </div>
+
+            <span className="text-xs text-gray-400 font-bold my-1">یا</span>
+
+            {/* Upload Custom Avatar */}
+            <div className="w-full md:w-1/2 h-32 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer relative overflow-hidden">
+              <input
+                id="custom-img"
+                type="file"
+                accept="image/*"
+                onChange={handleCustomImageChange}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+              />
+              {imagePreview && formik.values.img instanceof File ? (
+                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+              ) : (
+                <>
+                  <CloudUploadIcon className="text-gray-400" />
+                  <p className="text-xs font-medium text-gray-600">آپلود عکس شخصی</p>
+                </>
+              )}
+            </div>
+            {formik.touched.img && formik.errors.img && (
+              <div className="text-red-500 text-xs mt-1">{formik.errors.img}</div>
             )}
           </div>
 
