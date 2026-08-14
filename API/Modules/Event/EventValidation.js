@@ -2,51 +2,38 @@ import Joi from "joi";
 
 export const createEventValidator = Joi.object({
   title: Joi.string().required().messages({
-    "string.base": "عنوان باید یک متن باشد",
-    "string.empty": "عنوان نمی‌تواند خالی باشد",
-    "any.required": "فیلد عنوان الزامی است",
+    "string.empty": "عنوان رویداد نمی‌تواند خالی باشد",
+    "any.required": "عنوان رویداد الزامی است",
   }),
   type: Joi.string().required().messages({
-    "string.base": "نوع رویداد باید یک متن باشد",
     "string.empty": "نوع رویداد نمی‌تواند خالی باشد",
-    "any.required": "فیلد نوع رویداد الزامی است",
+    "any.required": "نوع رویداد الزامی است",
   }),
   date: Joi.string().required().messages({
-    "string.base": "تاریخ باید یک متن باشد",
-    "string.empty": "تاریخ نمی‌تواند خالی باشد",
-    "any.required": "فیلد تاریخ الزامی است",
+    "string.empty": "تاریخ رویداد نمی‌تواند خالی باشد",
+    "any.required": "تاریخ رویداد الزامی است",
   }),
   description: Joi.string().required().messages({
-    "string.base": "توضیحات باید یک متن باشد",
-    "string.empty": "توضیحات نمی‌تواند خالی باشد",
-    "any.required": "فیلد توضیحات الزامی است",
+    "string.empty": "توضیحات رویداد نمی‌تواند خالی باشد",
+    "any.required": "توضیحات رویداد الزامی است",
+  }),
+  img: Joi.string().required().messages({
+    "string.empty": "تصویر رویداد نمی‌تواند خالی باشد",
+    "any.required": "فیلد تصویر الزامی است",
   }),
   branch: Joi.string().valid("دخترانه", "پسرانه").required().messages({
-    "string.base": "شعبه باید یک متن باشد",
     "any.only": "شعبه مدرسه باید 'دخترانه' یا 'پسرانه' باشد",
-    "any.required": "فیلد شعبه الزامی است",
+    "any.required": "مشخص کردن شعبه الزامی است",
   }),
 });
 
 export const updateEventValidator = Joi.object({
-  title: Joi.string().messages({
-    "string.base": "عنوان باید یک متن باشد",
-    "string.empty": "عنوان نمی‌تواند خالی باشد",
-  }),
-  type: Joi.string().messages({
-    "string.base": "نوع رویداد باید یک متن باشد",
-    "string.empty": "نوع رویداد نمی‌تواند خالی باشد",
-  }),
-  date: Joi.string().messages({
-    "string.base": "تاریخ باید یک متن باشد",
-    "string.empty": "تاریخ نمی‌تواند خالی باشد",
-  }),
-  description: Joi.string().messages({
-    "string.base": "توضیحات باید یک متن باشد",
-    "string.empty": "توضیحات نمی‌تواند خالی باشد",
-  }),
+  title: Joi.string(),
+  type: Joi.string(),
+  date: Joi.string(),
+  description: Joi.string(),
+  img: Joi.string(),
   branch: Joi.string().valid("دخترانه", "پسرانه").messages({
-    "string.base": "شعبه باید یک متن باشد",
     "any.only": "شعبه مدرسه باید 'دخترانه' یا 'پسرانه' باشد",
   }),
 });

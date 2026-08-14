@@ -18,6 +18,10 @@ const eventSchema = new mongoose.Schema({
     type: String,
     required: [true, "نوشتن توضیحات رویداد الزامی است"],
   },
+  img: {
+    type: String,
+    required: [true, "ارسال تصویر رویداد الزامی است"],
+  },
   branch: {
     type: String,
     required: [true, "مشخص کردن شعبه مدرسه الزامی است"],
