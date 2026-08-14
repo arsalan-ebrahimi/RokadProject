@@ -4,23 +4,29 @@ import Award from "./AwardMd.js";
 export const create = catchAsync(async (req, res, next) => {
   const { title, rank, description, winners } = req.body;
 
+  const existingAward = await Award.findOne({ title });
+  if (existingAward) {
+    return next(new HandleERROR("جایزه‌ای با این عنوان قبلاً ثبت شده است", 400));
+  }
+
   const newAward = await Award.create({ title, rank, description, winners });
 
   return res.status(201).json({
     success: true,
     message: "جایزه با موفقیت ایجاد شد",
-    data: newAward,
+    data: newAward
   });
 });
 
 export const getAll = catchAsync(async (req, res, next) => {
   const features = new ApiFeatures(Award, req.query, req.role)
+    .search()
     .filter()
     .sort()
     .limitFields()
     .paginate()
     .populate();
-
+    
   const result = await features.execute();
   return res.status(200).json(result);
 });
@@ -28,19 +34,21 @@ export const getAll = catchAsync(async (req, res, next) => {
 export const getOne = catchAsync(async (req, res, next) => {
   const features = new ApiFeatures(Award, req.query, req.role)
     .addManualFilters({ _id: req.params.id })
-    .filter()
-    .sort()
     .limitFields()
-    .paginate()
     .populate();
 
   const result = await features.execute();
 
-  if (!result || (Array.isArray(result) && result.length === 0)) {
+  const doc = Array.isArray(result) ? result[0] : result?.data ? result.data[0] : result;
+
+  if (!doc) {
     return next(new HandleERROR("جایزه یافت نشد", 404));
   }
 
-  return res.status(200).json(result);
+  return res.status(200).json({
+    success: true,
+    data: doc
+  });
 });
 
 export const update = catchAsync(async (req, res, next) => {
@@ -63,7 +71,7 @@ export const update = catchAsync(async (req, res, next) => {
   return res.status(200).json({
     success: true,
     message: "جایزه با موفقیت بروزرسانی شد",
-    data: updatedAward,
+    data: updatedAward
   });
 });
 
@@ -76,7 +84,6 @@ export const remove = catchAsync(async (req, res, next) => {
 
   return res.status(200).json({
     success: true,
-    message: "جایزه با موفقیت حذف شد",
-    data: null,
+    message: "جایزه با موفقیت حذف شد"
   });
 });

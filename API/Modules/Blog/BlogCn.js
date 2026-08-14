@@ -20,6 +20,7 @@ export const create = catchAsync(async (req, res, next) => {
 
 export const getAll = catchAsync(async (req, res, next) => {
   const features = new ApiFeatures(Blog, req.query, req.role)
+    .search()
     .filter()
     .sort()
     .limitFields()
@@ -33,19 +34,21 @@ export const getAll = catchAsync(async (req, res, next) => {
 export const getOne = catchAsync(async (req, res, next) => {
   const features = new ApiFeatures(Blog, req.query, req.role)
     .addManualFilters({ _id: req.params.id })
-    .filter()
-    .sort()
     .limitFields()
-    .paginate()
     .populate();
 
   const result = await features.execute();
 
-  if (!result || (Array.isArray(result) && result.length === 0)) {
+  const doc = Array.isArray(result) ? result[0] : result?.data ? result.data[0] : result;
+
+  if (!doc) {
     return next(new HandleERROR("مقاله یافت نشد", 404));
   }
 
-  return res.status(200).json(result);
+  return res.status(200).json({
+    success: true,
+    data: doc
+  });
 });
 
 export const update = catchAsync(async (req, res, next) => {

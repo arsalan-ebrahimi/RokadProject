@@ -4,6 +4,7 @@ import bcryptjs from "bcryptjs";
 
 export const getAll = catchAsync(async (req, res, next) => {
   const features = new ApiFeatures(User, req.query, req.role)
+    .search()
     .filter()
     .sort()
     .limitFields()
@@ -19,10 +20,7 @@ export const getOne = catchAsync(async (req, res, next) => {
     .addManualFilters(
       req.role === "user" ? { _id: req.userId } : { _id: req.params.id }
     )
-    .filter()
-    .sort()
     .limitFields()
-    .paginate()
     .populate([
       {
         path: "favoriteProducts",
@@ -36,7 +34,17 @@ export const getOne = catchAsync(async (req, res, next) => {
     ]);
     
   const result = await features.execute();
-  return res.status(200).json(result);
+
+  const doc = Array.isArray(result) ? result[0] : result?.data ? result.data[0] : result;
+
+  if (!doc) {
+    return next(new HandleERROR("کاربر یافت نشد", 404));
+  }
+
+  return res.status(200).json({
+    success: true,
+    data: doc
+  });
 });
 
 export const update = catchAsync(async (req, res, next) => {

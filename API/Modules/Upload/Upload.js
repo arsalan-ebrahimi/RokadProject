@@ -11,11 +11,54 @@ uploadRouter.route("/multi").post(IsLogin, IsAdmin, upload.array("files", 10), u
 uploadRouter.route("/remove").post(IsLogin, IsAdmin, removeData);
 
 export default uploadRouter;
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     RemoveFileInput:
+ *       type: object
+ *       required:
+ *         - filename
+ *       properties:
+ *         filename:
+ *           type: string
+ *           description: Name or path of the file to delete
+ *           example: "file-1723560000000.jpg"
+ *     UploadResponse:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           example: true
+ *         message:
+ *           type: string
+ *           example: "فایل با موفقیت آپلود شد"
+ *         data:
+ *           type: string
+ *           description: Saved filename on the server
+ *           example: "file-1723560000000.jpg"
+ *     UploadMultipleResponse:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           example: true
+ *         message:
+ *           type: string
+ *           example: "فایل‌ها با موفقیت آپلود شدند"
+ *         data:
+ *           type: array
+ *           items:
+ *             type: string
+ *           example: ["file-1.jpg", "file-2.jpg"]
+ */
+
 /**
  * @swagger
  * tags:
- *   name: Upload
- *   description: File upload and management
+ *   - name: Upload
+ *     description: File Upload & Management Endpoints (Powered by Vanta-API)
  */
 
 /**
@@ -23,8 +66,8 @@ export default uploadRouter;
  * /api/upload:
  *   post:
  *     summary: Upload a single file
- *     description: Upload a single file to the server (admin only).
  *     tags: [Upload]
+ *     description: Uploads a single file (key name 'file'). Requires admin privileges and Bearer token.
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -33,35 +76,57 @@ export default uploadRouter;
  *         multipart/form-data:
  *           schema:
  *             type: object
+ *             required:
+ *               - file
  *             properties:
  *               file:
  *                 type: string
  *                 format: binary
+ *                 description: The file to upload
  *     responses:
  *       201:
  *         description: File uploaded successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: File uploaded successfully
- *                 data:
- *                   type: string
- *                   example: filename.png
- *                 success:
- *                   type: boolean
- *                   example: true
+ *               $ref: '#/components/schemas/UploadResponse'
  *       400:
  *         description: No file uploaded
- *
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               message: "هیچ فایلی آپلود نشده است"
+ *               statusCode: 400
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       403:
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+
+/**
+ * @swagger
  * /api/upload/multi:
  *   post:
  *     summary: Upload multiple files
- *     description: Upload multiple files at once (admin only). Maximum 10 files.
  *     tags: [Upload]
+ *     description: Uploads up to 10 files simultaneously (key name 'files'). Requires admin privileges and Bearer token.
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -70,39 +135,59 @@ export default uploadRouter;
  *         multipart/form-data:
  *           schema:
  *             type: object
+ *             required:
+ *               - files
  *             properties:
  *               files:
  *                 type: array
  *                 items:
  *                   type: string
  *                   format: binary
+ *                 description: Array of files to upload
  *     responses:
  *       201:
  *         description: Files uploaded successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Files uploaded successfully
- *                 data:
- *                   type: array
- *                   items:
- *                     type: string
- *                     example: filename1.png
- *                 success:
- *                   type: boolean
- *                   example: true
+ *               $ref: '#/components/schemas/UploadMultipleResponse'
  *       400:
  *         description: No files uploaded
- *
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               message: "هیچ فایلی آپلود نشده است"
+ *               statusCode: 400
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       403:
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+
+/**
+ * @swagger
  * /api/upload/remove:
  *   post:
- *     summary: Remove a file
- *     description: Remove a file from the server by filename.
+ *     summary: Remove an uploaded file
  *     tags: [Upload]
+ *     description: Deletes a specific file from the Public directory by providing its filename. Requires admin privileges and Bearer token.
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -110,27 +195,60 @@ export default uploadRouter;
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - filename
- *             properties:
- *               filename:
- *                 type: string
- *                 example: filename.png
+ *             $ref: '#/components/schemas/RemoveFileInput'
  *     responses:
  *       200:
- *         description: File removed successfully
+ *         description: File deleted successfully
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 message:
- *                   type: string
- *                   example: File removed successfully
  *                 success:
  *                   type: boolean
  *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "فایل با موفقیت حذف شد"
+ *                 data:
+ *                   nullable: true
+ *                   example: null
+ *       400:
+ *         description: Filename is missing
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               message: "ارسال نام فایل برای حذف الزامی است"
+ *               statusCode: 400
  *       404:
  *         description: File not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               message: "فایل مورد نظر یافت نشد"
+ *               statusCode: 404
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       403:
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
