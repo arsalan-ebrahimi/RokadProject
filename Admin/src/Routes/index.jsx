@@ -1,36 +1,68 @@
+// ==========================================
+// Dependencies
+// ==========================================
 import React from "react";
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
+
+// ==========================================
+// Layouts & Static Pages
+// ==========================================
 import Layout from "../Layout";
+import Auth from "../Pages/Auth";
 import Home from "../Pages/Home";
-import Enrollment from "../Pages/Enrollment";
+import NotFound from "../Pages/NotFound";
+
+// ==========================================
+// Blog Components
+// ==========================================
 import Blog from "../Pages/Blog";
 import BlogPage from "../Pages/Blog/BlogPage";
 import CreateBlog from "../Pages/Blog/CreateBlog";
 import UpdateBlog from "../Pages/Blog/UpdateBlog";
-import EnrollmentPage from "../Pages/Enrollment/EnrollmentPage";
-import UpdateEnrollment from "../Pages/Enrollment/UpdateEnrollment";
+
+// ==========================================
+// Event Components
+// ==========================================
+import EventLayout from "../Pages/Event";
+import EventPage from "../Pages/Event/EventPage";
+import CreateEvent from "../Pages/Event/CreateEvent";
+import UpdateEvent from "../Pages/Event/UpdateEvent";
+
+// ==========================================
+// Student Components
+// ==========================================
+import StudentLayout from "../Pages/Student";
+import StudentPage from "../Pages/Student/StudentPage";
+import CreateStudent from "../Pages/Student/CreateStudent";
+import UpdateStudent from "../Pages/Student/UpdateStudent";
+
+// ==========================================
+// Award Components
+// ==========================================
 import Award from "../Pages/Award";
-import AwardPage from "../Pages/Award/AawardPage";
-import UpdateAward from "../Pages/Award/UpdateAward";
+import AwardPage from "../Pages/Award/AawardPage"; // Notice the spelling 'AawardPage' based on your previous code
 import CreateAward from "../Pages/Award/CreateAward";
+import UpdateAward from "../Pages/Award/UpdateAward";
+
+// ==========================================
+// Comment Components
+// ==========================================
+import CommentLayout from "../Pages/Comment";
 import CommentPage from "../Pages/Comment/CommentPage";
 import CreateComment from "../Pages/Comment/CreateComment";
-import CommentLayout from "../Pages/Comment";
 import UpdateComment from "../Pages/Comment/UpdateComment";
-import Auth from "../Pages/Auth";
-import NotFound from "../Pages/NotFound"
 
-/**
- * Main Application Router configuration
- */
+// ==========================================
+// Application Router Configuration
+// ==========================================
 const router = createBrowserRouter([
   {
-    /* Auth route is separate from the main layout */
+    // Auth route is separate from the main layout
     path: "/auth",
     element: <Auth />,
   },
   {
-    /* Main Dashboard Layout */
+    // Main Dashboard Layout
     path: "/",
     element: <Layout />,
     children: [
@@ -39,7 +71,7 @@ const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        /* Blog Management Section */
+        // Blog Management Section
         path: "blog",
         element: <Blog />,
         children: [
@@ -49,16 +81,27 @@ const router = createBrowserRouter([
         ],
       },
       {
-        /* Enrollment Management Section */
-        path: "enrollment",
-        element: <Enrollment />,
+        // Event Management Section
+        path: "event",
+        element: <EventLayout />,
         children: [
-          { index: true, element: <EnrollmentPage /> },
-          { path: "update/:id", element: <UpdateEnrollment /> },
+          { index: true, element: <EventPage /> },
+          { path: "create", element: <CreateEvent /> },
+          { path: "update/:id", element: <UpdateEvent /> },
         ],
       },
       {
-        /* Awards & Honors Section */
+        // Student Management Section
+        path: "student",
+        element: <StudentLayout />,
+        children: [
+          { index: true, element: <StudentPage /> },
+          { path: "create", element: <CreateStudent /> },
+          { path: "update/:id", element: <UpdateStudent /> },
+        ],
+      },
+      {
+        // Awards & Honors Section
         path: "award",
         element: <Award />,
         children: [
@@ -68,7 +111,7 @@ const router = createBrowserRouter([
         ],
       },
       {
-        /* Comments Management Section */
+        // Comments Management Section
         path: "comment",
         element: <CommentLayout />,
         children: [
@@ -80,9 +123,9 @@ const router = createBrowserRouter([
     ],
   },
   {
-    /* Fallback for unknown paths - redirect to login or dashboard */
+    // Fallback for unknown paths
     path: "*",
-    element: <NotFound/>,
+    element: <NotFound />,
   },
 ]);
 
