@@ -1,28 +1,37 @@
-import React, { useContext } from "react";
+// ==========================================
+// Dependencies & Libraries
+// ==========================================
+import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { AuthContext } from "../../Context/AuthContext";
+
+// ==========================================
+// Store Actions & Utilities
+// ==========================================
+import { login } from "../../Store/Slices/authSlice"; 
 import fetchData from "../../Utils/fetchData";
 import Loading from "../../Components/Loading";
 import Notify from "../../Utils/notify";
 
-/**
- * AdminLogin Component
- * Handles administrative authentication using phone number and password.
- */
+// ==========================================
+// Component: AdminLogin
+// Description: Handles admin authentication logic
+// ==========================================
 export default function AdminLogin() {
+  // Navigation and Redux dispatch hooks
   const navigate = useNavigate();
-  const { handleToken } = useContext(AuthContext);
+  const dispatch = useDispatch();
 
-  /**
-   * Formik Configuration
-   * Manages form state, validation, and submission logic.
-   */
+  // ----------------------------------------
+  // Formik Configuration
+  // ----------------------------------------
   const formik = useFormik({
     initialValues: { phoneNumber: "", password: "" },
+    
+    // Validation rules using Yup
     validationSchema: Yup.object({
-      // Validates Iranian mobile number format (starts with 09)
       phoneNumber: Yup.string()
         .matches(/^09\d{9}$/, "شماره همراه معتبر نیست")
         .required("شماره همراه الزامی است"),
@@ -30,16 +39,18 @@ export default function AdminLogin() {
         .required("رمز عبور الزامی است")
         .min(6, "رمز عبور بسیار کوتاه است"),
     }),
+
+    // Form submission handler
     onSubmit: async (values, { setSubmitting }) => {
       try {
-        // Step 1: Format phone number to international format (+98...) for backend compatibility
+        // Format the phone number to match backend expectations (e.g., +98912...)
         const formattedPhone = values.phoneNumber.replace(/^0/, "+98");
 
-        // Step 2: API Call to authentication endpoint
+        // Execute API request for login
         const response = await fetchData("auth/login-password", {
           method: "POST",
-          headers: { 
-            "Content-Type": "application/json" 
+          headers: {
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             phoneNumber: formattedPhone,
@@ -47,62 +58,68 @@ export default function AdminLogin() {
           }),
         });
 
-        /**
-         * Step 3: Handle API Response
-         * Checks for success flag and validates user role.
-         */
+        // Process successful API response
         if (response && response.success) {
-          // Access role from data.user based on provided backend structure
           const userRole = response.data?.user?.role;
 
-          // Authorization: Only allow admin or superadmin to enter
+          // Role-based access control (RBAC): restrict access to admins only
           if (userRole === "admin" || userRole === "superAdmin") {
-            handleToken(response.data.token);
+            
+            // Dispatch login action to store token in Redux and LocalStorage
+            dispatch(login(response.data.token));
+            
+            // Show success notification
             Notify("success", `خوش آمدید ${response.data.user?.fullName || "مدیر"}`);
             
-            // Redirect to dashboard root (matched with router.js)
+            // Redirect to dashboard root
             navigate("/"); 
           } else {
+            // Reject unauthorized roles
             Notify("error", "شما اجازه دسترسی به پنل مدیریت را ندارید.");
           }
         } else {
-          // Display backend-specific error message
+          // Display error message from backend
           Notify("error", response?.message || "اطلاعات ورود نامعتبر است");
         }
       } catch (error) {
-        // Log critical errors (like JSON parse issues or network failures)
+        // Handle network or unexpected errors
         console.error("Authentication Error:", error);
         Notify("error", "خطا در برقراری ارتباط با سرور. لطفاً وضعیت شبکه را بررسی کنید.");
       } finally {
-        // Re-enable the submit button
+        // Re-enable form submission button
         setSubmitting(false);
       }
     },
   });
 
+  // ----------------------------------------
+  // Render Component
+  // ----------------------------------------
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f4f6f8] p-4" dir="rtl">
       <div className="max-w-md w-full bg-white rounded-3xl shadow-sm ring-1 ring-black/5 p-8 md:p-10">
         
-        {/* Branding & Logo */}
+        {/* Brand Logo */}
         <div className="flex justify-center mb-8">
-          <img 
-            src="/Logo-Type-green.png" 
-            alt="Rokad Admin Panel" 
-            className="h-16 w-auto object-contain" 
+          <img
+            src="/Logo-Type-green.png"
+            alt="Rokad Admin Panel"
+            className="h-16 w-auto object-contain"
           />
         </div>
 
+        {/* Header Texts */}
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">
           ورود به پنل مدیریت
         </h2>
         <p className="text-center text-gray-500 mb-8 text-sm">
           لطفاً شماره همراه و رمز عبور خود را وارد کنید
         </p>
-        
+
+        {/* Login Form */}
         <form onSubmit={formik.handleSubmit} className="space-y-5">
           
-          {/* Phone Number Field */}
+          {/* Phone Number Input Group */}
           <div className="flex flex-col">
             <input
               type="text"
@@ -116,6 +133,7 @@ export default function AdminLogin() {
               }`}
               {...formik.getFieldProps("phoneNumber")}
             />
+            {/* Phone Error Message */}
             {formik.touched.phoneNumber && formik.errors.phoneNumber && (
               <div className="text-red-500 text-xs mt-2 pr-2">
                 {formik.errors.phoneNumber}
@@ -123,7 +141,7 @@ export default function AdminLogin() {
             )}
           </div>
 
-          {/* Password Field */}
+          {/* Password Input Group */}
           <div className="flex flex-col">
             <input
               type="password"
@@ -137,6 +155,7 @@ export default function AdminLogin() {
               }`}
               {...formik.getFieldProps("password")}
             />
+            {/* Password Error Message */}
             {formik.touched.password && formik.errors.password && (
               <div className="text-red-500 text-xs mt-2 pr-2">
                 {formik.errors.password}
@@ -144,7 +163,7 @@ export default function AdminLogin() {
             )}
           </div>
 
-          {/* Submit Action */}
+          {/* Submit Button */}
           <button
             disabled={formik.isSubmitting}
             type="submit"
@@ -154,10 +173,11 @@ export default function AdminLogin() {
           </button>
         </form>
 
+        {/* Footer Support Text */}
         <div className="mt-8 text-center">
-            <p className="text-xs text-gray-400">
-                در صورت فراموشی رمز عبور با پشتیبانی فنی تماس بگیرید.
-            </p>
+          <p className="text-xs text-gray-400">
+            در صورت فراموشی رمز عبور با پشتیبانی فنی تماس بگیرید.
+          </p>
         </div>
       </div>
     </div>
