@@ -1,10 +1,16 @@
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import ApiFeatures, { catchAsync, HandleERROR } from "vanta-api";
 import Student from "./StudentMd.js";
 
-export const create = catchAsync(async (req, res, next) => {
-  const { fullName, job, generation, socialLinks } = req.body;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-  const newStudent = await Student.create({ fullName, job, generation, socialLinks });
+export const create = catchAsync(async (req, res, next) => {
+  const { fullName, job, generation, img, socialLinks } = req.body;
+
+  const newStudent = await Student.create({ fullName, job, generation, img, socialLinks });
 
   return res.status(201).json({
     success: true,
@@ -47,21 +53,30 @@ export const getOne = catchAsync(async (req, res, next) => {
 });
 
 export const update = catchAsync(async (req, res, next) => {
-  const allowedUpdates = ["fullName", "job", "generation", "socialLinks"];
+  const allowedUpdates = ["fullName", "job", "generation", "img", "socialLinks"];
   const updates = {};
 
   Object.keys(req.body).forEach((el) => {
     if (allowedUpdates.includes(el)) updates[el] = req.body[el];
   });
 
+  const oldStudent = await Student.findById(req.params.id);
+  if (!oldStudent) {
+    return next(new HandleERROR("دانش‌آموز یافت نشد", 404));
+  }
+
+  // Delete old image from hard drive if a new one is uploaded
+  if (updates.img && updates.img !== oldStudent.img) {
+    const filePath = path.join(__dirname, "../../Public", oldStudent.img);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+  }
+
   const updatedStudent = await Student.findByIdAndUpdate(req.params.id, updates, {
     new: true,
     runValidators: true,
   });
-
-  if (!updatedStudent) {
-    return next(new HandleERROR("دانش‌آموز یافت نشد", 404));
-  }
 
   return res.status(200).json({
     success: true,
@@ -75,6 +90,14 @@ export const remove = catchAsync(async (req, res, next) => {
 
   if (!deleteStudent) {
     return next(new HandleERROR("دانش‌آموز یافت نشد", 404));
+  }
+
+  // Delete associated image from hard drive
+  if (deleteStudent.img) {
+    const filePath = path.join(__dirname, "../../Public", deleteStudent.img);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
   }
 
   return res.status(200).json({

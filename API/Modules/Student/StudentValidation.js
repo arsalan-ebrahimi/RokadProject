@@ -15,6 +15,11 @@ export const createStudentValidator = Joi.object({
     "number.base": "نسل باید یک عدد باشد",
     "any.required": "فیلد نسل الزامی است",
   }),
+  img: Joi.string().required().messages({
+    "string.base": "تصویر باید یک متن (نام فایل) باشد",
+    "string.empty": "تصویر نمی‌تواند خالی باشد",
+    "any.required": "فیلد تصویر الزامی است",
+  }),
   socialLinks: Joi.array().items(
     Joi.object({
       type: Joi.string().required().messages({
@@ -44,6 +49,10 @@ export const updateStudentValidator = Joi.object({
   }),
   generation: Joi.number().messages({
     "number.base": "نسل باید یک عدد باشد",
+  }),
+  img: Joi.string().messages({
+    "string.base": "تصویر باید یک متن (نام فایل) باشد",
+    "string.empty": "تصویر نمی‌تواند خالی باشد",
   }),
   socialLinks: Joi.array().items(
     Joi.object({
