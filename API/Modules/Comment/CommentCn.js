@@ -1,5 +1,11 @@
+import fs from "fs";
+import { fileURLToPath } from "url";
+import path from "path";
 import ApiFeatures, { catchAsync, HandleERROR } from "vanta-api";
 import Comment from "./CommentMd.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const create = catchAsync(async (req, res, next) => {
   const { author, content, role, img } = req.body;
@@ -54,14 +60,23 @@ export const update = catchAsync(async (req, res, next) => {
     if (allowedUpdates.includes(el)) updates[el] = req.body[el];
   });
 
+  const oldComment = await Comment.findById(req.params.id);
+  if (!oldComment) {
+    return next(new HandleERROR("نظر یافت نشد", 404));
+  }
+
+
+  if (updates.img && updates.img !== oldComment.img && !oldComment.img.startsWith("default-")) {
+    const filePath = path.join(__dirname, "../../Public", oldComment.img); 
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+  }
+
   const updatedComment = await Comment.findByIdAndUpdate(req.params.id, updates, {
     new: true,
     runValidators: true,
   });
-
-  if (!updatedComment) {
-    return next(new HandleERROR("نظر یافت نشد", 404));
-  }
 
   return res.status(200).json({
     success: true,
@@ -75,6 +90,13 @@ export const remove = catchAsync(async (req, res, next) => {
 
   if (!deleteComment) {
     return next(new HandleERROR("نظر یافت نشد", 404));
+  }
+
+  if (deleteComment.img && !deleteComment.img.startsWith("default-")) {
+    const filePath = path.join(__dirname, "../../Public", deleteComment.img); 
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
   }
 
   return res.status(200).json({
