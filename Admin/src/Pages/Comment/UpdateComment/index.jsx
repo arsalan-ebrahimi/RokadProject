@@ -15,6 +15,7 @@ import fetchData from "../../../Utils/fetchData";
 import Notify from "../../../Utils/notify";
 import { DEFAULT_AVATARS } from "../../../Constants/defaultAvatars";
 import { getImageUrl } from "../../../Utils/getImageUrl";
+import Loading from "../../../Components/Loading"; 
 
 // ----------------------------------------
 // Validation Schema
@@ -27,7 +28,7 @@ const commentUpdateSchema = Yup.object({
 
 // ==========================================
 // Component: UpdateComment
-// Description: Form to update an existing comment (handles both text and image updates)
+// Description: Form to update an existing comment
 // ==========================================
 export default function UpdateComment() {
   const { id } = useParams();
@@ -67,8 +68,7 @@ export default function UpdateComment() {
           img: data.img || null,
         });
 
-        // Set initial preview using helper
-        setImagePreview(getImageUrl(data.img));
+        if (data.img) setImagePreview(getImageUrl(data.img));
       }
       setLoading(false);
     };
@@ -88,7 +88,6 @@ export default function UpdateComment() {
       try {
         let finalImageName = values.img;
 
-        // If user selected a new custom file
         if (values.img instanceof File) {
           const formData = new FormData();
           formData.append("file", values.img);
@@ -104,7 +103,6 @@ export default function UpdateComment() {
           finalImageName = uploadData.data;
         }
 
-        // Submit updated data via PATCH. (Backend handles deletion of old image if needed)
         const payload = {
           author: values.author,
           content: values.content,
@@ -137,6 +135,11 @@ export default function UpdateComment() {
   const handleCustomImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.name.toLowerCase().startsWith("default-")) {
+        Notify("error", "نام فایل مجاز نیست. لطفاً نام فایل را تغییر دهید.");
+        e.target.value = ""; 
+        return;
+      }
       formik.setFieldValue("img", file);
       setImagePreview(URL.createObjectURL(file)); 
     }
@@ -158,7 +161,7 @@ export default function UpdateComment() {
   if (loading) {
     return (
       <div dir="rtl" className="flex justify-center items-center min-h-screen bg-gray-50">
-        <p className="text-gray-500 text-lg">در حال بارگذاری اطلاعات...</p>
+        <Loading size={12} />
       </div>
     );
   }
@@ -258,11 +261,11 @@ export default function UpdateComment() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 ${
-                isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-[#51b5a5] hover:bg-teal-600"
+              className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 min-w-[150px] flex justify-center items-center ${
+                isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
               }`}
             >
-              {isSubmitting ? "در حال ذخیره..." : "ذخیره تغییرات"}
+              {isSubmitting ? <Loading color="#ffffff" size={8} /> : "ذخیره تغییرات"}
             </button>
           </div>
         </form>

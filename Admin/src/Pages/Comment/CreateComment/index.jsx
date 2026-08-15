@@ -13,6 +13,7 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import fetchData from "../../../Utils/fetchData";
 import Notify from "../../../Utils/notify";
 import { DEFAULT_AVATARS } from "../../../Constants/defaultAvatars";
+import Loading from "../../../Components/Loading"; 
 
 // ----------------------------------------
 // Validation Schema
@@ -48,7 +49,7 @@ export default function CreateComment() {
       try {
         let finalImageName = values.img;
 
-        // Step 1: Check if 'img' is a custom File object that needs uploading
+        // Upload if custom file selected
         if (values.img instanceof File) {
           const formData = new FormData();
           formData.append("file", values.img);
@@ -64,7 +65,6 @@ export default function CreateComment() {
           finalImageName = uploadData.data;
         }
 
-        // Step 2: Create comment with correct filename
         const payload = {
           author: values.author,
           content: values.content,
@@ -92,11 +92,17 @@ export default function CreateComment() {
   });
 
   // ----------------------------------------
-  // Handlers
+  // Handlers & Protections
   // ----------------------------------------
   const handleCustomImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Protection against backend conflict
+      if (file.name.toLowerCase().startsWith("default-")) {
+        Notify("error", "نام فایل مجاز نیست. لطفاً نام فایل را تغییر دهید.");
+        e.target.value = ""; 
+        return;
+      }
       formik.setFieldValue("img", file);
       setImagePreview(URL.createObjectURL(file)); 
     }
@@ -180,7 +186,6 @@ export default function CreateComment() {
           <div className="flex flex-col gap-4 border-t pt-4">
             <label className="text-sm font-semibold text-gray-700">انتخاب آواتار یا آپلود تصویر شخصی</label>
             
-            {/* Display Default Avatars */}
             <div className="flex gap-4 flex-wrap">
               {DEFAULT_AVATARS.map((avatar) => (
                 <img 
@@ -197,7 +202,6 @@ export default function CreateComment() {
 
             <span className="text-xs text-gray-400 font-bold my-1">یا</span>
 
-            {/* Upload Custom Avatar */}
             <div className="w-full md:w-1/2 h-32 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer relative overflow-hidden">
               <input
                 id="custom-img"
@@ -224,11 +228,11 @@ export default function CreateComment() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 ${
+              className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 min-w-[150px] flex justify-center items-center ${
                 isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-[#51b5a5] hover:bg-teal-600"
               }`}
             >
-              {isSubmitting ? "در حال ثبت..." : "ثبت نظر"}
+              {isSubmitting ? <Loading color="#ffffff" size={8} /> : "ثبت نظر"}
             </button>
           </div>
         </form>

@@ -26,7 +26,7 @@ export default function CommentCard({ comment, onEdit, onDelete }) {
     }
   };
 
-  // Determine correct image URL using our helper
+  // Determine correct image URL using our global helper
   const avatarUrl = getImageUrl(comment.img);
 
   return (
@@ -41,7 +41,7 @@ export default function CommentCard({ comment, onEdit, onDelete }) {
                 <img 
                   src={avatarUrl} 
                   alt={comment.author} 
-                  className="w-8 h-8 object-cover rounded-full border border-gray-200" 
+                  className="w-10 h-10 object-cover rounded-full border border-gray-200" 
                 />
                 <span>{comment.author}</span>
             </div>
@@ -58,7 +58,7 @@ export default function CommentCard({ comment, onEdit, onDelete }) {
       </div>
 
       {/* Action Toolbar */}
-      <div className="flex items-center gap-2 self-end md:self-center">
+      <div className="flex items-center gap-2 self-end md:self-center shrink-0">
         <button
           onClick={() => onEdit(comment._id)}
           className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
