@@ -12,7 +12,7 @@ import * as Yup from "yup";
 // ==========================================
 import { login } from "../../Store/Slices/authSlice"; 
 import fetchData from "../../Utils/fetchData";
-import Loading from "../../Components/Loading";
+import Loading from "../../Components/Loading"; // Custom Loading component
 import Notify from "../../Utils/notify";
 
 // ==========================================
@@ -164,13 +164,20 @@ export default function AdminLogin() {
           </div>
 
           {/* Submit Button */}
-          <button
-            disabled={formik.isSubmitting}
-            type="submit"
-            className="w-full h-[55px] bg-[#51b5a5] hover:bg-[#439a8c] text-white font-bold py-3 rounded-2xl transition-all duration-300 disabled:bg-[#9cdcd1] shadow-lg shadow-[#51b5a5]/30 hover:shadow-xl hover:-translate-y-1 flex justify-center items-center text-lg mt-6"
-          >
-            {formik.isSubmitting ? <Loading /> : "ورود به داشبورد"}
-          </button>
+          <div className="flex justify-center mt-6">
+            <button
+              disabled={formik.isSubmitting}
+              type="submit"
+              className={`w-full h-[55px] font-bold py-3 rounded-2xl transition-all duration-300 shadow-lg shadow-[#51b5a5]/30 hover:shadow-xl hover:-translate-y-1 flex justify-center items-center text-lg ${
+                formik.isSubmitting 
+                  ? "bg-[#9cdcd1] cursor-not-allowed" 
+                  : "bg-[#51b5a5] hover:bg-[#439a8c] text-white"
+              }`}
+            >
+              {/* Passed proper color parameter so it stays visible on the green button */}
+              {formik.isSubmitting ? <Loading color="#ffffff" size={8} /> : "ورود به داشبورد"}
+            </button>
+          </div>
         </form>
 
         {/* Footer Support Text */}
