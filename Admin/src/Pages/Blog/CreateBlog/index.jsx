@@ -12,6 +12,7 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 // ==========================================
 import fetchData from "../../../Utils/fetchData";
 import Notify from "../../../Utils/notify";
+import Loading from "../../../Components/Loading"; 
 
 // ----------------------------------------
 // Validation Schema for Formik
@@ -47,7 +48,6 @@ export default function CreateBlog() {
     onSubmit: async (values) => {
       setIsSubmitting(true);
       try {
-        // Step 1: Upload image to the server
         const formData = new FormData();
         formData.append("file", values.img);
 
@@ -56,14 +56,12 @@ export default function CreateBlog() {
           body: formData,
         });
 
-        // Abort if image upload fails
         if (!uploadData || !uploadData.success) {
           throw new Error(uploadData?.message || "آپلود عکس با خطا مواجه شد");
         }
 
         const uploadedFilename = uploadData.data;
 
-        // Step 2: Save the blog entry with the returned filename
         const blogPayload = {
           title: values.title,
           date: values.date,
@@ -78,7 +76,7 @@ export default function CreateBlog() {
 
         if (blogData && blogData.success) {
           Notify("success", "بلاگ با موفقیت ثبت شد!");
-          window.history.back(); // Redirect back to blog list
+          window.history.back(); 
         } else {
           throw new Error(blogData?.message || "ثبت بلاگ با خطا مواجه شد");
         }
@@ -91,15 +89,25 @@ export default function CreateBlog() {
   });
 
   // ----------------------------------------
-  // Handlers
+  // Handlers & Protections
   // ----------------------------------------
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.name.toLowerCase().startsWith("default-")) {
+        Notify("error", "نام فایل مجاز نیست. لطفاً نام فایل را تغییر دهید.");
+        e.target.value = ""; 
+        return;
+      }
       formik.setFieldValue("img", file);
-      setImagePreview(URL.createObjectURL(file)); // Generate local preview URL
+      setImagePreview(URL.createObjectURL(file)); 
     }
   };
+
+  const inputClass = (error) =>
+    `w-full border rounded-lg px-4 py-2.5 outline-none transition-all ${
+      error ? "border-red-500" : "border-gray-300 focus:border-[#51b5a5]"
+    }`;
 
   // ----------------------------------------
   // Render Component
@@ -107,7 +115,6 @@ export default function CreateBlog() {
   return (
     <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
       
-      {/* Header Section */}
       <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
         <h1 className="text-2xl font-bold text-[#1b234d]">افزودن بلاگ جدید</h1>
         <button
@@ -120,38 +127,30 @@ export default function CreateBlog() {
         </button>
       </div>
 
-      {/* Main Form Container */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 max-w-4xl mx-auto">
         <form onSubmit={formik.handleSubmit} className="flex flex-col gap-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
-            {/* Title Input */}
             <div className="flex flex-col gap-2">
-              <label htmlFor="title" className="text-sm font-semibold text-gray-700">عنوان بلاگ</label>
+              <label className="text-sm font-semibold text-gray-700">عنوان بلاگ</label>
               <input
-                id="title"
                 type="text"
                 placeholder="مثال: معرفی رشته شبکه و نرم افزار"
                 {...formik.getFieldProps("title")}
-                className={`w-full border rounded-lg px-4 py-2.5 outline-none transition-all ${
-                  formik.touched.title && formik.errors.title ? "border-red-500" : "border-gray-300 focus:border-[#51b5a5]"
-                }`}
+                className={inputClass(formik.touched.title && formik.errors.title)}
               />
               {formik.touched.title && formik.errors.title && (
                 <div className="text-red-500 text-xs mt-1">{formik.errors.title}</div>
               )}
             </div>
 
-            {/* Date Input */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold text-gray-700">تاریخ انتشار</label>
               <input
-                id="date"
                 type="text"
+                placeholder="مثال: 1404/06/15"
                 {...formik.getFieldProps("date")}
-                className={`w-full border rounded-lg px-4 py-2.5 outline-none transition-all ${
-                  formik.touched.date && formik.errors.date ? "border-red-500" : "border-gray-300 focus:border-[#51b5a5]"
-                }`}
+                className={inputClass(formik.touched.date && formik.errors.date)}
               />
               {formik.touched.date && formik.errors.date && (
                 <div className="text-red-500 text-xs mt-1">{formik.errors.date}</div>
@@ -159,30 +158,24 @@ export default function CreateBlog() {
             </div>
           </div>
 
-          {/* Description Input */}
           <div className="flex flex-col gap-2">
-            <label htmlFor="description" className="text-sm font-semibold text-gray-700">توضیحات و متن مقاله</label>
+            <label className="text-sm font-semibold text-gray-700">توضیحات و متن مقاله</label>
             <textarea
-              id="description"
               rows="6"
               placeholder="متن کامل بلاگ را اینجا بنویسید..."
               {...formik.getFieldProps("description")}
-              className={`w-full border rounded-lg px-4 py-3 outline-none transition-all resize-y ${
-                formik.touched.description && formik.errors.description ? "border-red-500" : "border-gray-300 focus:border-[#51b5a5]"
-              }`}
+              className={`resize-y ${inputClass(formik.touched.description && formik.errors.description)}`}
             ></textarea>
             {formik.touched.description && formik.errors.description && (
               <div className="text-red-500 text-xs mt-1">{formik.errors.description}</div>
             )}
           </div>
 
-          {/* Image Upload Input */}
           <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-gray-700">تصویر شاخص</label>
             <div className="w-full h-48 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-3 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer relative overflow-hidden">
               <input
                 id="img"
-                name="img"
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
@@ -193,9 +186,7 @@ export default function CreateBlog() {
               ) : (
                 <>
                   <CloudUploadIcon className="text-gray-400" fontSize="large" />
-                  <div className="text-center px-4">
-                    <p className="text-sm font-medium text-gray-600">برای آپلود تصویر کلیک کنید</p>
-                  </div>
+                  <p className="text-sm font-medium text-gray-600">برای آپلود تصویر کلیک کنید</p>
                 </>
               )}
             </div>
@@ -204,16 +195,15 @@ export default function CreateBlog() {
             )}
           </div>
 
-          {/* Submit Button */}
           <div className="flex justify-end mt-4">
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 ${
+              className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 min-w-[150px] flex justify-center items-center ${
                 isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-[#51b5a5] hover:bg-teal-600"
               }`}
             >
-              {isSubmitting ? "در حال ثبت..." : "ثبت و انتشار بلاگ"}
+              {isSubmitting ? <Loading color="#ffffff" size={8} /> : "ثبت و انتشار بلاگ"}
             </button>
           </div>
         </form>

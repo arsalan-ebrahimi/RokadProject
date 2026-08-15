@@ -11,48 +11,91 @@ import AddIcon from "@mui/icons-material/Add";
 import fetchData from "../../../Utils/fetchData"; 
 import BlogCard from "../BlogCard";
 import Notify from "../../../Utils/notify";
-import Confirm from "../../../Utils/Confirm"; // Custom SweetAlert2 Confirm
+import Confirm from "../../../Utils/Confirm"; 
+import Loading from "../../../Components/Loading"; 
 
 // ==========================================
 // Component: BlogPage
-// Description: Manages and displays the list of blog posts
+// Description: Manages and displays the list of blog posts with Infinite Scroll
 // ==========================================
 export default function BlogPage() {
   const navigate = useNavigate();
+  
+  // ----------------------------------------
+  // State Management
+  // ----------------------------------------
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
+  // Grid has up to 4 columns, so 12 is optimal
+  const LIMIT = 12;
 
   // ----------------------------------------
-  // Fetch Blogs Data on Mount
+  // Fetch Data Function
+  // ----------------------------------------
+  const fetchBlogs = async (pageNumber) => {
+    if (pageNumber === 1) setLoading(true);
+    else setLoadingMore(true);
+
+    const data = await fetchData(`blog?limit=${LIMIT}&page=${pageNumber}&sort=-_id`);
+    
+    if (data && data.success !== false) {
+      const fetchedBlogs = Array.isArray(data) ? data : data.data || [];
+      
+      if (fetchedBlogs.length < LIMIT) {
+        setHasMore(false);
+      }
+
+      if (pageNumber === 1) {
+        setBlogs(fetchedBlogs);
+      } else {
+        setBlogs((prev) => [...prev, ...fetchedBlogs]);
+      }
+    } else {
+      Notify("error", data?.message || "خطا در دریافت اطلاعات");
+    }
+
+    setLoading(false);
+    setLoadingMore(false);
+  };
+
+  useEffect(() => {
+    fetchBlogs(page);
+  }, [page]);
+
+  // ----------------------------------------
+  // Infinite Scroll Listener
   // ----------------------------------------
   useEffect(() => {
-    const getBlogs = async () => {
-      setLoading(true);
-      const data = await fetchData("blog");
-      
-      if (data && data.success !== false) {
-        setBlogs(Array.isArray(data) ? data : data.data || []);
+    const handleScroll = () => {
+      const scrollHeight = document.documentElement.scrollHeight;
+      const scrollTop = document.documentElement.scrollTop;
+      const clientHeight = window.innerHeight;
+
+      if (scrollTop + clientHeight >= scrollHeight - 100) {
+        if (hasMore && !loading && !loadingMore) {
+          setPage((prevPage) => prevPage + 1);
+        }
       }
-      setLoading(false);
     };
-    
-    getBlogs();
-  }, []);
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [hasMore, loading, loadingMore]);
 
   // ----------------------------------------
   // Action Handlers
   // ----------------------------------------
-
-  // Navigate to edit page
   const handleEditBlog = (data) => {
     const blogId = typeof data === "object" ? data._id : data;
     if (blogId) navigate(`update/${blogId}`); 
   };
 
-  // Navigate to create page
   const handleAddBlog = () => navigate("create");
 
-  // Handle blog deletion with custom confirmation
   const handleDeleteBlog = async (id) => {
     const isConfirmed = await Confirm(
       "آیا از حذف این بلاگ اطمینان دارید؟",
@@ -60,28 +103,14 @@ export default function BlogPage() {
       "بله، حذف کن"
     );
 
-    // Cancel deletion if user aborts
     if (!isConfirmed) return;
 
-    const blogToDelete = blogs.find((b) => b._id === id);
-
-    // Execute DELETE request to backend
     const deleteData = await fetchData(`blog/${id}`, {
       method: "DELETE",
     });
 
     if (deleteData && deleteData.success !== false) {
-      // Clean up associated image from server storage
-      if (blogToDelete && blogToDelete.img) {
-        await fetchData("upload/remove", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ filename: blogToDelete.img }),
-        });
-      }
-
-      // Update local state to remove the deleted blog
-      setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog._id !== id));
+      setBlogs((prev) => prev.filter((blog) => blog._id !== id));
       Notify("success", "بلاگ با موفقیت حذف شد.");
     } else {
       Notify("error", deleteData?.message || "حذف بلاگ ناموفق بود");
@@ -89,17 +118,8 @@ export default function BlogPage() {
   };
   
   // ----------------------------------------
-  // Render Components
+  // Render Component
   // ----------------------------------------
-  const renderedBlogCards = [...blogs].reverse().map((blog) => (
-    <BlogCard 
-      key={blog._id} 
-      blog={blog} 
-      onEdit={handleEditBlog} 
-      onDelete={handleDeleteBlog} 
-    />
-  ));
-
   return (
     <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
       
@@ -116,17 +136,36 @@ export default function BlogPage() {
       </div>
 
       {/* Main Content Area */}
-      {loading ? (
-        <div className="text-center text-gray-500 mt-10">در حال دریافت اطلاعات...</div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {renderedBlogCards}
-          
-          {/* Empty State */}
-          {blogs.length === 0 && (
-            <div className="col-span-full text-center text-gray-500 py-10">هیچ بلاگی یافت نشد.</div>
-          )}
+      {loading && page === 1 ? (
+        <div className="flex justify-center mt-20">
+          <Loading size={12} />
         </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {blogs.map((blog) => (
+              <BlogCard 
+                key={blog._id} 
+                blog={blog} 
+                onEdit={handleEditBlog} 
+                onDelete={handleDeleteBlog} 
+              />
+            ))}
+          </div>
+
+          {blogs.length === 0 && !loading && (
+            <div className="text-center text-gray-500 py-10">
+              هیچ بلاگی یافت نشد.
+            </div>
+          )}
+
+          {/* Loading indicator for Infinite Scroll */}
+          {loadingMore && (
+            <div className="flex justify-center mt-8 py-4 pb-10">
+              <Loading size={10} />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

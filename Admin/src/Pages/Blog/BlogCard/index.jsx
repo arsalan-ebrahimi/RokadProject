@@ -6,14 +6,18 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 // ==========================================
+// Utilities
+// ==========================================
+import { getImageUrl } from "../../../Utils/getImageUrl"; // Dynamic URL helper
+
+// ==========================================
 // Component: BlogCard
 // Description: Renders an individual blog post item
 // ==========================================
 export default function BlogCard({ blog, onEdit, onDelete }) {
-  // Construct the correct image URL
-  const baseUrl = import.meta.env.VITE_FILE_URL || "http://localhost:1337";
-  const imageUrl = blog.img?.startsWith("http") ? blog.img : `${baseUrl}/${blog.img}`;
-  const cleanUrl = imageUrl.replace(/([^:]\/)\/+/g, "$1"); 
+  
+  // Use global helper to generate valid URL
+  const imageUrl = getImageUrl(blog.img);
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
@@ -21,7 +25,7 @@ export default function BlogCard({ blog, onEdit, onDelete }) {
       {/* Blog Thumbnail Image */}
       <div className="h-48 w-full bg-gray-200 relative">
         {blog.img ? (
-          <img src={cleanUrl} alt={blog.title} className="w-full h-full object-cover" />
+          <img src={imageUrl} alt={blog.title} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400">بدون تصویر</div>
         )}
