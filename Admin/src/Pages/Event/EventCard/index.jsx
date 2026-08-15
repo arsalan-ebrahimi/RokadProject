@@ -9,7 +9,7 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 // ==========================================
 // Utilities
 // ==========================================
-import { getImageUrl } from "../../../Utils/getImageUrl"; // Reuse our helper
+import { getImageUrl } from "../../../Utils/getImageUrl"; 
 
 // ==========================================
 // Component: EventCard
@@ -23,6 +23,7 @@ export default function EventCard({ event, onEdit, onDelete }) {
       : "bg-blue-50 text-blue-600 border-blue-200";
   };
 
+  // Generate valid URL for the image
   const imageUrl = getImageUrl(event.img);
 
   return (

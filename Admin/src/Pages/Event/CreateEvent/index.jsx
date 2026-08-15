@@ -8,10 +8,11 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
 // ==========================================
-// Utilities
+// Utilities & Components
 // ==========================================
 import fetchData from "../../../Utils/fetchData";
 import Notify from "../../../Utils/notify";
+import Loading from "../../../Components/Loading"; // Custom Loading
 
 // ----------------------------------------
 // Validation Schema
@@ -96,11 +97,18 @@ export default function CreateEvent() {
   });
 
   // ----------------------------------------
-  // Handlers
+  // Handlers & Protections
   // ----------------------------------------
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Protection against default avatar naming conflict
+      if (file.name.toLowerCase().startsWith("default-")) {
+        Notify("error", "نام فایل مجاز نیست. لطفاً نام فایل را تغییر دهید.");
+        e.target.value = ""; 
+        return;
+      }
+
       formik.setFieldValue("img", file);
       setImagePreview(URL.createObjectURL(file)); 
     }
@@ -200,7 +208,7 @@ export default function CreateEvent() {
           </div>
 
           {/* Image Upload Area */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 border-t pt-4">
             <label className="text-sm font-semibold text-gray-700">تصویر رویداد</label>
             <div className="w-full h-48 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-3 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer relative overflow-hidden">
               <input
@@ -228,11 +236,11 @@ export default function CreateEvent() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 ${
+              className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 min-w-[150px] flex justify-center items-center ${
                 isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-[#51b5a5] hover:bg-teal-600"
               }`}
             >
-              {isSubmitting ? "در حال ثبت..." : "ثبت رویداد"}
+              {isSubmitting ? <Loading color="#ffffff" size={8} /> : "ثبت رویداد"}
             </button>
           </div>
         </form>
