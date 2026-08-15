@@ -1,65 +1,100 @@
 // ==========================================
-// Dependencies & Libraries
+// Dependencies & Icons
 // ==========================================
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 
 // ==========================================
-// Components & Utilities
+// Utilities & Components
 // ==========================================
 import fetchData from "../../../Utils/fetchData"; 
 import AwardCard from "../AwardCard"; 
 import Notify from "../../../Utils/notify";
-import Confirm from "../../../Utils/Confirm"; // Custom SweetAlert2 Confirm
+import Confirm from "../../../Utils/Confirm";
+import Loading from "../../../Components/Loading"; 
 
 // ==========================================
 // Component: AwardPage
-// Description: Manages and lists all awards
+// Description: Manages awards list with Infinite Scrolling
 // ==========================================
 export default function AwardPage() {
   const navigate = useNavigate();
+  
+  // ----------------------------------------
+  // State Management
+  // ----------------------------------------
   const [awards, setAwards] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); 
+  const [loadingMore, setLoadingMore] = useState(false); 
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
+  // Since it's a vertical list (flex-col), 10 is a good limit
+  const LIMIT = 10;
 
   // ----------------------------------------
-  // Fetch Awards Data on Component Mount
+  // Fetch Data Function
+  // ----------------------------------------
+  const fetchAwards = async (pageNumber) => {
+    if (pageNumber === 1) setLoading(true);
+    else setLoadingMore(true);
+
+    const data = await fetchData(`award?limit=${LIMIT}&page=${pageNumber}&sort=-_id`);
+    
+    if (data && data.success !== false) {
+      const fetchedAwards = Array.isArray(data) ? data : data.data || [];
+      
+      if (fetchedAwards.length < LIMIT) {
+        setHasMore(false);
+      }
+
+      if (pageNumber === 1) {
+        setAwards(fetchedAwards);
+      } else {
+        setAwards((prev) => [...prev, ...fetchedAwards]);
+      }
+    } else {
+      Notify("error", data?.message || "خطا در دریافت اطلاعات");
+    }
+
+    setLoading(false);
+    setLoadingMore(false);
+  };
+
+  useEffect(() => {
+    fetchAwards(page);
+  }, [page]);
+
+  // ----------------------------------------
+  // Infinite Scroll Listener
   // ----------------------------------------
   useEffect(() => {
-    const getAwards = async () => {
-      setLoading(true);
-      
-      const data = await fetchData("award");
-      
-      // Update state if data is successfully fetched
-      if (data && data.success !== false) { 
-        setAwards(Array.isArray(data) ? data : data.data || []);
-      } else {
-        console.error("Failed to fetch awards:", data?.message);
+    const handleScroll = () => {
+      const scrollHeight = document.documentElement.scrollHeight;
+      const scrollTop = document.documentElement.scrollTop;
+      const clientHeight = window.innerHeight;
+
+      if (scrollTop + clientHeight >= scrollHeight - 100) {
+        if (hasMore && !loading && !loadingMore) {
+          setPage((prevPage) => prevPage + 1);
+        }
       }
-      setLoading(false);
     };
 
-    getAwards();
-  }, []);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [hasMore, loading, loadingMore]);
 
   // ----------------------------------------
   // Action Handlers
   // ----------------------------------------
-  
-  // Navigate to update page
   const handleEditAward = (id) => {
-    if (id) {
-      navigate(`update/${id}`); 
-    }
+    if (id) navigate(`update/${id}`); 
   };
 
-  // Navigate to creation page
-  const handleAddAward = () => {
-    navigate("create");
-  };
+  const handleAddAward = () => navigate("create");
 
-  // Handle award deletion using custom SweetAlert2 Confirm
   const handleDeleteAward = async (id) => {
     const isConfirmed = await Confirm(
       "آیا از حذف این جایزه اطمینان دارید؟",
@@ -67,17 +102,12 @@ export default function AwardPage() {
       "بله، حذف کن"
     );
     
-    // Stop execution if user cancels
     if (!isConfirmed) return; 
 
-    // Execute DELETE request
-    const deleteData = await fetchData(`award/${id}`, {
-      method: "DELETE",
-    });
+    const deleteData = await fetchData(`award/${id}`, { method: "DELETE" });
 
     if (deleteData && deleteData.success !== false) {
-      // Remove deleted item from local state
-      setAwards((prevAwards) => prevAwards.filter((item) => item._id !== id));
+      setAwards((prev) => prev.filter((item) => item._id !== id));
       Notify("success", "جایزه با موفقیت حذف شد.");
     } else {
       Notify("error", deleteData?.message || "خطا در حذف اطلاعات");
@@ -85,22 +115,12 @@ export default function AwardPage() {
   };
   
   // ----------------------------------------
-  // Render Components
+  // Render Component
   // ----------------------------------------
-  // Render list of AwardCard components in reverse order (newest first)
-  const renderedAwardCards = [...awards].reverse().map((award) => (
-    <AwardCard 
-      key={award._id} 
-      award={award} 
-      onEdit={handleEditAward} 
-      onDelete={handleDeleteAward} 
-    />
-  ));
-
   return (
     <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
       
-      {/* Header with Page Title and Add Button */}
+      {/* Header */}
       <div className="flex justify-between items-center mb-8 border-b pb-4">
         <h1 className="text-2xl font-bold text-[#1b234d]">مدیریت افتخارات و جوایز</h1>
         <button
@@ -112,20 +132,39 @@ export default function AwardPage() {
         </button>
       </div>
 
-      {/* Loading state or Awards list */}
-      {loading ? (
-        <div className="text-center text-gray-500 mt-10">در حال دریافت اطلاعات...</div>
+      {/* Initial Full Page Loading */}
+      {loading && page === 1 ? (
+        <div className="flex justify-center mt-20">
+             <Loading size={12} />
+        </div>
       ) : (
-        <div className="flex flex-col gap-4">
-          {renderedAwardCards}
+        <>
+          {/* Main List */}
+          <div className="flex flex-col gap-4">
+            {awards.map((award) => (
+              <AwardCard 
+                key={award._id} 
+                award={award} 
+                onEdit={handleEditAward} 
+                onDelete={handleDeleteAward} 
+              />
+            ))}
+          </div>
 
-          {/* Empty state message */}
-          {awards.length === 0 && (
+          {/* Empty State */}
+          {awards.length === 0 && !loading && (
             <div className="text-center text-gray-500 py-10">
               هیچ جایزه‌ای یافت نشد.
             </div>
           )}
-        </div>
+
+          {/* Loading indicator for Infinite Scroll */}
+          {loadingMore && (
+            <div className="flex justify-center mt-8 py-4 pb-10">
+                <Loading size={10} />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

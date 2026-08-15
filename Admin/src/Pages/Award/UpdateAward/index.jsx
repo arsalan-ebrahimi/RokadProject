@@ -8,10 +8,11 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useNavigate, useParams } from "react-router-dom";
 
 // ==========================================
-// Utilities
+// Utilities & Components
 // ==========================================
 import fetchData from "../../../Utils/fetchData";
 import Notify from "../../../Utils/notify";
+import Loading from "../../../Components/Loading";
 
 // ----------------------------------------
 // Validation Schema
@@ -30,13 +31,12 @@ export default function UpdateAward() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Initial form values state
   const [initialValues, setInitialValues] = useState({
     title: "",
   });
 
   // ----------------------------------------
-  // Fetch Award Data on Component Mount
+  // Fetch Award Data on Mount
   // ----------------------------------------
   useEffect(() => {
     const getAwardData = async () => {
@@ -51,7 +51,6 @@ export default function UpdateAward() {
         awardData = response[0];
       }
 
-      // Populate form with existing data
       if (awardData) {
         setInitialValues({
           title: awardData.title || "",
@@ -62,7 +61,7 @@ export default function UpdateAward() {
     };
 
     if (id) getAwardData();
-  }, [id, navigate]);
+  }, [id]);
 
   // ----------------------------------------
   // Formik Configuration
@@ -74,13 +73,11 @@ export default function UpdateAward() {
     onSubmit: async (values) => {
       setIsSubmitting(true);
 
-      // Execute PATCH request to update award
       const response = await fetchData(`award/${id}`, {
         method: "PATCH", 
         body: JSON.stringify(values),
       });
 
-      // Handle response
       if (response && (response.success || response.status === "success")) {
         Notify("success", "جایزه با موفقیت ویرایش شد!");
         navigate("/award");
@@ -92,13 +89,18 @@ export default function UpdateAward() {
     },
   });
 
+  const inputClass = (error) =>
+    `w-full border rounded-lg px-4 py-2.5 outline-none transition-all ${
+      error ? "border-red-500" : "border-gray-300 focus:border-[#51b5a5]"
+    }`;
+
   // ----------------------------------------
   // Loading State
   // ----------------------------------------
   if (loading) {
     return (
       <div dir="rtl" className="flex justify-center items-center min-h-screen bg-gray-50">
-        <p className="text-gray-500 text-lg">در حال بارگذاری اطلاعات...</p>
+        <Loading size={12} />
       </div>
     );
   }
@@ -109,7 +111,6 @@ export default function UpdateAward() {
   return (
     <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
       
-      {/* Header Section with Back Button */}
       <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
         <h1 className="text-2xl font-bold text-[#1b234d]">ویرایش جایزه</h1>
         <button
@@ -122,36 +123,31 @@ export default function UpdateAward() {
         </button>
       </div>
 
-      {/* Main Form Container */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 max-w-4xl mx-auto">
         <form onSubmit={formik.handleSubmit} className="flex flex-col gap-6">
           
-          {/* Title Input Field */}
           <div className="flex flex-col gap-2">
             <label htmlFor="title" className="text-sm font-semibold text-gray-700">عنوان جایزه</label>
             <input
               id="title"
               type="text"
               {...formik.getFieldProps("title")}
-              className={`w-full border rounded-lg px-4 py-2.5 outline-none transition-all ${
-                formik.touched.title && formik.errors.title ? "border-red-500" : "border-gray-300 focus:border-[#51b5a5]"
-              }`}
+              className={inputClass(formik.touched.title && formik.errors.title)}
             />
             {formik.touched.title && formik.errors.title && (
               <div className="text-red-500 text-xs mt-1">{formik.errors.title}</div>
             )}
           </div>
 
-          {/* Submit Action */}
           <div className="flex justify-end mt-4">
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 ${
+              className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 min-w-[150px] flex justify-center items-center ${
                 isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
               }`}
             >
-              {isSubmitting ? "در حال ذخیره..." : "ذخیره تغییرات"}
+              {isSubmitting ? <Loading color="#ffffff" size={8} /> : "ذخیره تغییرات"}
             </button>
           </div>
         </form>

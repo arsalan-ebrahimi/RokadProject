@@ -7,10 +7,11 @@ import * as Yup from "yup";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 // ==========================================
-// Utilities
+// Utilities & Components
 // ==========================================
 import fetchData from "../../../Utils/fetchData";
 import Notify from "../../../Utils/notify";
+import Loading from "../../../Components/Loading";
 
 // ----------------------------------------
 // Validation Schema
@@ -37,16 +38,14 @@ export default function CreateAward() {
     onSubmit: async (values) => {
       setIsSubmitting(true);
       
-      // Execute POST request to create award
       const response = await fetchData("award", {
         method: "POST",
         body: JSON.stringify(values),
       });
 
-      // Handle response
       if (response && response.success !== false) {
         Notify("success", "جایزه با موفقیت ثبت شد!");
-        window.history.back(); // Return to previous page
+        window.history.back(); 
       } else {
         Notify("error", response?.message || "ثبت جایزه با خطا مواجه شد");
       }
@@ -55,10 +54,17 @@ export default function CreateAward() {
     },
   });
 
+  const inputClass = (error) =>
+    `w-full border rounded-lg px-4 py-2.5 outline-none transition-all ${
+      error ? "border-red-500" : "border-gray-300 focus:border-[#51b5a5]"
+    }`;
+
+  // ----------------------------------------
+  // Render Component
+  // ----------------------------------------
   return (
     <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
       
-      {/* Header Section with Back Button */}
       <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
         <h1 className="text-2xl font-bold text-[#1b234d]">افزودن جایزه جدید</h1>
         <button
@@ -71,11 +77,9 @@ export default function CreateAward() {
         </button>
       </div>
 
-      {/* Main Form Container */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 max-w-4xl mx-auto">
         <form onSubmit={formik.handleSubmit} className="flex flex-col gap-6">
           
-          {/* Title Input Field */}
           <div className="flex flex-col gap-2">
             <label htmlFor="title" className="text-sm font-semibold text-gray-700">عنوان جایزه</label>
             <input
@@ -83,25 +87,22 @@ export default function CreateAward() {
               type="text"
               placeholder="مثال: تندیس کارآفرین برتر"
               {...formik.getFieldProps("title")}
-              className={`w-full border rounded-lg px-4 py-2.5 outline-none transition-all ${
-                formik.touched.title && formik.errors.title ? "border-red-500" : "border-gray-300 focus:border-[#51b5a5]"
-              }`}
+              className={inputClass(formik.touched.title && formik.errors.title)}
             />
             {formik.touched.title && formik.errors.title && (
               <div className="text-red-500 text-xs mt-1">{formik.errors.title}</div>
             )}
           </div>
 
-          {/* Submit Action */}
           <div className="flex justify-end mt-4">
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 ${
+              className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 min-w-[150px] flex justify-center items-center ${
                 isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-[#51b5a5] hover:bg-teal-600"
               }`}
             >
-              {isSubmitting ? "در حال ثبت..." : "ثبت جایزه"}
+              {isSubmitting ? <Loading color="#ffffff" size={8} /> : "ثبت جایزه"}
             </button>
           </div>
         </form>
