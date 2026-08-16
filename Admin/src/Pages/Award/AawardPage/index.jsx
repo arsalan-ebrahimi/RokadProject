@@ -8,11 +8,11 @@ import AddIcon from "@mui/icons-material/Add";
 // ==========================================
 // Utilities & Components
 // ==========================================
-import fetchData from "../../../Utils/fetchData"; 
-import AwardCard from "../AwardCard"; 
+import fetchData from "../../../Utils/fetchData";
+import AwardCard from "../AwardCard";
 import Notify from "../../../Utils/notify";
 import Confirm from "../../../Utils/Confirm";
-import Loading from "../../../Components/Loading"; 
+import Loading from "../../../Components/Loading";
 
 // ==========================================
 // Component: AwardPage
@@ -20,13 +20,13 @@ import Loading from "../../../Components/Loading";
 // ==========================================
 export default function AwardPage() {
   const navigate = useNavigate();
-  
+
   // ----------------------------------------
   // State Management
   // ----------------------------------------
   const [awards, setAwards] = useState([]);
-  const [loading, setLoading] = useState(true); 
-  const [loadingMore, setLoadingMore] = useState(false); 
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
@@ -40,11 +40,13 @@ export default function AwardPage() {
     if (pageNumber === 1) setLoading(true);
     else setLoadingMore(true);
 
-    const data = await fetchData(`award?limit=${LIMIT}&page=${pageNumber}&sort=-_id`);
-    
+    const data = await fetchData(
+      `award?limit=${LIMIT}&page=${pageNumber}&sort=-_id`,
+    );
+
     if (data && data.success !== false) {
       const fetchedAwards = Array.isArray(data) ? data : data.data || [];
-      
+
       if (fetchedAwards.length < LIMIT) {
         setHasMore(false);
       }
@@ -52,7 +54,13 @@ export default function AwardPage() {
       if (pageNumber === 1) {
         setAwards(fetchedAwards);
       } else {
-        setAwards((prev) => [...prev, ...fetchedAwards]);
+        setAwards((prev) => {
+          const uniqueNewItems = fetchedAwards.filter(
+            (newItem) =>
+              !prev.some((existingItem) => existingItem._id === newItem._id),
+          );
+          return [...prev, ...uniqueNewItems];
+        });
       }
     } else {
       Notify("error", data?.message || "خطا در دریافت اطلاعات");
@@ -90,7 +98,7 @@ export default function AwardPage() {
   // Action Handlers
   // ----------------------------------------
   const handleEditAward = (id) => {
-    if (id) navigate(`update/${id}`); 
+    if (id) navigate(`update/${id}`);
   };
 
   const handleAddAward = () => navigate("create");
@@ -99,10 +107,10 @@ export default function AwardPage() {
     const isConfirmed = await Confirm(
       "آیا از حذف این جایزه اطمینان دارید؟",
       "این عمل غیرقابل بازگشت است.",
-      "بله، حذف کن"
+      "بله، حذف کن",
     );
-    
-    if (!isConfirmed) return; 
+
+    if (!isConfirmed) return;
 
     const deleteData = await fetchData(`award/${id}`, { method: "DELETE" });
 
@@ -113,16 +121,17 @@ export default function AwardPage() {
       Notify("error", deleteData?.message || "خطا در حذف اطلاعات");
     }
   };
-  
+
   // ----------------------------------------
   // Render Component
   // ----------------------------------------
   return (
     <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
-      
       {/* Header */}
       <div className="flex justify-between items-center mb-8 border-b pb-4">
-        <h1 className="text-2xl font-bold text-[#1b234d]">مدیریت افتخارات و جوایز</h1>
+        <h1 className="text-2xl font-bold text-[#1b234d]">
+          مدیریت افتخارات و جوایز
+        </h1>
         <button
           className="flex items-center gap-2 bg-[#51b5a5] hover:bg-teal-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
           onClick={handleAddAward}
@@ -135,18 +144,18 @@ export default function AwardPage() {
       {/* Initial Full Page Loading */}
       {loading && page === 1 ? (
         <div className="flex justify-center mt-20">
-             <Loading size={12} />
+          <Loading size={12} />
         </div>
       ) : (
         <>
           {/* Main List */}
           <div className="flex flex-col gap-4">
             {awards.map((award) => (
-              <AwardCard 
-                key={award._id} 
-                award={award} 
-                onEdit={handleEditAward} 
-                onDelete={handleDeleteAward} 
+              <AwardCard
+                key={award._id}
+                award={award}
+                onEdit={handleEditAward}
+                onDelete={handleDeleteAward}
               />
             ))}
           </div>
@@ -161,7 +170,7 @@ export default function AwardPage() {
           {/* Loading indicator for Infinite Scroll */}
           {loadingMore && (
             <div className="flex justify-center mt-8 py-4 pb-10">
-                <Loading size={10} />
+              <Loading size={10} />
             </div>
           )}
         </>
