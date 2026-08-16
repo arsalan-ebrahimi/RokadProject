@@ -6,8 +6,8 @@ export const getImageUrl = (imageName) => {
     return `/default-avatars/${imageName}`;
   }
 
-  const baseUrl = import.meta.env.VITE_FILE_URL || "http://localhost:1337";
+  const baseUrl = import.meta.env.VITE_FILE_URL || "http://localhost:5000";
   
-  const cleanUrl = `${baseUrl}/Public/${imageName}`.replace(/([^:]\/)\/+/g, "$1");
+  const cleanUrl = `${baseUrl}/${imageName}`.replace(/([^:]\/)\/+/g, "$1");
   return cleanUrl;
 };
