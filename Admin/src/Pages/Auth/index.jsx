@@ -1,18 +1,24 @@
 // ==========================================
 // Dependencies & Libraries
 // ==========================================
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
 // ==========================================
+// Icons
+// ==========================================
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+
+// ==========================================
 // Store Actions & Utilities
 // ==========================================
 import { login } from "../../Store/Slices/authSlice"; 
 import fetchData from "../../Utils/fetchData";
-import Loading from "../../Components/Loading"; // Custom Loading component
+import Loading from "../../Components/Loading"; 
 import Notify from "../../Utils/notify";
 
 // ==========================================
@@ -20,9 +26,11 @@ import Notify from "../../Utils/notify";
 // Description: Handles admin authentication logic
 // ==========================================
 export default function AdminLogin() {
-  // Navigation and Redux dispatch hooks
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  // State to toggle password visibility
+  const [showPassword, setShowPassword] = useState(false);
 
   // ----------------------------------------
   // Formik Configuration
@@ -30,7 +38,6 @@ export default function AdminLogin() {
   const formik = useFormik({
     initialValues: { phoneNumber: "", password: "" },
     
-    // Validation rules using Yup
     validationSchema: Yup.object({
       phoneNumber: Yup.string()
         .matches(/^09\d{9}$/, "شماره همراه معتبر نیست")
@@ -40,13 +47,10 @@ export default function AdminLogin() {
         .min(6, "رمز عبور بسیار کوتاه است"),
     }),
 
-    // Form submission handler
     onSubmit: async (values, { setSubmitting }) => {
       try {
-        // Format the phone number to match backend expectations (e.g., +98912...)
         const formattedPhone = values.phoneNumber.replace(/^0/, "+98");
 
-        // Execute API request for login
         const response = await fetchData("auth/login-password", {
           method: "POST",
           headers: {
@@ -58,35 +62,23 @@ export default function AdminLogin() {
           }),
         });
 
-        // Process successful API response
         if (response && response.success) {
           const userRole = response.data?.user?.role;
 
-          // Role-based access control (RBAC): restrict access to admins only
           if (userRole === "admin" || userRole === "superAdmin") {
-            
-            // Dispatch login action to store token in Redux and LocalStorage
             dispatch(login(response.data.token));
-            
-            // Show success notification
             Notify("success", `خوش آمدید ${response.data.user?.fullName || "مدیر"}`);
-            
-            // Redirect to dashboard root
             navigate("/"); 
           } else {
-            // Reject unauthorized roles
             Notify("error", "شما اجازه دسترسی به پنل مدیریت را ندارید.");
           }
         } else {
-          // Display error message from backend
           Notify("error", response?.message || "اطلاعات ورود نامعتبر است");
         }
       } catch (error) {
-        // Handle network or unexpected errors
         console.error("Authentication Error:", error);
         Notify("error", "خطا در برقراری ارتباط با سرور. لطفاً وضعیت شبکه را بررسی کنید.");
       } finally {
-        // Re-enable form submission button
         setSubmitting(false);
       }
     },
@@ -97,7 +89,8 @@ export default function AdminLogin() {
   // ----------------------------------------
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f4f6f8] p-4" dir="rtl">
-      <div className="max-w-md w-full bg-white rounded-3xl shadow-sm ring-1 ring-black/5 p-8 md:p-10">
+      {/* Slightly refined card shadow and border */}
+      <div className="max-w-md w-full bg-white rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 p-8 md:p-10">
         
         {/* Brand Logo */}
         <div className="flex justify-center mb-8">
@@ -109,7 +102,7 @@ export default function AdminLogin() {
         </div>
 
         {/* Header Texts */}
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">
+        <h2 className="text-2xl font-bold text-center text-[#1b234d] mb-2">
           ورود به پنل مدیریت
         </h2>
         <p className="text-center text-gray-500 mb-8 text-sm">
@@ -120,68 +113,78 @@ export default function AdminLogin() {
         <form onSubmit={formik.handleSubmit} className="space-y-5">
           
           {/* Phone Number Input Group */}
-          <div className="flex flex-col">
+          <div className="flex flex-col relative">
             <input
               type="text"
               name="phoneNumber"
               placeholder="شماره همراه (مثلاً 0912...)"
               dir="ltr"
-              className={`w-full px-5 py-3.5 rounded-2xl border-0 bg-gray-50 outline-none transition-all text-left font-sans ring-1 ${
+              className={`w-full px-5 py-4 rounded-2xl bg-gray-50/50 outline-none transition-all text-left font-sans border focus:bg-white ${
                 formik.touched.phoneNumber && formik.errors.phoneNumber
-                  ? "ring-red-400"
-                  : "ring-black/5 focus:ring-2 focus:ring-[#51b5a5]/50"
+                  ? "border-red-400 focus:ring-4 focus:ring-red-500/10"
+                  : "border-gray-200 focus:border-[#51b5a5] focus:ring-4 focus:ring-[#51b5a5]/10"
               }`}
               {...formik.getFieldProps("phoneNumber")}
             />
-            {/* Phone Error Message */}
             {formik.touched.phoneNumber && formik.errors.phoneNumber && (
-              <div className="text-red-500 text-xs mt-2 pr-2">
+              <div className="text-red-500 text-xs mt-2 pr-2 font-medium">
                 {formik.errors.phoneNumber}
               </div>
             )}
           </div>
 
           {/* Password Input Group */}
-          <div className="flex flex-col">
+          <div className="flex flex-col relative">
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               name="password"
               placeholder="رمز عبور"
               dir="ltr"
-              className={`w-full px-5 py-3.5 rounded-2xl border-0 shadow-sm bg-[#fcfcfc] outline-none transition-all text-left font-sans tracking-widest ${
+              className={`w-full pl-5 pr-12 py-4 rounded-2xl bg-gray-50/50 outline-none transition-all text-left font-sans tracking-widest border focus:bg-white ${
                 formik.touched.password && formik.errors.password
-                  ? "ring-2 ring-red-400/50 focus:ring-red-400"
-                  : "ring-1 ring-black/5 focus:ring-2 focus:ring-[#51b5a5]/50 hover:shadow-md"
+                  ? "border-red-400 focus:ring-4 focus:ring-red-500/10"
+                  : "border-gray-200 focus:border-[#51b5a5] focus:ring-4 focus:ring-[#51b5a5]/10"
               }`}
               {...formik.getFieldProps("password")}
             />
-            {/* Password Error Message */}
+            
+            {/* Minimal eye icon for password visibility */}
+            <div className="absolute right-4 top-[18px]">
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-gray-400 hover:text-[#51b5a5] transition-colors focus:outline-none"
+                tabIndex="-1"
+              >
+                {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+              </button>
+            </div>
+
             {formik.touched.password && formik.errors.password && (
-              <div className="text-red-500 text-xs mt-2 pr-2">
+              <div className="text-red-500 text-xs mt-2 pr-2 font-medium">
                 {formik.errors.password}
               </div>
             )}
           </div>
 
           {/* Submit Button */}
-          <div className="flex justify-center mt-6">
+          <div className="pt-2">
             <button
               disabled={formik.isSubmitting}
               type="submit"
-              className={`w-full h-[55px] font-bold py-3 rounded-2xl transition-all duration-300 shadow-lg shadow-[#51b5a5]/30 hover:shadow-xl hover:-translate-y-1 flex justify-center items-center text-lg ${
+              className={`w-full h-[55px] font-bold py-3 rounded-2xl transition-all duration-300 flex justify-center items-center text-lg ${
                 formik.isSubmitting 
                   ? "bg-[#9cdcd1] cursor-not-allowed" 
-                  : "bg-[#51b5a5] hover:bg-[#439a8c] text-white"
+                  : "bg-[#51b5a5] hover:bg-[#439a8c] text-white shadow-lg shadow-[#51b5a5]/20 hover:-translate-y-1 hover:shadow-[#51b5a5]/30"
               }`}
             >
-              {/* Passed proper color parameter so it stays visible on the green button */}
               {formik.isSubmitting ? <Loading color="#ffffff" size={8} /> : "ورود به داشبورد"}
             </button>
           </div>
         </form>
 
         {/* Footer Support Text */}
-        <div className="mt-8 text-center">
+        <div className="mt-8 text-center pt-6 border-t border-gray-50">
           <p className="text-xs text-gray-400">
             در صورت فراموشی رمز عبور با پشتیبانی فنی تماس بگیرید.
           </p>
