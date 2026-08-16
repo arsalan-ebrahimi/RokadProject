@@ -20,7 +20,6 @@ export const create = catchAsync(async (req, res, next) => {
 
 export const getAll = catchAsync(async (req, res, next) => {
   const features = new ApiFeatures(Award, req.query, req.role)
-    .search()
     .filter()
     .sort()
     .limitFields()
@@ -34,6 +33,7 @@ export const getAll = catchAsync(async (req, res, next) => {
 export const getOne = catchAsync(async (req, res, next) => {
   const features = new ApiFeatures(Award, req.query, req.role)
     .addManualFilters({ _id: req.params.id })
+    .filter() 
     .limitFields()
     .populate();
 
