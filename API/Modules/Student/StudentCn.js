@@ -21,7 +21,6 @@ export const create = catchAsync(async (req, res, next) => {
 
 export const getAll = catchAsync(async (req, res, next) => {
   const features = new ApiFeatures(Student, req.query, req.role)
-    .search()
     .filter()
     .sort()
     .limitFields()
@@ -35,20 +34,19 @@ export const getAll = catchAsync(async (req, res, next) => {
 export const getOne = catchAsync(async (req, res, next) => {
   const features = new ApiFeatures(Student, req.query, req.role)
     .addManualFilters({ _id: req.params.id })
+    .filter() 
     .limitFields()
     .populate();
 
   const result = await features.execute();
 
-  const doc = Array.isArray(result) ? result[0] : result?.data ? result.data[0] : result;
-
-  if (!doc) {
-    return next(new HandleERROR("دانش‌آموز یافت نشد", 404));
+  if (!result || (Array.isArray(result) && result.length === 0)) {
+    return next(new HandleERROR("دانش‌آموز مورد نظر یافت نشد", 404));
   }
 
   return res.status(200).json({
     success: true,
-    data: doc
+    data: Array.isArray(result) ? result[0] : result
   });
 });
 
@@ -65,7 +63,6 @@ export const update = catchAsync(async (req, res, next) => {
     return next(new HandleERROR("دانش‌آموز یافت نشد", 404));
   }
 
-  // Delete old image from hard drive if a new one is uploaded
   if (updates.img && updates.img !== oldStudent.img) {
     const filePath = path.join(__dirname, "../../Public", oldStudent.img);
     if (fs.existsSync(filePath)) {
@@ -92,7 +89,6 @@ export const remove = catchAsync(async (req, res, next) => {
     return next(new HandleERROR("دانش‌آموز یافت نشد", 404));
   }
 
-  // Delete associated image from hard drive
   if (deleteStudent.img) {
     const filePath = path.join(__dirname, "../../Public", deleteStudent.img);
     if (fs.existsSync(filePath)) {

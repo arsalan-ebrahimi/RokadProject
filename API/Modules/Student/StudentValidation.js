@@ -22,6 +22,7 @@ export const createStudentValidator = Joi.object({
   }),
   socialLinks: Joi.array().items(
     Joi.object({
+      _id: Joi.any(), 
       type: Joi.string().required().messages({
         "string.base": "نوع شبکه اجتماعی باید متن باشد",
         "string.empty": "نوع شبکه اجتماعی نمی‌تواند خالی باشد",
@@ -56,6 +57,7 @@ export const updateStudentValidator = Joi.object({
   }),
   socialLinks: Joi.array().items(
     Joi.object({
+      _id: Joi.any(), 
       type: Joi.string().required().messages({
         "string.base": "نوع شبکه اجتماعی باید متن باشد",
         "string.empty": "نوع شبکه اجتماعی نمی‌تواند خالی باشد",

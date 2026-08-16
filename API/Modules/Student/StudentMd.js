@@ -13,6 +13,10 @@ const studentSchema = new mongoose.Schema({
     type: Number,
     required: [true, "تعیین نسل دانش‌آموز الزامی است"],
   },
+  img: {
+    type: String,
+    required: [true, "انتخاب تصویر دانش‌آموز الزامی است"],
+  },
   socialLinks: [{
     type: {
       type: String,
