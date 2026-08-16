@@ -8,11 +8,11 @@ import AddIcon from "@mui/icons-material/Add";
 // ==========================================
 // Utilities & Components
 // ==========================================
-import fetchData from "../../../Utils/fetchData"; 
-import EventCard from "../EventCard"; 
+import fetchData from "../../../Utils/fetchData";
+import EventCard from "../EventCard";
 import Notify from "../../../Utils/notify";
-import Confirm from "../../../Utils/Confirm"; 
-import Loading from "../../../Components/Loading"; 
+import Confirm from "../../../Utils/Confirm";
+import Loading from "../../../Components/Loading";
 
 // ==========================================
 // Component: EventPage
@@ -20,7 +20,7 @@ import Loading from "../../../Components/Loading";
 // ==========================================
 export default function EventPage() {
   const navigate = useNavigate();
-  
+
   // ----------------------------------------
   // State Management
   // ----------------------------------------
@@ -40,19 +40,27 @@ export default function EventPage() {
     if (pageNumber === 1) setLoading(true);
     else setLoadingMore(true);
 
-    const data = await fetchData(`event?limit=${LIMIT}&page=${pageNumber}&sort=-_id`);
-    
+    const data = await fetchData(
+      `event?limit=${LIMIT}&page=${pageNumber}&sort=-_id`,
+    );
+
     if (data && data.success !== false) {
       const fetchedEvents = Array.isArray(data) ? data : data.data || [];
-      
+
       if (fetchedEvents.length < LIMIT) {
         setHasMore(false);
       }
-
       if (pageNumber === 1) {
+        
         setEvents(fetchedEvents);
       } else {
-        setEvents((prev) => [...prev, ...fetchedEvents]);
+        setEvents((prev) => {
+          const uniqueNewItems = fetchedEvents.filter(
+            (newItem) =>
+              !prev.some((existingItem) => existingItem._id === newItem._id),
+          );
+          return [...prev, ...uniqueNewItems];
+        });
       }
     } else {
       Notify("error", data?.message || "خطا در دریافت اطلاعات");
@@ -90,7 +98,7 @@ export default function EventPage() {
   // Action Handlers
   // ----------------------------------------
   const handleEditEvent = (id) => {
-    if (id) navigate(`update/${id}`); 
+    if (id) navigate(`update/${id}`);
   };
 
   const handleAddEvent = () => navigate("create");
@@ -99,10 +107,10 @@ export default function EventPage() {
     const isConfirmed = await Confirm(
       "آیا از حذف این رویداد اطمینان دارید؟",
       "این عمل غیرقابل بازگشت است و تصویر آن نیز پاک خواهد شد.",
-      "بله، حذف کن"
+      "بله، حذف کن",
     );
-    
-    if (!isConfirmed) return; 
+
+    if (!isConfirmed) return;
 
     // Execute DELETE request
     const deleteData = await fetchData(`event/${id}`, {
@@ -116,13 +124,12 @@ export default function EventPage() {
       Notify("error", deleteData?.message || "خطا در حذف رویداد");
     }
   };
-  
+
   // ----------------------------------------
   // Render Component
   // ----------------------------------------
   return (
     <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
-      
       {/* Page Header */}
       <div className="flex justify-between items-center mb-8 border-b pb-4">
         <h1 className="text-2xl font-bold text-[#1b234d]">مدیریت رویدادها</h1>
@@ -144,11 +151,11 @@ export default function EventPage() {
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {events.map((event) => (
-              <EventCard 
-                key={event._id} 
-                event={event} 
-                onEdit={handleEditEvent} 
-                onDelete={handleDeleteEvent} 
+              <EventCard
+                key={event._id}
+                event={event}
+                onEdit={handleEditEvent}
+                onDelete={handleDeleteEvent}
               />
             ))}
           </div>

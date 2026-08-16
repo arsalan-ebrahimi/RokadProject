@@ -6,18 +6,19 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import { useNavigate } from "react-router-dom";
 
 // ==========================================
 // Utilities & Components
 // ==========================================
 import fetchData from "../../../Utils/fetchData";
 import Notify from "../../../Utils/notify";
-import Loading from "../../../Components/Loading"; // Custom Loading
+import Loading from "../../../Components/Loading";
 
 // ----------------------------------------
-// Validation Schema
+// Validation Schema for Formik
 // ----------------------------------------
-const eventValidationSchema = Yup.object({
+const eventCreateSchema = Yup.object({
   title: Yup.string().required("عنوان رویداد الزامی است"),
   type: Yup.string().required("نوع رویداد الزامی است"),
   date: Yup.string().required("تاریخ رویداد الزامی است"),
@@ -30,9 +31,11 @@ const eventValidationSchema = Yup.object({
 
 // ==========================================
 // Component: CreateEvent
-// Description: Form to create a new event with image upload
+// Description: Form to create a new event
 // ==========================================
 export default function CreateEvent() {
+  const navigate = useNavigate();
+  
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -48,11 +51,10 @@ export default function CreateEvent() {
       branch: "",
       img: null,
     },
-    validationSchema: eventValidationSchema,
+    validationSchema: eventCreateSchema,
     onSubmit: async (values) => {
       setIsSubmitting(true);
       try {
-        // Step 1: Upload Image
         const formData = new FormData();
         formData.append("file", values.img);
 
@@ -65,26 +67,24 @@ export default function CreateEvent() {
           throw new Error(uploadData?.message || "آپلود تصویر با خطا مواجه شد");
         }
 
-        const uploadedFilename = uploadData.data;
-
-        // Step 2: Save Event Data
         const payload = {
           title: values.title,
           type: values.type,
           date: values.date,
           description: values.description,
           branch: values.branch,
-          img: uploadedFilename,
+          img: uploadData.data, // نام فایل آپلود شده
         };
 
         const response = await fetchData("event", {
-          method: "POST",
+          method: "POST", 
           body: JSON.stringify(payload),
         });
 
-        if (response && response.success !== false) {
-          Notify("success", "رویداد با موفقیت ثبت شد!");
-          window.history.back(); 
+        // 🟢 رفع مشکل ارور در صورت موفقیت: بررسی دقیق‌تر
+        if (response && (response.success || response.success !== false)) {
+          Notify("success", "رویداد با موفقیت ایجاد شد!");
+          navigate("/event");
         } else {
           throw new Error(response?.message || "ثبت رویداد با خطا مواجه شد");
         }
@@ -102,13 +102,11 @@ export default function CreateEvent() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Protection against default avatar naming conflict
       if (file.name.toLowerCase().startsWith("default-")) {
         Notify("error", "نام فایل مجاز نیست. لطفاً نام فایل را تغییر دهید.");
         e.target.value = ""; 
         return;
       }
-
       formik.setFieldValue("img", file);
       setImagePreview(URL.createObjectURL(file)); 
     }
@@ -129,7 +127,7 @@ export default function CreateEvent() {
         <h1 className="text-2xl font-bold text-[#1b234d]">افزودن رویداد جدید</h1>
         <button
           type="button"
-          onClick={() => window.history.back()}
+          onClick={() => navigate("/event")}
           className="flex items-center gap-2 text-gray-500 hover:text-[#1b234d] transition-colors font-medium"
         >
           <span>بازگشت</span>
@@ -157,7 +155,6 @@ export default function CreateEvent() {
               <label className="text-sm font-semibold text-gray-700">نوع رویداد</label>
               <input
                 type="text"
-                placeholder="مثال: مسابقه، همایش"
                 {...formik.getFieldProps("type")}
                 className={inputClass(formik.touched.type && formik.errors.type)}
               />
@@ -170,7 +167,6 @@ export default function CreateEvent() {
               <label className="text-sm font-semibold text-gray-700">تاریخ رویداد</label>
               <input
                 type="text"
-                placeholder="مثال: 1404/05/20"
                 {...formik.getFieldProps("date")}
                 className={inputClass(formik.touched.date && formik.errors.date)}
               />
@@ -209,7 +205,7 @@ export default function CreateEvent() {
 
           {/* Image Upload Area */}
           <div className="flex flex-col gap-2 border-t pt-4">
-            <label className="text-sm font-semibold text-gray-700">تصویر رویداد</label>
+            <label className="text-sm font-semibold text-gray-700">آپلود تصویر رویداد</label>
             <div className="w-full h-48 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-3 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer relative overflow-hidden">
               <input
                 id="img"
@@ -240,7 +236,7 @@ export default function CreateEvent() {
                 isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-[#51b5a5] hover:bg-teal-600"
               }`}
             >
-              {isSubmitting ? <Loading color="#ffffff" size={8} /> : "ثبت رویداد"}
+              {isSubmitting ? <Loading color="#ffffff" size={8} /> : "ایجاد رویداد"}
             </button>
           </div>
         </form>
