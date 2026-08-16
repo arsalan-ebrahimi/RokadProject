@@ -29,7 +29,6 @@ const blogUpdateSchema = Yup.object({
 
 // ==========================================
 // Component: UpdateBlog
-// Description: Form to update an existing blog and handle image replacement
 // ==========================================
 export default function UpdateBlog() {
   const { id } = useParams();
@@ -151,9 +150,6 @@ export default function UpdateBlog() {
       error ? "border-red-500" : "border-gray-300 focus:border-[#51b5a5]"
     }`;
 
-  // ----------------------------------------
-  // Loading State
-  // ----------------------------------------
   if (loading) {
     return (
       <div dir="rtl" className="flex justify-center items-center min-h-screen bg-gray-50">
@@ -191,6 +187,9 @@ export default function UpdateBlog() {
                 {...formik.getFieldProps("title")}
                 className={inputClass(formik.touched.title && formik.errors.title)}
               />
+              {formik.touched.title && formik.errors.title && (
+                <div className="text-red-500 text-xs mt-1">{formik.errors.title}</div>
+              )}
             </div>
 
             <div className="flex flex-col gap-2">
@@ -200,6 +199,9 @@ export default function UpdateBlog() {
                 {...formik.getFieldProps("date")}
                 className={inputClass(formik.touched.date && formik.errors.date)}
               />
+              {formik.touched.date && formik.errors.date && (
+                <div className="text-red-500 text-xs mt-1">{formik.errors.date}</div>
+              )}
             </div>
           </div>
 
@@ -210,6 +212,9 @@ export default function UpdateBlog() {
               {...formik.getFieldProps("description")}
               className={`resize-y ${inputClass(formik.touched.description && formik.errors.description)}`}
             ></textarea>
+            {formik.touched.description && formik.errors.description && (
+              <div className="text-red-500 text-xs mt-1">{formik.errors.description}</div>
+            )}
           </div>
 
           <div className="flex flex-col gap-2 border-t pt-4">
@@ -230,6 +235,9 @@ export default function UpdateBlog() {
                 </>
               )}
             </div>
+            {formik.touched.img && formik.errors.img && (
+              <div className="text-red-500 text-xs mt-1">{formik.errors.img}</div>
+            )}
           </div>
 
           <div className="flex justify-end mt-4">

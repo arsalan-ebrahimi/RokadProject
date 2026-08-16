@@ -8,11 +8,11 @@ import AddIcon from "@mui/icons-material/Add";
 // ==========================================
 // Utilities & Components
 // ==========================================
-import fetchData from "../../../Utils/fetchData"; 
+import fetchData from "../../../Utils/fetchData";
 import BlogCard from "../BlogCard";
 import Notify from "../../../Utils/notify";
-import Confirm from "../../../Utils/Confirm"; 
-import Loading from "../../../Components/Loading"; 
+import Confirm from "../../../Utils/Confirm";
+import Loading from "../../../Components/Loading";
 
 // ==========================================
 // Component: BlogPage
@@ -20,7 +20,7 @@ import Loading from "../../../Components/Loading";
 // ==========================================
 export default function BlogPage() {
   const navigate = useNavigate();
-  
+
   // ----------------------------------------
   // State Management
   // ----------------------------------------
@@ -40,11 +40,13 @@ export default function BlogPage() {
     if (pageNumber === 1) setLoading(true);
     else setLoadingMore(true);
 
-    const data = await fetchData(`blog?limit=${LIMIT}&page=${pageNumber}&sort=-_id`);
-    
+    const data = await fetchData(
+      `blog?limit=${LIMIT}&page=${pageNumber}&sort=-_id`,
+    );
+
     if (data && data.success !== false) {
       const fetchedBlogs = Array.isArray(data) ? data : data.data || [];
-      
+
       if (fetchedBlogs.length < LIMIT) {
         setHasMore(false);
       }
@@ -52,7 +54,13 @@ export default function BlogPage() {
       if (pageNumber === 1) {
         setBlogs(fetchedBlogs);
       } else {
-        setBlogs((prev) => [...prev, ...fetchedBlogs]);
+        setBlogs((prev) => {
+          const uniqueNewItems = fetchedBlogs.filter(
+            (newItem) =>
+              !prev.some((existingItem) => existingItem._id === newItem._id),
+          );
+          return [...prev, ...uniqueNewItems];
+        });
       }
     } else {
       Notify("error", data?.message || "خطا در دریافت اطلاعات");
@@ -91,7 +99,7 @@ export default function BlogPage() {
   // ----------------------------------------
   const handleEditBlog = (data) => {
     const blogId = typeof data === "object" ? data._id : data;
-    if (blogId) navigate(`update/${blogId}`); 
+    if (blogId) navigate(`update/${blogId}`);
   };
 
   const handleAddBlog = () => navigate("create");
@@ -100,7 +108,7 @@ export default function BlogPage() {
     const isConfirmed = await Confirm(
       "آیا از حذف این بلاگ اطمینان دارید؟",
       "این عمل غیرقابل بازگشت است و تصویر آن نیز حذف خواهد شد.",
-      "بله، حذف کن"
+      "بله، حذف کن",
     );
 
     if (!isConfirmed) return;
@@ -116,13 +124,12 @@ export default function BlogPage() {
       Notify("error", deleteData?.message || "حذف بلاگ ناموفق بود");
     }
   };
-  
+
   // ----------------------------------------
   // Render Component
   // ----------------------------------------
   return (
     <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
-      
       {/* Page Header */}
       <div className="flex justify-between items-center mb-8 border-b pb-4">
         <h1 className="text-2xl font-bold text-[#1b234d]">مدیریت بلاگ‌ها</h1>
@@ -144,11 +151,11 @@ export default function BlogPage() {
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {blogs.map((blog) => (
-              <BlogCard 
-                key={blog._id} 
-                blog={blog} 
-                onEdit={handleEditBlog} 
-                onDelete={handleDeleteBlog} 
+              <BlogCard
+                key={blog._id}
+                blog={blog}
+                onEdit={handleEditBlog}
+                onDelete={handleDeleteBlog}
               />
             ))}
           </div>
