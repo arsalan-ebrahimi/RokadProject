@@ -143,6 +143,7 @@ export default function CreateComment() {
               <label className="text-sm font-semibold text-gray-700">نام نویسنده</label>
               <input
                 type="text"
+                placeholder="مثال: محمد محمدی"
                 {...formik.getFieldProps("author")}
                 className={inputClass(formik.touched.author && formik.errors.author)}
               />
@@ -153,15 +154,12 @@ export default function CreateComment() {
 
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold text-gray-700">نقش</label>
-              <select
+              <input
+                type="text"
+                placeholder="مثال: پدر دانش آموز"
                 {...formik.getFieldProps("role")}
-                className={`bg-white ${inputClass(formik.touched.role && formik.errors.role)}`}
-              >
-                <option value="">انتخاب کنید</option>
-                <option value="دانش آموز">دانش آموز</option>
-                <option value="اولیا">اولیا</option>
-                <option value="معلم">معلم</option>
-              </select>
+                className={inputClass(formik.touched.role && formik.errors.role)}
+              />
               {formik.touched.role && formik.errors.role && (
                 <div className="text-red-500 text-xs mt-1">{formik.errors.role}</div>
               )}
@@ -172,6 +170,7 @@ export default function CreateComment() {
             <label className="text-sm font-semibold text-gray-700">متن نظر</label>
             <textarea
               rows="4"
+              placeholder="متن نظر را اینجا بنویسید..."
               {...formik.getFieldProps("content")}
               className={`w-full border rounded-lg px-4 py-3 outline-none transition-all resize-y ${
                 formik.touched.content && formik.errors.content ? "border-red-500" : "border-gray-300 focus:border-[#51b5a5]"
@@ -189,7 +188,7 @@ export default function CreateComment() {
             <div className="flex gap-4 flex-wrap">
               {DEFAULT_AVATARS.map((avatar) => (
                 <img 
-                  key={avatar.id}
+                  key={`avatar-${avatar.id}`}
                   src={`/default-avatars/${avatar.filename}`} 
                   alt={avatar.alt}
                   onClick={() => handleSelectDefaultAvatar(avatar.filename)}

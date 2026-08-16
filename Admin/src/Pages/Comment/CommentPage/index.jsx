@@ -8,11 +8,11 @@ import AddIcon from "@mui/icons-material/Add";
 // ==========================================
 // Utilities & Components
 // ==========================================
-import fetchData from "../../../Utils/fetchData"; 
-import CommentCard from "../CommentCard"; 
+import fetchData from "../../../Utils/fetchData";
+import CommentCard from "../CommentCard";
 import Notify from "../../../Utils/notify";
-import Confirm from "../../../Utils/Confirm"; 
-import Loading from "../../../Components/Loading"; 
+import Confirm from "../../../Utils/Confirm";
+import Loading from "../../../Components/Loading";
 
 // ==========================================
 // Component: CommentPage
@@ -20,7 +20,7 @@ import Loading from "../../../Components/Loading";
 // ==========================================
 export default function CommentPage() {
   const navigate = useNavigate();
-  
+
   // ----------------------------------------
   // State Management
   // ----------------------------------------
@@ -40,11 +40,13 @@ export default function CommentPage() {
     if (pageNumber === 1) setLoading(true);
     else setLoadingMore(true);
 
-    const data = await fetchData(`comment?limit=${LIMIT}&page=${pageNumber}&sort=-_id`);
-    
-    if (data && data.success !== false) { 
+    const data = await fetchData(
+      `comment?limit=${LIMIT}&page=${pageNumber}&sort=-_id`,
+    );
+
+    if (data && data.success !== false) {
       const fetchedComments = Array.isArray(data) ? data : data.data || [];
-      
+
       if (fetchedComments.length < LIMIT) {
         setHasMore(false);
       }
@@ -52,7 +54,13 @@ export default function CommentPage() {
       if (pageNumber === 1) {
         setComments(fetchedComments);
       } else {
-        setComments((prev) => [...prev, ...fetchedComments]);
+        setComments((prev) => {
+          const uniqueNewItems = fetchedComments.filter(
+            (newItem) =>
+              !prev.some((existingItem) => existingItem._id === newItem._id),
+          );
+          return [...prev, ...uniqueNewItems];
+        });
       }
     } else {
       Notify("error", data?.message || "خطا در دریافت اطلاعات");
@@ -90,7 +98,7 @@ export default function CommentPage() {
   // Action Handlers
   // ----------------------------------------
   const handleEditComment = (id) => {
-    if (id) navigate(`update/${id}`); 
+    if (id) navigate(`update/${id}`);
   };
 
   const handleAddComment = () => {
@@ -101,10 +109,10 @@ export default function CommentPage() {
     const isConfirmed = await Confirm(
       "آیا از حذف این نظر اطمینان دارید؟",
       "این عمل غیرقابل بازگشت است و تصویر دستی آن (در صورت وجود) نیز پاک خواهد شد.",
-      "بله، حذف کن"
+      "بله، حذف کن",
     );
-    
-    if (!isConfirmed) return; 
+
+    if (!isConfirmed) return;
 
     const deleteData = await fetchData(`comment/${id}`, { method: "DELETE" });
 
@@ -115,13 +123,12 @@ export default function CommentPage() {
       Notify("error", deleteData?.message || "خطا در حذف نظر");
     }
   };
-  
+
   // ----------------------------------------
   // Render Component
   // ----------------------------------------
   return (
     <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
-      
       {/* Header */}
       <div className="flex justify-between items-center mb-8 border-b pb-4">
         <h1 className="text-2xl font-bold text-[#1b234d]">مدیریت نظرات</h1>
@@ -144,11 +151,11 @@ export default function CommentPage() {
           {/* Main List */}
           <div className="flex flex-col gap-4">
             {comments.map((comment) => (
-              <CommentCard 
-                key={comment._id} 
-                comment={comment} 
-                onEdit={handleEditComment} 
-                onDelete={handleDeleteComment} 
+              <CommentCard
+                key={comment._id}
+                comment={comment}
+                onEdit={handleEditComment}
+                onDelete={handleDeleteComment}
               />
             ))}
           </div>

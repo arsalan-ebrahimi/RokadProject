@@ -191,19 +191,23 @@ export default function UpdateComment() {
                 {...formik.getFieldProps("author")}
                 className={inputClass(formik.touched.author && formik.errors.author)}
               />
+              {formik.touched.author && formik.errors.author && (
+                <div className="text-red-500 text-xs mt-1">{formik.errors.author}</div>
+              )}
             </div>
 
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold text-gray-700">نقش</label>
-              <select
+              {/* 🟢 تغییر یافته به اینپوت متنی */}
+              <input
+                type="text"
+                placeholder="مثال: اولیای دانش‌آموز"
                 {...formik.getFieldProps("role")}
-                className={`bg-white ${inputClass(formik.touched.role && formik.errors.role)}`}
-              >
-                <option value="">انتخاب کنید</option>
-                <option value="دانش آموز">دانش آموز</option>
-                <option value="اولیا">اولیا</option>
-                <option value="معلم">معلم</option>
-              </select>
+                className={inputClass(formik.touched.role && formik.errors.role)}
+              />
+              {formik.touched.role && formik.errors.role && (
+                <div className="text-red-500 text-xs mt-1">{formik.errors.role}</div>
+              )}
             </div>
           </div>
 
@@ -216,6 +220,9 @@ export default function UpdateComment() {
                 formik.touched.content && formik.errors.content ? "border-red-500" : "border-gray-300 focus:border-[#51b5a5]"
               }`}
             ></textarea>
+            {formik.touched.content && formik.errors.content && (
+              <div className="text-red-500 text-xs mt-1">{formik.errors.content}</div>
+            )}
           </div>
 
           {/* Avatar Selection Area */}
@@ -225,7 +232,7 @@ export default function UpdateComment() {
             <div className="flex gap-4 flex-wrap">
               {DEFAULT_AVATARS.map((avatar) => (
                 <img 
-                  key={avatar.id}
+                  key={`avatar-${avatar.id}`}
                   src={`/default-avatars/${avatar.filename}`} 
                   alt={avatar.alt}
                   onClick={() => handleSelectDefaultAvatar(avatar.filename)}
@@ -255,6 +262,9 @@ export default function UpdateComment() {
                 </>
               )}
             </div>
+            {formik.touched.img && formik.errors.img && (
+              <div className="text-red-500 text-xs mt-1">{formik.errors.img}</div>
+            )}
           </div>
 
           <div className="flex justify-end mt-4">
