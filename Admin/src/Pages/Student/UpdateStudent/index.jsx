@@ -16,9 +16,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import fetchData from "../../../Utils/fetchData";
 import Notify from "../../../Utils/notify";
 import { getImageUrl } from "../../../Utils/getImageUrl";
+import Loading from "../../../Components/Loading";
 
 // ----------------------------------------
-// Validation Schema for Formik
+// Validation Schema
 // ----------------------------------------
 const studentUpdateSchema = Yup.object({
   fullName: Yup.string().required("وارد کردن نام کامل الزامی است"),
@@ -34,7 +35,6 @@ const studentUpdateSchema = Yup.object({
 
 // ==========================================
 // Component: UpdateStudent
-// Description: Form to update existing student data with dynamic social links
 // ==========================================
 export default function UpdateStudent() {
   const { id } = useParams();
@@ -44,7 +44,6 @@ export default function UpdateStudent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Initial values state
   const [initialValues, setInitialValues] = useState({
     fullName: "",
     job: "",
@@ -59,25 +58,30 @@ export default function UpdateStudent() {
   useEffect(() => {
     const getStudentData = async () => {
       setLoading(true);
-      const response = await fetchData(`student/${id}`);
-      
-      let data = null;
-      if (response && response.data) {
-        data = Array.isArray(response.data) ? response.data[0] : response.data;
-      } else if (Array.isArray(response)) {
-        data = response[0];
-      }
+      try {
+        const response = await fetchData(`student/${id}`);
+        
+        let rawData = response?.data?.data || response?.data || response;
+        let data = Array.isArray(rawData) ? rawData[0] : rawData;
 
-      if (data) {
-        setInitialValues({
-          fullName: data.fullName || "",
-          job: data.job || "",
-          generation: data.generation || "",
-          img: data.img || null,
-          socialLinks: data.socialLinks || [],
-        });
+        if (data && data._id) {
+          setInitialValues({
+            fullName: data.fullName || "",
+            job: data.job || "",
+            generation: data.generation || "",
+            img: data.img || null,
+            socialLinks: data.socialLinks || [],
+          });
 
-        if (data.img) setImagePreview(getImageUrl(data.img));
+          if (data.img) {
+            setImagePreview(getImageUrl(data.img));
+          }
+        } else {
+          Notify("error", "اطلاعات دانش‌آموز یافت نشد یا فرمت دیتا اشتباه است.");
+        }
+      } catch (error) {
+        console.error("Fetch Student Error:", error);
+        Notify("error", "خطا در ارتباط با سرور");
       }
       
       setLoading(false);
@@ -98,7 +102,6 @@ export default function UpdateStudent() {
       try {
         let finalImageName = values.img;
 
-        // Check if a new file is uploaded
         if (values.img instanceof File) {
           const formData = new FormData();
           formData.append("file", values.img);
@@ -144,6 +147,11 @@ export default function UpdateStudent() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.name.toLowerCase().startsWith("default-")) {
+        Notify("error", "نام فایل مجاز نیست. لطفاً نام فایل را تغییر دهید.");
+        e.target.value = ""; 
+        return;
+      }
       formik.setFieldValue("img", file);
       setImagePreview(URL.createObjectURL(file)); 
     }
@@ -157,7 +165,7 @@ export default function UpdateStudent() {
   if (loading) {
     return (
       <div dir="rtl" className="flex justify-center items-center min-h-screen bg-gray-50">
-        <p className="text-gray-500 text-lg">در حال بارگذاری اطلاعات...</p>
+        <Loading size={12} />
       </div>
     );
   }
@@ -167,7 +175,6 @@ export default function UpdateStudent() {
   // ----------------------------------------
   return (
     <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
-      
       <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
         <h1 className="text-2xl font-bold text-[#1b234d]">ویرایش اطلاعات دانش‌آموز</h1>
         <button
@@ -183,7 +190,6 @@ export default function UpdateStudent() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 max-w-4xl mx-auto">
         <FormikProvider value={formik}>
           <form onSubmit={formik.handleSubmit} className="flex flex-col gap-8">
-            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-gray-700">نام کامل</label>
@@ -192,6 +198,9 @@ export default function UpdateStudent() {
                   {...formik.getFieldProps("fullName")}
                   className={inputClass(formik.touched.fullName && formik.errors.fullName)}
                 />
+                {formik.touched.fullName && formik.errors.fullName && (
+                  <div className="text-red-500 text-xs mt-1">{formik.errors.fullName}</div>
+                )}
               </div>
 
               <div className="flex flex-col gap-2">
@@ -201,6 +210,9 @@ export default function UpdateStudent() {
                   {...formik.getFieldProps("job")}
                   className={inputClass(formik.touched.job && formik.errors.job)}
                 />
+                {formik.touched.job && formik.errors.job && (
+                  <div className="text-red-500 text-xs mt-1">{formik.errors.job}</div>
+                )}
               </div>
 
               <div className="flex flex-col gap-2">
@@ -210,10 +222,12 @@ export default function UpdateStudent() {
                   {...formik.getFieldProps("generation")}
                   className={inputClass(formik.touched.generation && formik.errors.generation)}
                 />
+                {formik.touched.generation && formik.errors.generation && (
+                  <div className="text-red-500 text-xs mt-1">{formik.errors.generation}</div>
+                )}
               </div>
             </div>
 
-            {/* Dynamic Social Links Section */}
             <div className="flex flex-col gap-4 border-t pt-4">
               <label className="text-sm font-semibold text-gray-700">شبکه‌های اجتماعی</label>
               <FieldArray name="socialLinks">
@@ -236,7 +250,7 @@ export default function UpdateStudent() {
                             {touchedType && typeError && <span className="text-red-500 text-xs">{typeError}</span>}
                           </div>
                           
-                          <div className="w-full md:w-full flex flex-col gap-1">
+                          <div className="w-full flex flex-col gap-1">
                             <input
                               dir="ltr"
                               placeholder="https://..."
@@ -261,7 +275,7 @@ export default function UpdateStudent() {
                     <button
                       type="button"
                       onClick={() => push({ type: "", link: "" })}
-                      className="self-start flex items-center gap-2 text-blue-500 bg-blue-50 px-4 py-2 rounded-lg font-medium hover:bg-blue-100 transition-colors"
+                      className="self-start flex items-center gap-2 text-[#51b5a5] bg-teal-50 px-4 py-2 rounded-lg font-medium hover:bg-teal-100 transition-colors"
                     >
                       <AddIcon fontSize="small" />
                       افزودن لینک
@@ -271,7 +285,6 @@ export default function UpdateStudent() {
               </FieldArray>
             </div>
 
-            {/* Image Upload Area */}
             <div className="flex flex-col gap-2 border-t pt-4">
               <label className="text-sm font-semibold text-gray-700">تغییر تصویر دانش‌آموز</label>
               <div className="w-full md:w-1/2 h-48 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-3 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer relative overflow-hidden">
@@ -291,17 +304,20 @@ export default function UpdateStudent() {
                   </>
                 )}
               </div>
+              {formik.touched.img && formik.errors.img && (
+                <div className="text-red-500 text-xs mt-1">{formik.errors.img}</div>
+              )}
             </div>
 
             <div className="flex justify-end mt-4">
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 ${
-                  isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
+                className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 min-w-[150px] flex justify-center items-center ${
+                  isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-[#51b5a5] hover:bg-teal-600"
                 }`}
               >
-                {isSubmitting ? "در حال ذخیره..." : "ذخیره تغییرات"}
+                {isSubmitting ? <Loading color="#ffffff" size={8} /> : "ذخیره تغییرات"}
               </button>
             </div>
           </form>

@@ -14,6 +14,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 // ==========================================
 import fetchData from "../../../Utils/fetchData";
 import Notify from "../../../Utils/notify";
+import Loading from "../../../Components/Loading";
 
 // ----------------------------------------
 // Validation Schema
@@ -33,15 +34,11 @@ const studentValidationSchema = Yup.object({
 
 // ==========================================
 // Component: CreateStudent
-// Description: Form to create a new student with dynamic social links and image
 // ==========================================
 export default function CreateStudent() {
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // ----------------------------------------
-  // Formik Setup
-  // ----------------------------------------
   const formik = useFormik({
     initialValues: {
       fullName: "",
@@ -54,7 +51,6 @@ export default function CreateStudent() {
     onSubmit: async (values) => {
       setIsSubmitting(true);
       try {
-        // Step 1: Upload Image
         const formData = new FormData();
         formData.append("file", values.img);
 
@@ -69,7 +65,6 @@ export default function CreateStudent() {
 
         const uploadedFilename = uploadData.data;
 
-        // Step 2: Save Student Data
         const payload = {
           fullName: values.fullName,
           job: values.job,
@@ -97,12 +92,15 @@ export default function CreateStudent() {
     },
   });
 
-  // ----------------------------------------
-  // Handlers
-  // ----------------------------------------
+  // Security Protection for Default Files
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.name.toLowerCase().startsWith("default-")) {
+        Notify("error", "نام فایل مجاز نیست. لطفاً نام فایل را تغییر دهید.");
+        e.target.value = ""; 
+        return;
+      }
       formik.setFieldValue("img", file);
       setImagePreview(URL.createObjectURL(file)); 
     }
@@ -113,9 +111,6 @@ export default function CreateStudent() {
       error ? "border-red-500" : "border-gray-300 focus:border-[#51b5a5]"
     }`;
 
-  // ----------------------------------------
-  // Render Component
-  // ----------------------------------------
   return (
     <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
       
@@ -136,7 +131,6 @@ export default function CreateStudent() {
           <form onSubmit={formik.handleSubmit} className="flex flex-col gap-8">
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* FullName */}
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-gray-700">نام کامل</label>
                 <input
@@ -150,7 +144,6 @@ export default function CreateStudent() {
                 )}
               </div>
 
-              {/* Job */}
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-gray-700">شغل فعلی</label>
                 <input
@@ -164,7 +157,6 @@ export default function CreateStudent() {
                 )}
               </div>
 
-              {/* Generation */}
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-gray-700">نسل (عدد)</label>
                 <input
@@ -179,7 +171,6 @@ export default function CreateStudent() {
               </div>
             </div>
 
-            {/* Dynamic Social Links Section */}
             <div className="flex flex-col gap-4 border-t pt-4">
               <label className="text-sm font-semibold text-gray-700">شبکه‌های اجتماعی</label>
               <FieldArray name="socialLinks">
@@ -202,7 +193,7 @@ export default function CreateStudent() {
                             {touchedType && typeError && <span className="text-red-500 text-xs">{typeError}</span>}
                           </div>
                           
-                          <div className="w-full md:w-full flex flex-col gap-1">
+                          <div className="w-full flex flex-col gap-1">
                             <input
                               dir="ltr"
                               placeholder="https://..."
@@ -237,7 +228,6 @@ export default function CreateStudent() {
               </FieldArray>
             </div>
 
-            {/* Image Upload Area */}
             <div className="flex flex-col gap-2 border-t pt-4">
               <label className="text-sm font-semibold text-gray-700">تصویر دانش‌آموز</label>
               <div className="w-full md:w-1/2 h-48 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-3 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer relative overflow-hidden">
@@ -266,11 +256,11 @@ export default function CreateStudent() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 ${
+                className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 min-w-[150px] flex justify-center items-center ${
                   isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-[#51b5a5] hover:bg-teal-600"
                 }`}
               >
-                {isSubmitting ? "در حال ثبت..." : "ثبت دانش‌آموز"}
+                {isSubmitting ? <Loading color="#ffffff" size={8} /> : "ثبت دانش‌آموز"}
               </button>
             </div>
           </form>
