@@ -15,24 +15,30 @@ export const create = catchAsync(async (req, res, next) => {
     return next(new HandleERROR("رویدادی با این عنوان قبلاً ثبت شده است", 400));
   }
 
-  const newEvent = await Event.create({ title, type, date, description, branch, img });
+  const newEvent = await Event.create({
+    title,
+    type,
+    date,
+    description,
+    branch,
+    img,
+  });
 
   return res.status(201).json({
     success: true,
     message: "رویداد با موفقیت ایجاد شد",
-    data: newEvent
+    data: newEvent,
   });
 });
 
 export const getAll = catchAsync(async (req, res, next) => {
   const features = new ApiFeatures(Event, req.query, req.role)
-    .search()
     .filter()
     .sort()
     .limitFields()
     .paginate()
     .populate();
-    
+
   const result = await features.execute();
   return res.status(200).json(result);
 });
@@ -40,12 +46,17 @@ export const getAll = catchAsync(async (req, res, next) => {
 export const getOne = catchAsync(async (req, res, next) => {
   const features = new ApiFeatures(Event, req.query, req.role)
     .addManualFilters({ _id: req.params.id })
+    .filter()
     .limitFields()
     .populate();
 
   const result = await features.execute();
 
-  const doc = Array.isArray(result) ? result[0] : result?.data ? result.data[0] : result;
+  const doc = Array.isArray(result)
+    ? result[0]
+    : result?.data
+      ? result.data[0]
+      : result;
 
   if (!doc) {
     return next(new HandleERROR("رویداد یافت نشد", 404));
@@ -53,12 +64,19 @@ export const getOne = catchAsync(async (req, res, next) => {
 
   return res.status(200).json({
     success: true,
-    data: doc
+    data: doc,
   });
 });
 
 export const update = catchAsync(async (req, res, next) => {
-  const allowedUpdates = ["title", "type", "date", "description", "branch", "img"];
+  const allowedUpdates = [
+    "title",
+    "type",
+    "date",
+    "description",
+    "branch",
+    "img",
+  ];
   const updates = {};
 
   Object.keys(req.body).forEach((el) => {
@@ -86,7 +104,7 @@ export const update = catchAsync(async (req, res, next) => {
   return res.status(200).json({
     success: true,
     message: "رویداد با موفقیت بروزرسانی شد",
-    data: updatedEvent
+    data: updatedEvent,
   });
 });
 
@@ -107,6 +125,6 @@ export const remove = catchAsync(async (req, res, next) => {
   return res.status(200).json({
     success: true,
     message: "رویداد با موفقیت حذف شد",
-    data: null
+    data: null,
   });
 });
