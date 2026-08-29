@@ -23,12 +23,18 @@ const eventSchema = new mongoose.Schema({
     required: [true, "ارسال تصویر رویداد الزامی است"],
   },
   branch: {
-    type: String,
-    required: [true, "مشخص کردن شعبه مدرسه الزامی است"],
+    type: [String], 
+    required: [true, "مشخص کردن حداقل یک شعبه الزامی است"],
     enum: {
       values: ["دخترانه", "پسرانه"],
       message: "شعبه مدرسه باید 'دخترانه' یا 'پسرانه' باشد",
     },
+    validate: {
+      validator: function(v) {
+        return v && v.length > 0;
+      },
+      message: "حداقل یک شعبه باید انتخاب شود"
+    }
   },
 });
 

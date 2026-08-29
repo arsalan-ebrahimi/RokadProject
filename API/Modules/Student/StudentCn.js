@@ -8,9 +8,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export const create = catchAsync(async (req, res, next) => {
-  const { fullName, job, generation, img, socialLinks } = req.body;
+  const { fullName, job, generation, schoolType, major, img, socialLinks } = req.body;
 
-  const newStudent = await Student.create({ fullName, job, generation, img, socialLinks });
+  const newStudent = await Student.create({ fullName, job, generation, schoolType, major, img, socialLinks });
 
   return res.status(201).json({
     success: true,
@@ -22,6 +22,7 @@ export const create = catchAsync(async (req, res, next) => {
 export const getAll = catchAsync(async (req, res, next) => {
   const features = new ApiFeatures(Student, req.query, req.role)
     .filter()
+    .search(['fullName', 'job', 'schoolType', 'major'])
     .sort()
     .limitFields()
     .paginate()
@@ -51,7 +52,7 @@ export const getOne = catchAsync(async (req, res, next) => {
 });
 
 export const update = catchAsync(async (req, res, next) => {
-  const allowedUpdates = ["fullName", "job", "generation", "img", "socialLinks"];
+  const allowedUpdates = ["fullName", "job", "generation", "schoolType", "major", "img", "socialLinks"];
   const updates = {};
 
   Object.keys(req.body).forEach((el) => {

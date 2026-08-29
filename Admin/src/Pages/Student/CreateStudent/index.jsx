@@ -19,14 +19,17 @@ import Loading from "../../../Components/Loading";
 // ----------------------------------------
 // Validation Schema
 // ----------------------------------------
+const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_()،,.\u200C]+$/;
 const studentValidationSchema = Yup.object({
-  fullName: Yup.string().required("وارد کردن نام کامل الزامی است"),
-  job: Yup.string().required("وارد کردن شغل الزامی است"),
+  fullName: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("وارد کردن نام کامل الزامی است"),
+  job: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("وارد کردن شغل الزامی است"),
   generation: Yup.number().typeError("نسل باید عدد باشد").required("تعیین نسل الزامی است"),
+  schoolType: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("نوع مدرسه الزامی است"),
+  major: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("رشته تحصیلی الزامی است"),
   img: Yup.mixed().required("انتخاب تصویر دانش‌آموز الزامی است"),
   socialLinks: Yup.array().of(
     Yup.object({
-      type: Yup.string().required("نوع شبکه الزامی است"),
+      type: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("نوع شبکه الزامی است"),
       link: Yup.string().required("لینک الزامی است"),
     })
   ),
@@ -44,6 +47,8 @@ export default function CreateStudent() {
       fullName: "",
       job: "",
       generation: "",
+      schoolType: "",
+      major: "",
       img: null,
       socialLinks: [],
     },
@@ -69,6 +74,8 @@ export default function CreateStudent() {
           fullName: values.fullName,
           job: values.job,
           generation: Number(values.generation),
+          schoolType: values.schoolType,
+          major: values.major,
           img: uploadedFilename,
           socialLinks: values.socialLinks,
         };
@@ -96,6 +103,12 @@ export default function CreateStudent() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/svg+xml", "image/webp"];
+      if (!allowedTypes.includes(file.type)) {
+        Notify("error", "فرمت فایل غیرمجاز است. فقط JPG, JPEG, PNG, SVG, WEBP مجاز است.");
+        e.target.value = "";
+        return;
+      }
       if (file.name.toLowerCase().startsWith("default-")) {
         Notify("error", "نام فایل مجاز نیست. لطفاً نام فایل را تغییر دهید.");
         e.target.value = ""; 
@@ -107,19 +120,18 @@ export default function CreateStudent() {
   };
 
   const inputClass = (error) =>
-    `w-full border rounded-lg px-4 py-2.5 outline-none transition-all ${
-      error ? "border-red-500" : "border-gray-300 focus:border-[#51b5a5]"
+    `w-full border bg-white rounded-lg px-4 py-2.5 outline-none transition-all ${
+      error ? "border-red-500" : "border-gray-300 focus:border-primary"
     }`;
 
   return (
     <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
-      
       <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-[#1b234d]">افزودن دانش‌آموز جدید</h1>
+        <h1 className="text-2xl font-bold text-secondary">افزودن دانش‌آموز جدید</h1>
         <button
           type="button"
           onClick={() => window.history.back()}
-          className="flex items-center gap-2 text-gray-500 hover:text-[#1b234d] transition-colors font-medium"
+          className="flex items-center gap-2 text-gray-500 hover:text-secondary transition-colors font-medium"
         >
           <span>بازگشت</span>
           <ArrowForwardIcon fontSize="small" />
@@ -129,8 +141,8 @@ export default function CreateStudent() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 max-w-4xl mx-auto">
         <FormikProvider value={formik}>
           <form onSubmit={formik.handleSubmit} className="flex flex-col gap-8">
-            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-gray-700">نام کامل</label>
                 <input
@@ -169,6 +181,36 @@ export default function CreateStudent() {
                   <div className="text-red-500 text-xs mt-1">{formik.errors.generation}</div>
                 )}
               </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-700">نوع مدرسه</label>
+                <select
+                  {...formik.getFieldProps("schoolType")}
+                  className={inputClass(formik.touched.schoolType && formik.errors.schoolType)}
+                >
+                  <option value="">انتخاب کنید</option>
+                  <option value="هنرستان پسرانه رکاد">هنرستان پسرانه رکاد</option>
+                  <option value="هنرستان دخترانه رکاد">هنرستان دخترانه رکاد</option>
+                </select>
+                {formik.touched.schoolType && formik.errors.schoolType && (
+                  <div className="text-red-500 text-xs mt-1">{formik.errors.schoolType}</div>
+                )}
+              </div>
+
+              <div className="col-span-1 md:col-span-2 flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-700">رشته تحصیلی</label>
+                <select
+                  {...formik.getFieldProps("major")}
+                  className={inputClass(formik.touched.major && formik.errors.major)}
+                >
+                  <option value="">انتخاب کنید</option>
+                  <option value="تولید و توسعه پایگاه‌های اینترنتی (برنامه نویسی و طراحی سایت)">تولید و توسعه پایگاه‌های اینترنتی (برنامه نویسی و طراحی سایت)</option>
+                  <option value="تولید محتوای چندرسانه‌ای (طراحی گرافیک و تولید محتوای ویدئویی و صوتی)">تولید محتوای چندرسانه‌ای (طراحی گرافیک و تولید محتوای ویدئویی و صوتی)</option>
+                </select>
+                {formik.touched.major && formik.errors.major && (
+                  <div className="text-red-500 text-xs mt-1">{formik.errors.major}</div>
+                )}
+              </div>
             </div>
 
             <div className="flex flex-col gap-4 border-t pt-4">
@@ -192,7 +234,6 @@ export default function CreateStudent() {
                             />
                             {touchedType && typeError && <span className="text-red-500 text-xs">{typeError}</span>}
                           </div>
-                          
                           <div className="w-full flex flex-col gap-1">
                             <input
                               dir="ltr"
@@ -202,7 +243,6 @@ export default function CreateStudent() {
                             />
                             {touchedLink && linkError && <span className="text-red-500 text-xs">{linkError}</span>}
                           </div>
-
                           <button
                             type="button"
                             onClick={() => remove(index)}
@@ -214,11 +254,10 @@ export default function CreateStudent() {
                         </div>
                       );
                     })}
-
                     <button
                       type="button"
                       onClick={() => push({ type: "", link: "" })}
-                      className="self-start flex items-center gap-2 text-[#51b5a5] bg-teal-50 px-4 py-2 rounded-lg font-medium hover:bg-teal-100 transition-colors"
+                      className="self-start flex items-center gap-2 text-primary bg-teal-50 px-4 py-2 rounded-lg font-medium hover:bg-teal-100 transition-colors"
                     >
                       <AddIcon fontSize="small" />
                       افزودن لینک جدید
@@ -234,7 +273,7 @@ export default function CreateStudent() {
                 <input
                   id="img"
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg, image/png, image/svg+xml, image/webp"
                   onChange={handleImageChange}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 />
@@ -256,11 +295,11 @@ export default function CreateStudent() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 min-w-[150px] flex justify-center items-center ${
-                  isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-[#51b5a5] hover:bg-teal-600"
+                className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 min-w-btn-wide flex justify-center items-center ${
+                  isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-teal-600"
                 }`}
               >
-                {isSubmitting ? <Loading color="#ffffff" size={8} /> : "ثبت دانش‌آموز"}
+                {isSubmitting ? <Loading color="var(--color-white)" size={8} /> : "ثبت دانش‌آموز"}
               </button>
             </div>
           </form>

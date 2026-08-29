@@ -18,12 +18,13 @@ import Loading from "../../../Components/Loading";
 // ----------------------------------------
 // Validation Schema for Formik
 // ----------------------------------------
+const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_()،,.\u200C]+$/;
 const eventCreateSchema = Yup.object({
-  title: Yup.string().required("عنوان رویداد الزامی است"),
-  type: Yup.string().required("نوع رویداد الزامی است"),
-  date: Yup.string().required("تاریخ رویداد الزامی است"),
-  description: Yup.string().required("توضیحات رویداد الزامی است"),
-  branch: Yup.string()
+  title: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("عنوان رویداد الزامی است"),
+  type: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("نوع رویداد الزامی است"),
+  date: Yup.string().matches(safeTextRegex, "مقدار غیرمجاز").required("تاریخ رویداد الزامی است"),
+  description: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("توضیحات رویداد الزامی است"),
+  branch: Yup.string().matches(safeTextRegex, "مقدار غیرمجاز")
     .oneOf(["دخترانه", "پسرانه"], "شعبه باید انتخاب شود")
     .required("مشخص کردن شعبه الزامی است"),
   img: Yup.mixed().required("انتخاب تصویر رویداد الزامی است"),
@@ -107,6 +108,13 @@ export default function CreateEvent() {
         e.target.value = ""; 
         return;
       }
+      // Image format validation (Security Layer)
+      const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/svg+xml", "image/webp"];
+      if (!allowedTypes.includes(file.type)) {
+        Notify("error", "فرمت فایل مجاز نیست. لطفاً یک تصویر با فرمت JPG، PNG، SVG یا WEBP انتخاب کنید.");
+        e.target.value = "";
+        return;
+      }
       formik.setFieldValue("img", file);
       setImagePreview(URL.createObjectURL(file)); 
     }
@@ -114,7 +122,7 @@ export default function CreateEvent() {
 
   const inputClass = (error) =>
     `w-full border rounded-lg px-4 py-2.5 outline-none transition-all ${
-      error ? "border-red-500" : "border-gray-300 focus:border-[#51b5a5]"
+      error ? "border-red-500" : "border-gray-300 focus:border-primary"
     }`;
 
   // ----------------------------------------
@@ -124,11 +132,11 @@ export default function CreateEvent() {
     <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
       
       <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-[#1b234d]">افزودن رویداد جدید</h1>
+        <h1 className="text-2xl font-bold text-secondary">افزودن رویداد جدید</h1>
         <button
           type="button"
           onClick={() => navigate("/event")}
-          className="flex items-center gap-2 text-gray-500 hover:text-[#1b234d] transition-colors font-medium"
+          className="flex items-center gap-2 text-gray-500 hover:text-secondary transition-colors font-medium"
         >
           <span>بازگشت</span>
           <ArrowForwardIcon fontSize="small" />
@@ -210,7 +218,7 @@ export default function CreateEvent() {
               <input
                 id="img"
                 type="file"
-                accept="image/*"
+                accept="image/jpeg, image/png, image/svg+xml, image/webp"
                 onChange={handleImageChange}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               />
@@ -232,11 +240,11 @@ export default function CreateEvent() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 min-w-[150px] flex justify-center items-center ${
-                isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-[#51b5a5] hover:bg-teal-600"
+              className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 min-w-btn-wide flex justify-center items-center ${
+                isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-teal-600"
               }`}
             >
-              {isSubmitting ? <Loading color="#ffffff" size={8} /> : "ایجاد رویداد"}
+              {isSubmitting ? <Loading color="var(--color-white)" size={8} /> : "ایجاد رویداد"}
             </button>
           </div>
         </form>

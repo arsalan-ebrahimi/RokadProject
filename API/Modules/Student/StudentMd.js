@@ -13,6 +13,14 @@ const studentSchema = new mongoose.Schema({
     type: Number,
     required: [true, "تعیین نسل دانش‌آموز الزامی است"],
   },
+  schoolType: {
+    type: String,
+    required: [true, "وارد کردن نوع مدرسه الزامی است"],
+  },
+  major: {
+    type: String,
+    required: [true, "وارد کردن رشته تحصیلی الزامی است"],
+  },
   img: {
     type: String,
     required: [true, "انتخاب تصویر دانش‌آموز الزامی است"],
