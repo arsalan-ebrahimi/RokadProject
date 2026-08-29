@@ -1,6 +1,8 @@
 import multer from "multer";
 import { __dirname } from "../app.js";
 import path from "path";
+import { HandleERROR } from "vanta-api";
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, `${__dirname}/Public`);
@@ -12,6 +14,17 @@ const storage = multer.diskStorage({
     );
   },
 });
-const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
+
+const allowedTypes = /jpeg|jpg|png|svg|webp/;
+function fileFilter(req, file, cb) {
+  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = allowedTypes.test(file.mimetype);
+  if (extname && mimetype) {
+    return cb(null, true);
+  }
+  return cb(new HandleERROR("فرمت فایل غیرمجاز است", 400));
+}
+
+const upload = multer({ storage, fileFilter });
 
 export default upload;

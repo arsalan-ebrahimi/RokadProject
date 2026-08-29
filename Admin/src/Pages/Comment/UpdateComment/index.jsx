@@ -20,10 +20,11 @@ import Loading from "../../../Components/Loading";
 // ----------------------------------------
 // Validation Schema
 // ----------------------------------------
+const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_()،,.\u200C]+$/;
 const commentUpdateSchema = Yup.object({
-  author: Yup.string().required("نام نویسنده الزامی است"),
-  content: Yup.string().required("متن نظر الزامی است"),
-  role: Yup.string().required("نقش نویسنده الزامی است"),
+  author: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("نام نویسنده الزامی است"),
+  content: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("متن نظر الزامی است"),
+  role: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("نقش نویسنده الزامی است"),
 });
 
 // ==========================================
@@ -135,6 +136,12 @@ export default function UpdateComment() {
   const handleCustomImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/svg+xml", "image/webp"];
+      if (!allowedTypes.includes(file.type)) {
+        Notify("error", "فرمت فایل غیرمجاز است. فقط JPG, JPEG, PNG, SVG, WEBP مجاز است.");
+        e.target.value = "";
+        return;
+      }
       if (file.name.toLowerCase().startsWith("default-")) {
         Notify("error", "نام فایل مجاز نیست. لطفاً نام فایل را تغییر دهید.");
         e.target.value = ""; 
@@ -152,7 +159,7 @@ export default function UpdateComment() {
 
   const inputClass = (error) =>
     `w-full border rounded-lg px-4 py-2.5 outline-none transition-all ${
-      error ? "border-red-500" : "border-gray-300 focus:border-[#51b5a5]"
+      error ? "border-red-500" : "border-gray-300 focus:border-primary"
     }`;
 
   // ----------------------------------------
@@ -169,11 +176,11 @@ export default function UpdateComment() {
   return (
     <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
       <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-[#1b234d]">ویرایش نظر</h1>
+        <h1 className="text-2xl font-bold text-secondary">ویرایش نظر</h1>
         <button
           type="button"
           onClick={() => navigate("/comment")}
-          className="flex items-center gap-2 text-gray-500 hover:text-[#1b234d] transition-colors font-medium"
+          className="flex items-center gap-2 text-gray-500 hover:text-secondary transition-colors font-medium"
         >
           <span>بازگشت</span>
           <ArrowForwardIcon fontSize="small" />
@@ -198,7 +205,6 @@ export default function UpdateComment() {
 
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold text-gray-700">نقش</label>
-              {/* 🟢 تغییر یافته به اینپوت متنی */}
               <input
                 type="text"
                 placeholder="مثال: اولیای دانش‌آموز"
@@ -217,7 +223,7 @@ export default function UpdateComment() {
               rows="4"
               {...formik.getFieldProps("content")}
               className={`w-full border rounded-lg px-4 py-3 outline-none transition-all resize-y ${
-                formik.touched.content && formik.errors.content ? "border-red-500" : "border-gray-300 focus:border-[#51b5a5]"
+                formik.touched.content && formik.errors.content ? "border-red-500" : "border-gray-300 focus:border-primary"
               }`}
             ></textarea>
             {formik.touched.content && formik.errors.content && (
@@ -237,7 +243,7 @@ export default function UpdateComment() {
                   alt={avatar.alt}
                   onClick={() => handleSelectDefaultAvatar(avatar.filename)}
                   className={`w-14 h-14 object-cover rounded-full cursor-pointer transition-all hover:scale-105 border-2 ${
-                    formik.values.img === avatar.filename ? "border-[#51b5a5] shadow-md" : "border-transparent"
+                    formik.values.img === avatar.filename ? "border-primary shadow-md" : "border-transparent"
                   }`}
                 />
               ))}
@@ -249,7 +255,7 @@ export default function UpdateComment() {
               <input
                 id="custom-img"
                 type="file"
-                accept="image/*"
+                accept="image/jpeg, image/png, image/svg+xml, image/webp"
                 onChange={handleCustomImageChange}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               />
@@ -271,11 +277,11 @@ export default function UpdateComment() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 min-w-[150px] flex justify-center items-center ${
+              className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 min-w-btn-wide flex justify-center items-center ${
                 isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
               }`}
             >
-              {isSubmitting ? <Loading color="#ffffff" size={8} /> : "ذخیره تغییرات"}
+              {isSubmitting ? <Loading color="var(--color-white)" size={8} /> : "ذخیره تغییرات"}
             </button>
           </div>
         </form>

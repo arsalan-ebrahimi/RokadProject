@@ -9,6 +9,12 @@ export const uploadSingle = catchAsync(async (req, res, next) => {
     return next(new HandleERROR("هیچ فایلی آپلود نشده است", 400));
   }
 
+  const validExtRegex = /\.(jpe?g|png|svg|webp)$/i;
+  if (!validExtRegex.test(file.originalname)) {
+    if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+    return next(new HandleERROR("پسوند فایل غیرمجاز است", 400));
+  }
+
   if (file.originalname.toLowerCase().startsWith("default-")) {
     if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
     return next(new HandleERROR("استفاده از نام‌های رزرو شده سیستم (مثل default-) مجاز نیست", 403));
@@ -26,6 +32,15 @@ export const uploadMultiple = catchAsync(async (req, res, next) => {
 
   if (!files || files.length === 0) {
     return next(new HandleERROR("هیچ فایلی آپلود نشده است", 400));
+  }
+
+  const validExtRegex = /\.(jpe?g|png|svg|webp)$/i;
+  const hasInvalidExt = files.some(file => !validExtRegex.test(file.originalname));
+  if (hasInvalidExt) {
+    files.forEach(file => {
+      if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+    });
+    return next(new HandleERROR("پسوند برخی از فایل‌ها غیرمجاز است", 400));
   }
 
   const hasInvalidName = files.some(file => 
@@ -56,6 +71,11 @@ export const removeData = catchAsync(async (req, res, next) => {
   }
 
   const removeDataFilename = filename.split("/").at(-1);
+
+  const validExtRegex = /\.(jpe?g|png|svg|webp)$/i;
+  if (!validExtRegex.test(removeDataFilename)) {
+    return next(new HandleERROR("فقط حذف فایل‌های تصویری مجاز است", 400));
+  }
 
   if (removeDataFilename.toLowerCase().startsWith("default-")) {
     return next(new HandleERROR("شما اجازه حذف فایل‌های پیش‌فرض و سیستمی را ندارید", 403));

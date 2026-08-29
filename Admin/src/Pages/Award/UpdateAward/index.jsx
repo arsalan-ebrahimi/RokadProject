@@ -17,12 +17,13 @@ import Loading from "../../../Components/Loading";
 // ----------------------------------------
 // Validation Schema
 // ----------------------------------------
+const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_()،,.\u200C]+$/;
 const awardUpdateSchema = Yup.object({
-  title: Yup.string().required("عنوان جایزه الزامی است"),
+  title: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("عنوان جایزه الزامی است"),
   rank: Yup.number()
     .oneOf([1, 2, 3], "مقام باید 1، 2 یا 3 باشد")
     .required("تعیین مقام الزامی است"),
-  description: Yup.string().required("نوشتن توضیحات الزامی است"),
+  description: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("نوشتن توضیحات الزامی است"),
   winners: Yup.array()
     .of(Yup.string())
     .min(1, "حداقل یک برنده باید انتخاب شود")
@@ -128,7 +129,7 @@ export default function UpdateAward() {
 
   const inputClass = (error) =>
     `w-full border rounded-lg px-4 py-2.5 outline-none transition-all ${
-      error ? "border-red-500" : "border-gray-300 focus:border-[#51b5a5]"
+      error ? "border-red-500" : "border-gray-300 focus:border-primary"
     }`;
 
   // ----------------------------------------
@@ -146,11 +147,11 @@ export default function UpdateAward() {
     <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
       
       <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-[#1b234d]">ویرایش جایزه</h1>
+        <h1 className="text-2xl font-bold text-secondary">ویرایش جایزه</h1>
         <button
           type="button"
           onClick={() => navigate("/award")}
-          className="flex items-center gap-2 text-gray-500 hover:text-[#1b234d] transition-colors font-medium"
+          className="flex items-center gap-2 text-gray-500 hover:text-secondary transition-colors font-medium"
         >
           <span>بازگشت</span>
           <ArrowForwardIcon fontSize="small" />
@@ -243,11 +244,11 @@ export default function UpdateAward() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 min-w-[150px] flex justify-center items-center ${
+              className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 min-w-btn-wide flex justify-center items-center ${
                 isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
               }`}
             >
-              {isSubmitting ? <Loading color="#ffffff" size={8} /> : "ذخیره تغییرات"}
+              {isSubmitting ? <Loading color="var(--color-white)" size={8} /> : "ذخیره تغییرات"}
             </button>
           </div>
         </form>

@@ -1,7 +1,7 @@
 import Joi from "joi";
 
 export const createAwardValidator = Joi.object({
-  title: Joi.string().required().messages({
+  title: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_()،,.\u200C]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).required().messages({
     "string.base": "عنوان باید یک متن باشد",
     "string.empty": "عنوان نمی‌تواند خالی باشد",
     "any.required": "فیلد عنوان الزامی است",
@@ -11,7 +11,7 @@ export const createAwardValidator = Joi.object({
     "any.only": "مقام باید یکی از مقادیر 1، 2 یا 3 باشد",
     "any.required": "فیلد مقام الزامی است",
   }),
-  description: Joi.string().required().messages({
+  description: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_()،,.\u200C]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).required().messages({
     "string.base": "توضیحات باید یک متن باشد",
     "string.empty": "توضیحات نمی‌تواند خالی باشد",
     "any.required": "فیلد توضیحات الزامی است",
@@ -26,7 +26,7 @@ export const createAwardValidator = Joi.object({
 });
 
 export const updateAwardValidator = Joi.object({
-  title: Joi.string().messages({
+  title: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_()،,.\u200C]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).messages({
     "string.base": "عنوان باید یک متن باشد",
     "string.empty": "عنوان نمی‌تواند خالی باشد",
   }),
@@ -34,7 +34,7 @@ export const updateAwardValidator = Joi.object({
     "number.base": "مقام باید عدد باشد",
     "any.only": "مقام باید یکی از مقادیر 1، 2 یا 3 باشد",
   }),
-  description: Joi.string().messages({
+  description: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_()،,.\u200C]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).messages({
     "string.base": "توضیحات باید یک متن باشد",
     "string.empty": "توضیحات نمی‌تواند خالی باشد",
   }),

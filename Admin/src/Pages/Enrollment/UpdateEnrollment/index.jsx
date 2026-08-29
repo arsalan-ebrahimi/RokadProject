@@ -7,22 +7,23 @@ import { useNavigate, useParams } from "react-router-dom";
 import Notify from "../../../Utils/notify";
 
 // Form validation schema using Yup
+const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_()،,.\u200C]+$/;
 const enrollmentValidationSchema = Yup.object({
-  firstName: Yup.string().required("نام الزامی است"),
-  lastName: Yup.string().required("نام خانوادگی الزامی است"),
-  fatherName: Yup.string().required("نام پدر الزامی است"),
-  motherName: Yup.string().required("نام مادر الزامی است"),
-  nationalCode: Yup.string().length(10, "کد ملی باید ۱۰ رقم باشد").required("کد ملی الزامی است"),
+  firstName: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("نام الزامی است"),
+  lastName: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("نام خانوادگی الزامی است"),
+  fatherName: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("نام پدر الزامی است"),
+  motherName: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("نام مادر الزامی است"),
+  nationalCode: Yup.string().matches(safeTextRegex, "کد ملی باید ۱۰ رقم باشد").length(10, "کد ملی باید ۱۰ رقم باشد").required("کد ملی الزامی است"),
   birthDate: Yup.object({
-    day: Yup.string().required("روز"),
-    month: Yup.string().required("ماه"),
-    year: Yup.string().required("سال"),
+    day: Yup.string().matches(safeTextRegex, "مقدار غیرمجاز").required("روز"),
+    month: Yup.string().matches(safeTextRegex, "مقدار غیرمجاز").required("ماه"),
+    year: Yup.string().matches(safeTextRegex, "مقدار غیرمجاز").required("سال"),
   }),
-  mobileNumber: Yup.string().required("موبایل دانش‌آموز الزامی است"),
-  parentsMobileNumber: Yup.string().required("موبایل والدین الزامی است"),
-  grade: Yup.string().required("پایه تحصیلی الزامی است"),
-  schoolType: Yup.string().required("نوع مدرسه الزامی است"),
-  major: Yup.string().required("رشته تحصیلی الزامی است"),
+  mobileNumber: Yup.string().matches(safeTextRegex, "مقدار غیرمجاز").required("موبایل دانش‌آموز الزامی است"),
+  parentsMobileNumber: Yup.string().matches(safeTextRegex, "مقدار غیرمجاز").required("موبایل والدین الزامی است"),
+  grade: Yup.string().matches(safeTextRegex, "مقدار غیرمجاز").required("پایه تحصیلی الزامی است"),
+  schoolType: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("نوع مدرسه الزامی است"),
+  major: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("رشته تحصیلی الزامی است"),
 });
 
 export default function UpdateEnrollment() {
@@ -113,7 +114,7 @@ export default function UpdateEnrollment() {
   // Helper function for dynamic tailwind classes based on validation
   const inputClass = (error) =>
     `w-full border rounded-lg px-4 py-2.5 outline-none transition-all ${
-      error ? "border-red-500" : "border-gray-300 focus:border-[#1b234d]"
+      error ? "border-red-500" : "border-gray-300 focus:border-secondary"
     }`;
 
   if (loading) {
@@ -128,11 +129,11 @@ export default function UpdateEnrollment() {
     <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
       {/* Header section with back navigation */}
       <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-[#1b234d]">ویرایش پیش‌ثبت‌نام</h1>
+        <h1 className="text-2xl font-bold text-secondary">ویرایش پیش‌ثبت‌نام</h1>
         <button
           type="button"
           onClick={() => navigate("/enrollment")}
-          className="flex items-center gap-2 text-gray-500 hover:text-[#1b234d] transition-colors font-medium"
+          className="flex items-center gap-2 text-gray-500 hover:text-secondary transition-colors font-medium"
         >
           <span>بازگشت</span>
           <ArrowForwardIcon fontSize="small" />
@@ -232,7 +233,7 @@ export default function UpdateEnrollment() {
               type="submit"
               disabled={isSubmitting}
               className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 ${
-                isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-[#1b234d] hover:bg-blue-900"
+                isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-secondary hover:bg-blue-900"
               }`}
             >
               {isSubmitting ? "در حال ذخیره..." : "ویرایش اطلاعات"}
