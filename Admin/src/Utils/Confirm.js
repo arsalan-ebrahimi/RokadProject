@@ -33,7 +33,7 @@ const Confirm = async (
     
     // Custom Tailwind-like styling classes
     customClass: {
-      popup: "rounded-[2rem] p-4 shadow-xl border border-gray-100",
+      popup: "rounded-card p-4 shadow-xl border border-gray-100",
       confirmButton: "font-bold rounded-xl px-6 py-2.5 shadow-sm transition-colors outline-none text-white",
       cancelButton: "font-bold rounded-xl px-6 py-2.5 hover:bg-gray-200 transition-colors outline-none",
     },

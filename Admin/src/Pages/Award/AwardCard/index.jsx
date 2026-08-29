@@ -63,7 +63,7 @@ export default function AwardCard({ award, onEdit, onDelete }) {
         {/* Title and Label */}
         <div className="flex flex-col gap-1">
           <span className="text-xs font-medium text-gray-500">عنوان جایزه:</span>
-          <h2 className="text-lg font-bold text-[#1b234d] line-clamp-1">
+          <h2 className="text-lg font-bold text-secondary line-clamp-1">
             {award.title}
           </h2>
         </div>

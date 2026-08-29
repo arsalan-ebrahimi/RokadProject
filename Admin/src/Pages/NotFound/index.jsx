@@ -9,7 +9,7 @@ export default function NotFound() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f4f6f8] p-4" dir="rtl">
+    <div className="min-h-screen flex items-center justify-center bg-bg-light p-4" dir="rtl">
       <div className="max-w-lg w-full bg-white rounded-3xl shadow-sm ring-1 ring-black/5 p-8 md:p-14 text-center flex flex-col items-center">
         
         {/* Brand Logo - Optional but keeps the user connected to the brand */}
@@ -22,7 +22,7 @@ export default function NotFound() {
         </div>
         
         {/* Large 404 Text */}
-        <h1 className="text-8xl md:text-9xl font-black text-[#51b5a5] drop-shadow-sm mb-4 tracking-widest">
+        <h1 className="text-8xl md:text-9xl font-black text-primary drop-shadow-sm mb-4 tracking-widest">
           404
         </h1>
         
@@ -39,7 +39,7 @@ export default function NotFound() {
         {/* Back to Home Button */}
         <button 
           onClick={() => navigate('/')}
-          className="w-full sm:w-auto px-10 h-[55px] bg-[#51b5a5] hover:bg-[#439a8c] text-white font-bold rounded-2xl transition-all duration-300 shadow-lg shadow-[#51b5a5]/30 hover:shadow-xl hover:-translate-y-1 flex justify-center items-center text-lg"
+          className="w-full sm:w-auto px-10 h-btn-tall bg-primary hover:bg-primary-hover text-white font-bold rounded-2xl transition-all duration-300 shadow-lg shadow-primary/30 hover:shadow-xl hover:-translate-y-1 flex justify-center items-center text-lg"
         >
           بازگشت به صفحه اصلی
         </button>

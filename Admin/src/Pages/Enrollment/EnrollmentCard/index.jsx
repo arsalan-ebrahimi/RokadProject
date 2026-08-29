@@ -23,7 +23,7 @@ export default function EnrollmentCard({ enrollment, onEdit, onDelete }) {
         {/* Full Name display */}
         <div className="flex items-center gap-2 min-w-[200px]">
           <span className="text-sm text-gray-500">نام و نام خانوادگی:</span>
-          <h2 className="text-lg font-bold text-[#1b234d]">
+          <h2 className="text-lg font-bold text-secondary">
             {enrollment.firstName} {enrollment.lastName}
           </h2>
         </div>

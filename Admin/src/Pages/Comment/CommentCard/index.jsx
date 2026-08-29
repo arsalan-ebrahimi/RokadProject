@@ -37,7 +37,7 @@ export default function CommentCard({ comment, onEdit, onDelete }) {
         
         {/* Header containing Avatar, Name, Role */}
         <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-2 text-[#1b234d] font-bold">
+            <div className="flex items-center gap-2 text-secondary font-bold">
                 <img 
                   src={avatarUrl} 
                   alt={comment.author} 

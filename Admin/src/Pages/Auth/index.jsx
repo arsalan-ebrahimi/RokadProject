@@ -88,9 +88,9 @@ export default function AdminLogin() {
   // Render Component
   // ----------------------------------------
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f4f6f8] p-4" dir="rtl">
+    <div className="min-h-screen flex items-center justify-center bg-bg-light p-4" dir="rtl">
       {/* Slightly refined card shadow and border */}
-      <div className="max-w-md w-full bg-white rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 p-8 md:p-10">
+      <div className="max-w-md w-full bg-white rounded-card shadow-xl shadow-gray-200/40 border border-gray-100 p-8 md:p-10">
         
         {/* Brand Logo */}
         <div className="flex justify-center mb-8">
@@ -102,7 +102,7 @@ export default function AdminLogin() {
         </div>
 
         {/* Header Texts */}
-        <h2 className="text-2xl font-bold text-center text-[#1b234d] mb-2">
+        <h2 className="text-2xl font-bold text-center text-secondary mb-2">
           ورود به پنل مدیریت
         </h2>
         <p className="text-center text-gray-500 mb-8 text-sm">
@@ -122,7 +122,7 @@ export default function AdminLogin() {
               className={`w-full px-5 py-4 rounded-2xl bg-gray-50/50 outline-none transition-all text-left font-sans border focus:bg-white ${
                 formik.touched.phoneNumber && formik.errors.phoneNumber
                   ? "border-red-400 focus:ring-4 focus:ring-red-500/10"
-                  : "border-gray-200 focus:border-[#51b5a5] focus:ring-4 focus:ring-[#51b5a5]/10"
+                  : "border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10"
               }`}
               {...formik.getFieldProps("phoneNumber")}
             />
@@ -143,7 +143,7 @@ export default function AdminLogin() {
               className={`w-full pl-5 pr-12 py-4 rounded-2xl bg-gray-50/50 outline-none transition-all text-left font-sans tracking-widest border focus:bg-white ${
                 formik.touched.password && formik.errors.password
                   ? "border-red-400 focus:ring-4 focus:ring-red-500/10"
-                  : "border-gray-200 focus:border-[#51b5a5] focus:ring-4 focus:ring-[#51b5a5]/10"
+                  : "border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10"
               }`}
               {...formik.getFieldProps("password")}
             />
@@ -153,7 +153,7 @@ export default function AdminLogin() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="text-gray-400 hover:text-[#51b5a5] transition-colors focus:outline-none"
+                className="text-gray-400 hover:text-primary transition-colors focus:outline-none"
                 tabIndex="-1"
               >
                 {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
@@ -172,13 +172,13 @@ export default function AdminLogin() {
             <button
               disabled={formik.isSubmitting}
               type="submit"
-              className={`w-full h-[55px] font-bold py-3 rounded-2xl transition-all duration-300 flex justify-center items-center text-lg ${
+              className={`w-full h-btn-tall font-bold py-3 rounded-2xl transition-all duration-300 flex justify-center items-center text-lg ${
                 formik.isSubmitting 
                   ? "bg-[#9cdcd1] cursor-not-allowed" 
-                  : "bg-[#51b5a5] hover:bg-[#439a8c] text-white shadow-lg shadow-[#51b5a5]/20 hover:-translate-y-1 hover:shadow-[#51b5a5]/30"
+                  : "bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20 hover:-translate-y-1 hover:shadow-primary/30"
               }`}
             >
-              {formik.isSubmitting ? <Loading color="#ffffff" size={8} /> : "ورود به داشبورد"}
+              {formik.isSubmitting ? <Loading color="var(--color-white)" size={8} /> : "ورود به داشبورد"}
             </button>
           </div>
         </form>

@@ -49,7 +49,7 @@ export default function StudentCard({ student, onEdit, onDelete }) {
           </span>
         </div>
 
-        <h2 className="text-lg font-bold text-[#1b234d] line-clamp-1 mb-1">
+        <h2 className="text-lg font-bold text-secondary line-clamp-1 mb-1">
           {student.fullName}
         </h2>
 

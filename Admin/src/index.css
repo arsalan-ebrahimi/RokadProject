@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+@theme {
+  --color-primary: #51b5a5;
+  --color-secondary: #1b234d;
+  --color-white: #ffffff;
+  --color-bg-light: #f4f6f8;
+  --color-primary-hover: #439a8c;
+
+  --spacing-btn-wide: 150px;
+  --spacing-btn-tall: 55px;
+  
+  --font-size-icon-lg: 50px;
+  
+  --radius-card: 2rem;
+}

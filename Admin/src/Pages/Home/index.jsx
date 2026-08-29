@@ -15,6 +15,7 @@ import CommentIcon from "@mui/icons-material/Comment";
 import EventIcon from "@mui/icons-material/Event";
 import PeopleIcon from "@mui/icons-material/People";
 import LogoutIcon from "@mui/icons-material/Logout"; 
+import SettingsIcon from "@mui/icons-material/Settings";
 
 // ==========================================
 // Component: Home (Dashboard)
@@ -42,7 +43,7 @@ export default function Home() {
       title: "مدیریت بلاگ",
       subtitle: "(Blog Management)",
       path: "/blog",
-      icon: <ArticleIcon style={{ fontSize: 50 }} />,
+      icon: <ArticleIcon style={{ fontSize: "var(--font-size-icon-lg)" }} />,
       bgClass: "bg-gradient-to-br from-blue-400 to-indigo-500", 
       shadowClass: "shadow-indigo-200",
     },
@@ -51,7 +52,7 @@ export default function Home() {
       title: "مدیریت رویدادها",
       subtitle: "(Events)",
       path: "/event",
-      icon: <EventIcon style={{ fontSize: 50 }} />,
+      icon: <EventIcon style={{ fontSize: "var(--font-size-icon-lg)" }} />,
       bgClass: "bg-gradient-to-br from-emerald-400 to-teal-500", 
       shadowClass: "shadow-teal-200",
     },
@@ -60,7 +61,7 @@ export default function Home() {
       title: "مدیریت دانش‌آموزان",
       subtitle: "(Students)",
       path: "/student",
-      icon: <PeopleIcon style={{ fontSize: 50 }} />,
+      icon: <PeopleIcon style={{ fontSize: "var(--font-size-icon-lg)" }} />,
       bgClass: "bg-gradient-to-br from-rose-400 to-pink-500", 
       shadowClass: "shadow-pink-200",
     },
@@ -69,7 +70,7 @@ export default function Home() {
       title: "مدیریت جوایز",
       subtitle: "(Awards & Honors)",
       path: "/award",
-      icon: <EmojiEventsIcon style={{ fontSize: 50 }} />,
+      icon: <EmojiEventsIcon style={{ fontSize: "var(--font-size-icon-lg)" }} />,
       bgClass: "bg-gradient-to-br from-violet-400 to-purple-500", 
       shadowClass: "shadow-purple-200",
     },
@@ -78,7 +79,7 @@ export default function Home() {
       title: "مدیریت نظرات",
       subtitle: "(Comments)",
       path: "/comment",
-      icon: <CommentIcon style={{ fontSize: 50 }} />,
+      icon: <CommentIcon style={{ fontSize: "var(--font-size-icon-lg)" }} />,
       bgClass: "bg-gradient-to-br from-amber-400 to-orange-500",
       shadowClass: "shadow-orange-200",
     },
@@ -92,8 +93,16 @@ export default function Home() {
       dir="rtl"
       className="flex flex-col items-center justify-center min-h-[85vh] p-6 bg-gray-50 relative"
     >
-      {/* --- Logout Button Section --- */}
-      <div className="absolute top-6 left-6">
+      {/* --- Top Action Buttons Section (Settings & Logout) --- */}
+      <div className="absolute top-6 left-6 flex items-center gap-4">
+        <button
+          onClick={() => navigate("/seo")}
+          className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white rounded-xl transition-all duration-300 shadow-sm hover:shadow-md group font-bold"
+        >
+          <span>تنظیمات سئو</span>
+          <SettingsIcon className="group-hover:rotate-90 transition-transform duration-500" />
+        </button>
+        
         <button
           onClick={handleLogout}
           className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all duration-300 shadow-sm hover:shadow-md group font-bold"
@@ -105,7 +114,7 @@ export default function Home() {
 
       {/* --- Dashboard Header Section --- */}
       <div className="text-center mb-12 space-y-2 mt-8">
-        <h1 className="text-3xl md:text-5xl font-extrabold text-[#1b234d] tracking-tight">
+        <h1 className="text-3xl md:text-5xl font-extrabold text-secondary tracking-tight">
           به داشبورد ادمین خوش آمدید
         </h1>
         <p className="text-gray-500 text-lg">

@@ -52,7 +52,7 @@ export default function EventCard({ event, onEdit, onDelete }) {
         </div>
 
         {/* Title */}
-        <h2 className="text-lg font-bold text-[#1b234d] line-clamp-1 mb-2">
+        <h2 className="text-lg font-bold text-secondary line-clamp-1 mb-2">
           {event.title}
         </h2>
 

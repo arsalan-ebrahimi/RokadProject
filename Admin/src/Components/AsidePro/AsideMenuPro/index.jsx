@@ -1,7 +1,6 @@
 // ==========================================
 // Dependencies & Icons
 // ==========================================
-
 import { useNavigate } from "react-router-dom";
 import { AsideItemPro } from "./AsideItemPro";
 import { useState } from "react";
@@ -21,7 +20,8 @@ export function AsideMenuPro({ titleMenu }) {
     "رویدادها",
     "دانش‌آموزان",
     "افتخارات",
-    "نظرات"
+    "نظرات",
+    "سئو"
   ];
 
   // Updated Navigation URLs
@@ -31,7 +31,8 @@ export function AsideMenuPro({ titleMenu }) {
     "/event",
     "/student",
     "/award",
-    "/comment"
+    "/comment",
+    "/seo"
   ];
 
   const mapItems = items.map((title, index) => (
@@ -45,18 +46,18 @@ export function AsideMenuPro({ titleMenu }) {
         onClick={() => setOpen(!open)}
         className="cursor-pointer flex justify-between items-center px-3 py-3 rounded-lg transition-colors hover:bg-gray-50"
       >
-        <span className="font-semibold text-[#1b234d] text-[16px]">
+        <span className="font-semibold text-secondary text-[16px]">
           {titleMenu}
         </span>
         <KeyboardArrowDownIcon
-          className="transition-transform duration-300 text-[#51b5a5]"
+          className="transition-transform duration-300 text-primary"
           style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
         />
       </div>
 
       {/* Submenu List */}
       {open && (
-        <div className="mt-1 pr-4 border-r-2 border-[#51b5a5]/30 mr-2 flex flex-col gap-1">
+        <div className="mt-1 pr-4 border-r-2 border-primary/30 mr-2 flex flex-col gap-1">
           {mapItems}
         </div>
       )}

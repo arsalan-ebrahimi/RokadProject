@@ -33,7 +33,7 @@ export default function BlogCard({ blog, onEdit, onDelete }) {
 
       {/* Blog Content Section */}
       <div className="p-4 flex flex-col flex-grow">
-        <h2 className="text-lg font-bold text-[#1b234d] line-clamp-1 mb-1">{blog.title}</h2>
+        <h2 className="text-lg font-bold text-secondary line-clamp-1 mb-1">{blog.title}</h2>
         <span className="text-sm text-gray-400 mb-3">{blog.date}</span>
         <p className="text-sm text-gray-600 line-clamp-3 mb-4 flex-grow">{blog.description}</p>
 
