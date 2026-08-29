@@ -37,11 +37,11 @@ export default commentRouter;
  *         author:
  *           type: string
  *           description: Name of the comment author
- *           example: "علی احمدی"
+ *           example: "Ali Ahmadi"
  *         content:
  *           type: string
  *           description: The comment text
- *           example: "این مقاله بسیار مفید و کاربردی بود، ممنون!"
+ *           example: "This article was very useful and practical, thanks!"
  *         role:
  *           type: string
  *           description: Role of the author (e.g., user, admin)
@@ -69,10 +69,10 @@ export default commentRouter;
  *       properties:
  *         author:
  *           type: string
- *           example: "علی احمدی"
+ *           example: "Ali Ahmadi"
  *         content:
  *           type: string
- *           example: "این مقاله بسیار مفید و کاربردی بود، ممنون!"
+ *           example: "This article was very useful and practical, thanks!"
  *         role:
  *           type: string
  *           example: "user"
@@ -87,7 +87,7 @@ export default commentRouter;
  *           example: true
  *         message:
  *           type: string
- *           example: "نظر با موفقیت ثبت شد"
+ *           example: "Comment submitted successfully"
  *         data:
  *           $ref: '#/components/schemas/Comment'
  *     CommentListResponse:
@@ -126,7 +126,7 @@ export default commentRouter;
  *           example: false
  *         message:
  *           type: string
- *           example: "متن خطا در اینجا نمایش داده می‌شود"
+ *           example: "Error message will be displayed here"
  *         statusCode:
  *           type: integer
  *           example: 400
@@ -141,122 +141,53 @@ export default commentRouter;
  * @swagger
  * tags:
  *   - name: Comments
- *     description: Comment Management Endpoints (Powered by Vanta-API)
+ *     description: Comment Management Endpoints 
  */
 
 /**
  * @swagger
  * /api/comment:
  *   get:
- *     summary: Retrieve all comments with advanced Vanta-API features
+ *     summary: Retrieve all comments with advanced features
  *     tags: [Comments]
- *     description: |
- *       Fetch a list of comments with full support for Vanta-API advanced querying features.
- *       
- *       ### 💡 Important: Dynamic Query Keys
- *       The parameter fields shown below (like `author[regex]` or `createdAt[gte]`) are **DYNAMIC**. 
- *       We used `author` and `createdAt` in the Swagger form just so you can easily test them. In your actual frontend code, **you can replace them with any field name from the model** (e.g., `content[regex]=...` or `role[regex]=...`).
- *       
- *       ---
- *       
- *       ### Frontend Developer Guide
- *       
- *       1. Global Search (q):
- *          - Description: Performs a case-insensitive text search across all indexed string fields in the database schema.
- *          - Example: /api/comment?q=عالی
- *       
- *       2. Pagination (page and limit):
- *          - Description: Splits large data sets into smaller chunks to optimize client rendering.
- *          - Example: /api/comment?page=2&limit=5
- *       
- *       3. Field Limiting (fields):
- *          - Description: Projection operator to include specific fields, or exclude unneeded fields by adding a minus (-) prefix.
- *          - Example (Include): /api/comment?fields=author,content
- *          - Example (Exclude): /api/comment?fields=-createdAt
- *       
- *       4. Sorting (sort):
- *          - Description: Orders records by one or multiple fields. Add a minus (-) prefix for descending order.
- *          - Example: /api/comment?sort=-createdAt
- *       
- *       5. Entity Population (populate):
- *          - Description: Replaces referenced MongoDB ObjectIds with their fully populated target documents.
- *          - Example: /api/comment?populate=post
- *       
- *       6. Flexible Regex Filtering ([regex]):
- *          - Description: Powerful pattern matching on string fields. It is NOT limited to prefixes; it supports standard regex patterns including substrings, start/end anchors (^, $), and OR logic (|).
- *          - Example (Substring Match): /api/comment?author[regex]=احمدی
- *          - Example (Starts With / Prefix): /api/comment?author[regex]=^علی
- *          - Example (Ends With / Suffix): /api/comment?role[regex]=user$
- *          - Example (Multiple Choices / OR): /api/comment?role[regex]=user|admin
- *       
- *       7. Range Comparisons (gte, lte, gt, lt):
- *          - Description: Boundary filtering for numeric or date fields using standard relational operators (greater than [gt], greater than or equal to [gte], less than [lt], less than or equal to [lte]).
- *          - Example: /api/comment?createdAt[gte]=2026-01-01&createdAt[lte]=2026-12-31
+ *     description: "Retrieve the list of records with filtering, pagination, and advanced search ."
  *     parameters:
  *       - in: query
  *         name: q
  *         schema:
  *           type: string
- *         description: "Global search query across searchable text fields"
- *         example: "عالی"
+ *         description: "Search text"
+ *         example: "Excellent"
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
  *           default: 1
- *         description: "Active page number for pagination"
+ *         description: "Page number"
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
  *           default: 10
- *         description: "Total records returned per page"
+ *         description: "Items per page"
  *       - in: query
  *         name: sort
  *         schema:
  *           type: string
- *         description: "Sorting field name. Prepend with '-' for descending order"
+ *         description: "Sorting"
  *         example: "-createdAt"
  *       - in: query
  *         name: fields
  *         schema:
  *           type: string
- *         description: "Comma-separated list of fields to include or exclude"
+ *         description: "Select fields"
  *         example: "author,content"
  *       - in: query
  *         name: populate
  *         schema:
  *           type: string
- *         description: "Comma-separated list of relational fields to populate"
+ *         description: "Populate relations"
  *         example: "user"
- *       - in: query
- *         name: "author[regex]"
- *         schema:
- *           type: string
- *         description: "💡 DYNAMIC FIELD: 'author' is just an example! You can replace it with ANY text field (e.g., content[regex]). Regex search. Supports standard patterns (^, $, |)"
- *         example: "^علی"
- *       - in: query
- *         name: "createdAt[gte]"
- *         schema:
- *           type: string
- *         description: "💡 DYNAMIC FIELD: 'createdAt' is just an example! You can apply [gte] to ANY date/number field. Lower boundary filter (greater than or equal to [gte])"
- *         example: "2026-01-01"
- *       - in: query
- *         name: "createdAt[gt]"
- *         schema:
- *           type: string
- *         description: "💡 DYNAMIC FIELD: 'createdAt' is just an example! Strict lower boundary filter (greater than [gt])"
- *       - in: query
- *         name: "createdAt[lte]"
- *         schema:
- *           type: string
- *         description: "💡 DYNAMIC FIELD: 'createdAt' is just an example! Upper boundary filter (less than or equal to [lte])"
- *         example: "2026-12-31"
- *       - in: query
- *         name: "createdAt[lt]"
- *         schema:
- *           type: string
- *         description: "💡 DYNAMIC FIELD: 'createdAt' is just an example! Strict upper boundary filter (less than [lt])"
  *     responses:
  *       200:
  *         description: Successfully retrieved the list of comments
@@ -272,7 +203,7 @@ export default commentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "خطای سرور رخ داده است"
+ *               message: "Server error occurred"
  *               statusCode: 500
  * 
  *   post:
@@ -296,11 +227,11 @@ export default commentRouter;
  *               $ref: '#/components/schemas/CommentResponse'
  *             example:
  *               success: true
- *               message: "نظر با موفقیت ثبت شد"
+ *               message: "Comment submitted successfully"
  *               data:
  *                 _id: "64a2b3c4d5e6f7a8b9c0d1e2"
- *                 author: "علی احمدی"
- *                 content: "این مقاله بسیار مفید و کاربردی بود، ممنون!"
+ *                 author: "Ali Ahmadi"
+ *                 content: "This article was very useful and practical, thanks!"
  *                 role: "user"
  *                 img: "avatar-user.png"
  *                 createdAt: "2026-08-15T14:48:00.000Z"
@@ -313,7 +244,7 @@ export default commentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "نام نویسنده الزامی است"
+ *               message: "Author name is required"
  *               statusCode: 400
  *       401:
  *         description: Unauthorized (User not logged in)
@@ -323,7 +254,7 @@ export default commentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "لطفا ابتدا وارد حساب کاربری خود شوید"
+ *               message: "Please log in to your account first"
  *               statusCode: 401
  *       403:
  *         description: Forbidden (User does not have admin role)
@@ -333,7 +264,7 @@ export default commentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "شما مجاز به انجام این عملیات نیستید"
+ *               message: "You are not authorized to perform this operation"
  *               statusCode: 403
  *       500:
  *         description: Internal Server Error
@@ -349,19 +280,7 @@ export default commentRouter;
  *   get:
  *     summary: Get a specific comment by ID
  *     tags: [Comments]
- *     description: |
- *       Retrieve detailed information of a single comment using its MongoDB ObjectId.
- *       
- *       ### Frontend Developer Guide
- *       Even when fetching a single document by ID, you can use Vanta-API features:
- *       
- *       1. Field Selection (fields):
- *          - Description: Fetch only the exact fields you need from this specific comment.
- *          - Example: /api/comment/64a2b3c4d5e6f7a8b9c0d1e2?fields=author,content
- *       
- *       2. Entity Population (populate):
- *          - Description: Expand references into full objects inside this specific comment.
- *          - Example: /api/comment/64a2b3c4d5e6f7a8b9c0d1e2?populate=user
+ *     description: "Get the details of a specific record."
  *     parameters:
  *       - in: path
  *         name: id
@@ -374,13 +293,13 @@ export default commentRouter;
  *         name: fields
  *         schema:
  *           type: string
- *         description: "Comma-separated list of fields to include or exclude"
+ *         description: "Select fields"
  *         example: "author,content"
  *       - in: query
  *         name: populate
  *         schema:
  *           type: string
- *         description: "Comma-separated list of relational fields to populate"
+ *         description: "Populate relations"
  *     responses:
  *       200:
  *         description: Comment fetched successfully
@@ -392,8 +311,8 @@ export default commentRouter;
  *               success: true
  *               data:
  *                 _id: "64a2b3c4d5e6f7a8b9c0d1e2"
- *                 author: "علی احمدی"
- *                 content: "این مقاله بسیار مفید و کاربردی بود، ممنون!"
+ *                 author: "Ali Ahmadi"
+ *                 content: "This article was very useful and practical, thanks!"
  *                 role: "user"
  *                 img: "avatar-user.png"
  *                 createdAt: "2026-08-15T14:48:00.000Z"
@@ -406,7 +325,7 @@ export default commentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "نظر یافت نشد"
+ *               message: "Comment not found"
  *               statusCode: 404
  *       500:
  *         description: Internal Server Error
@@ -437,10 +356,10 @@ export default commentRouter;
  *             properties:
  *               author:
  *                 type: string
- *                 example: "علی احمدی (بروزرسانی شده)"
+ *                 example: "Ali Ahmadi ((Updated))"
  *               content:
  *                 type: string
- *                 example: "متن نظر ویرایش شد..."
+ *                 example: "Comment text edited..."
  *               role:
  *                 type: string
  *                 example: "admin"
@@ -456,11 +375,11 @@ export default commentRouter;
  *               $ref: '#/components/schemas/CommentResponse'
  *             example:
  *               success: true
- *               message: "نظر با موفقیت بروزرسانی شد"
+ *               message: "Comment updated successfully"
  *               data:
  *                 _id: "64a2b3c4d5e6f7a8b9c0d1e2"
- *                 author: "علی احمدی (بروزرسانی شده)"
- *                 content: "متن نظر ویرایش شد..."
+ *                 author: "Ali Ahmadi ((Updated))"
+ *                 content: "Comment text edited..."
  *                 role: "admin"
  *                 img: "new-avatar.png"
  *                 createdAt: "2026-08-15T14:48:00.000Z"
@@ -473,7 +392,7 @@ export default commentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "نام نویسنده نمی‌تواند خالی باشد"
+ *               message: "Author name cannot be empty"
  *               statusCode: 400
  *       401:
  *         description: Unauthorized (User not logged in)
@@ -483,7 +402,7 @@ export default commentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "لطفا ابتدا وارد حساب کاربری خود شوید"
+ *               message: "Please log in to your account first"
  *               statusCode: 401
  *       403:
  *         description: Forbidden (User does not have admin role)
@@ -493,7 +412,7 @@ export default commentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "شما مجاز به انجام این عملیات نیستید"
+ *               message: "You are not authorized to perform this operation"
  *               statusCode: 403
  *       404:
  *         description: Comment not found
@@ -503,7 +422,7 @@ export default commentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "نظر یافت نشد"
+ *               message: "Comment not found"
  *               statusCode: 404
  *       500:
  *         description: Internal Server Error
@@ -538,7 +457,7 @@ export default commentRouter;
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: "نظر با موفقیت حذف شد"
+ *                   example: "Comment deleted successfully"
  *                 data:
  *                   nullable: true
  *                   example: null
@@ -550,7 +469,7 @@ export default commentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "لطفا ابتدا وارد حساب کاربری خود شوید"
+ *               message: "Please log in to your account first"
  *               statusCode: 401
  *       403:
  *         description: Forbidden
@@ -560,7 +479,7 @@ export default commentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "شما مجاز به انجام این عملیات نیستید"
+ *               message: "You are not authorized to perform this operation"
  *               statusCode: 403
  *       404:
  *         description: Comment not found
@@ -570,7 +489,7 @@ export default commentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "نظر یافت نشد"
+ *               message: "Comment not found"
  *               statusCode: 404
  *       500:
  *         description: Internal Server Error

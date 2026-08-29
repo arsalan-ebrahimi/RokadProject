@@ -98,7 +98,7 @@ export default authRouter;
  *           example: true
  *         message:
  *           type: string
- *           example: "با موفقیت وارد شدید"
+ *           example: "Successfully logged in"
  *         data:
  *           type: object
  *           properties:
@@ -110,7 +110,7 @@ export default authRouter;
  *               properties:
  *                 fullName:
  *                   type: string
- *                   example: "علی محمدی"
+ *                   example: "Ali Mohammadi"
  *                 phoneNumber:
  *                   type: string
  *                   example: "09123456789"
@@ -119,7 +119,7 @@ export default authRouter;
  *                   example: "user"
  *                 birthDate:
  *                   type: string
- *                   example: "1404 مرداد 1"
+ *                   example: "2025 August 1"
  *     AuthCheckResponse:
  *       type: object
  *       properties:
@@ -128,7 +128,7 @@ export default authRouter;
  *           example: true
  *         message:
  *           type: string
- *           example: "کد تایید با موفقیت ارسال شد"
+ *           example: "Verification code sent successfully"
  *         data:
  *           type: object
  *           properties:
@@ -146,7 +146,7 @@ export default authRouter;
  *           example: true
  *         message:
  *           type: string
- *           example: "عملیات با موفقیت انجام شد"
+ *           example: "Operation was successful"
  *     ErrorResponse:
  *       type: object
  *       properties:
@@ -155,7 +155,7 @@ export default authRouter;
  *           example: false
  *         message:
  *           type: string
- *           example: "خطایی رخ داده است"
+ *           example: "An error occurred"
  *         statusCode:
  *           type: integer
  *           example: 400
@@ -236,7 +236,7 @@ export default authRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "شماره موبایل یا رمز عبور اشتباه است"
+ *               message: "Incorrect phone number or password"
  *               statusCode: 401
  */
 
@@ -268,7 +268,7 @@ export default authRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "کد تایید اشتباه یا منقضی شده است"
+ *               message: "Verification code is incorrect or expired"
  *               statusCode: 400
  */
 
@@ -322,7 +322,7 @@ export default authRouter;
  *               $ref: '#/components/schemas/MessageResponse'
  *             example:
  *               success: true
- *               message: "رمز عبور با موفقیت تغییر کرد"
+ *               message: "Password changed successfully"
  *       400:
  *         description: Invalid OTP code
  *         content:
@@ -331,7 +331,7 @@ export default authRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "کد تایید اشتباه است"
+ *               message: "Verification code is incorrect"
  *               statusCode: 400
  *       404:
  *         description: User not found
@@ -341,6 +341,6 @@ export default authRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "کاربری با این شماره یافت نشد"
+ *               message: "No user found with this phone number"
  *               statusCode: 404
  */

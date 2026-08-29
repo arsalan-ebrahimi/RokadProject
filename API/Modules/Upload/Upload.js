@@ -33,7 +33,7 @@ export default uploadRouter;
  *           example: true
  *         message:
  *           type: string
- *           example: "فایل با موفقیت آپلود شد"
+ *           example: "File uploaded successfully"
  *         data:
  *           type: string
  *           description: Saved filename on the server
@@ -46,7 +46,7 @@ export default uploadRouter;
  *           example: true
  *         message:
  *           type: string
- *           example: "فایل‌ها با موفقیت آپلود شدند"
+ *           example: "Files uploaded successfully"
  *         data:
  *           type: array
  *           items:
@@ -58,7 +58,7 @@ export default uploadRouter;
  * @swagger
  * tags:
  *   - name: Upload
- *     description: File Upload & Management Endpoints (Powered by Vanta-API)
+ *     description: File Upload & Management Endpoints 
  */
 
 /**
@@ -98,7 +98,7 @@ export default uploadRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "هیچ فایلی آپلود نشده است"
+ *               message: "No file was uploaded"
  *               statusCode: 400
  *       401:
  *         description: Unauthorized
@@ -159,7 +159,7 @@ export default uploadRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "هیچ فایلی آپلود نشده است"
+ *               message: "No file was uploaded"
  *               statusCode: 400
  *       401:
  *         description: Unauthorized
@@ -209,7 +209,7 @@ export default uploadRouter;
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: "فایل با موفقیت حذف شد"
+ *                   example: "File deleted successfully"
  *                 data:
  *                   nullable: true
  *                   example: null
@@ -221,7 +221,7 @@ export default uploadRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "ارسال نام فایل برای حذف الزامی است"
+ *               message: "Providing a filename to delete is required"
  *               statusCode: 400
  *       404:
  *         description: File not found
@@ -231,7 +231,7 @@ export default uploadRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "فایل مورد نظر یافت نشد"
+ *               message: "Requested file not found"
  *               statusCode: 404
  *       401:
  *         description: Unauthorized

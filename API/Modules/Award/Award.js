@@ -37,7 +37,7 @@ export default awardRouter;
  *         title:
  *           type: string
  *           description: Award title
- *           example: "جایزه نفر اول المپیاد علمی"
+ *           example: "1st Place Science Olympiad Award"
  *         rank:
  *           type: integer
  *           description: Award rank (1, 2, or 3)
@@ -45,7 +45,7 @@ export default awardRouter;
  *         description:
  *           type: string
  *           description: Award content/description
- *           example: "این جایزه به دانش‌آموزی تعلق می‌گیرد که بالاترین نمره را کسب کرده است."
+ *           example: "This award is given to the student with the highest score."
  *         winners:
  *           type: array
  *           items:
@@ -66,13 +66,13 @@ export default awardRouter;
  *       properties:
  *         title:
  *           type: string
- *           example: "جایزه نفر اول المپیاد علمی"
+ *           example: "1st Place Science Olympiad Award"
  *         rank:
  *           type: integer
  *           example: 1
  *         description:
  *           type: string
- *           example: "این جایزه به دانش‌آموزی تعلق می‌گیرد که بالاترین نمره را کسب کرده است."
+ *           example: "This award is given to the student with the highest score."
  *         winners:
  *           type: array
  *           items:
@@ -86,7 +86,7 @@ export default awardRouter;
  *           example: true
  *         message:
  *           type: string
- *           example: "جایزه با موفقیت ایجاد شد"
+ *           example: "Award created successfully"
  *         data:
  *           $ref: '#/components/schemas/Award'
  *     AwardListResponse:
@@ -125,7 +125,7 @@ export default awardRouter;
  *           example: false
  *         message:
  *           type: string
- *           example: "متن خطا در اینجا نمایش داده می‌شود"
+ *           example: "Error message will be displayed here"
  *         statusCode:
  *           type: integer
  *           example: 400
@@ -140,124 +140,53 @@ export default awardRouter;
  * @swagger
  * tags:
  *   - name: Award
- *     description: Award Management Endpoints (Powered by Vanta-API)
+ *     description: Award Management Endpoints 
  */
 
 /**
  * @swagger
  * /api/award:
  *   get:
- *     summary: Retrieve all awards with advanced Vanta-API features
+ *     summary: Retrieve all awards with advanced features
  *     tags: [Award]
- *     description: |
- *       Fetch a list of awards with full support for Vanta-API advanced querying features.
- *       
- *       ### 💡 Important: Dynamic Query Keys
- *       The parameter fields shown below (like `title[regex]` or `rank[gte]`) are **DYNAMIC**. 
- *       We used `title` and `rank` in the Swagger form just so you can easily test them. In your actual frontend code, **you can replace them with any field name from the model** (e.g., `description[regex]=...`).
- *       
- *       ---
- *       
- *       ### Frontend Developer Guide
- *       
- *       1. Global Search (q):
- *          - Description: Performs a case-insensitive text search across all indexed string fields in the database schema.
- *          - Example: /api/award?q=المپیاد
- *       
- *       2. Pagination (page and limit):
- *          - Description: Splits large data sets into smaller chunks to optimize client rendering.
- *          - Example: /api/award?page=2&limit=5
- *       
- *       3. Field Limiting (fields):
- *          - Description: Projection operator to include specific fields, or exclude unneeded fields by adding a minus (-) prefix.
- *          - Example (Include): /api/award?fields=title,rank
- *          - Example (Exclude): /api/award?fields=-description
- *       
- *       4. Sorting (sort):
- *          - Description: Orders records by one or multiple fields. Add a minus (-) prefix for descending order.
- *          - Example: /api/award?sort=-rank
- *       
- *       5. Entity Population (populate):
- *          - Description: Replaces referenced MongoDB ObjectIds with their fully populated target documents.
- *          - Example: /api/award?populate=winners
- *       
- *       6. Flexible Regex Filtering ([regex]):
- *          - Description: Powerful pattern matching on string fields. It is NOT limited to prefixes; it supports standard regex patterns including substrings, start/end anchors (^, $), and OR logic (|).
- *          - Example (Substring Match): /api/award?title[regex]=المپیاد
- *          - Example (Starts With / Prefix): /api/award?title[regex]=^جایزه
- *          - Example (Ends With / Suffix): /api/award?title[regex]=علمی$
- *          - Example (Multiple Choices / OR): /api/award?title[regex]=ریاضی|فیزیک
- *       
- *       7. Range Comparisons (gte, lte, gt, lt):
- *          - Description: Boundary filtering for numeric fields (like rank) using standard relational operators (greater than [gt], greater than or equal to [gte], less than [lt], less than or equal to [lte]).
- *          - Example: /api/award?rank[gte]=1&rank[lte]=2
+ *     description: "Retrieve the list of records with filtering, pagination, and advanced search ."
  *     parameters:
  *       - in: query
  *         name: q
  *         schema:
  *           type: string
- *         description: "Global search query across searchable text fields"
- *         example: "المپیاد"
+ *         description: "Search text"
+ *         example: "Olympiad"
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
  *           default: 1
- *         description: "Active page number for pagination"
+ *         description: "Page number"
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
  *           default: 10
- *         description: "Total records returned per page"
+ *         description: "Items per page"
  *       - in: query
  *         name: sort
  *         schema:
  *           type: string
- *         description: "Sorting field name. Prepend with '-' for descending order"
+ *         description: "Sorting"
  *         example: "rank"
  *       - in: query
  *         name: fields
  *         schema:
  *           type: string
- *         description: "Comma-separated list of fields to include or exclude"
+ *         description: "Select fields"
  *         example: "title,rank"
  *       - in: query
  *         name: populate
  *         schema:
  *           type: string
- *         description: "Comma-separated list of relational fields to populate"
+ *         description: "Populate relations"
  *         example: "winners"
- *       - in: query
- *         name: "title[regex]"
- *         schema:
- *           type: string
- *         description: "💡 DYNAMIC FIELD: 'title' is just an example! You can replace it with ANY text field (e.g., description[regex]). Regex search. Supports standard patterns (^, $, |)"
- *         example: "^جایزه"
- *       - in: query
- *         name: "rank[gte]"
- *         schema:
- *           type: integer
- *         description: "💡 DYNAMIC FIELD: 'rank' is just an example! You can apply [gte] to ANY numeric/date field. Lower boundary filter (greater than or equal to [gte])"
- *         example: 1
- *       - in: query
- *         name: "rank[gt]"
- *         schema:
- *           type: integer
- *         description: "💡 DYNAMIC FIELD: 'rank' is just an example! Strict lower boundary filter (greater than [gt])"
- *         example: 1
- *       - in: query
- *         name: "rank[lte]"
- *         schema:
- *           type: integer
- *         description: "💡 DYNAMIC FIELD: 'rank' is just an example! Upper boundary filter (less than or equal to [lte])"
- *         example: 3
- *       - in: query
- *         name: "rank[lt]"
- *         schema:
- *           type: integer
- *         description: "💡 DYNAMIC FIELD: 'rank' is just an example! Strict upper boundary filter (less than [lt])"
- *         example: 3
  *     responses:
  *       200:
  *         description: Successfully retrieved the list of awards
@@ -273,7 +202,7 @@ export default awardRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "خطای سرور رخ داده است"
+ *               message: "Server error occurred"
  *               statusCode: 500
  * 
  *   post:
@@ -306,13 +235,13 @@ export default awardRouter;
  *                 summary: Duplicate Title Error
  *                 value:
  *                   success: false
- *                   message: "جایزه‌ای با این عنوان قبلاً ثبت شده است"
+ *                   message: "An award with this title is already registered"
  *                   statusCode: 400
  *               ValidationError:
  *                 summary: Validation Error
  *                 value:
  *                   success: false
- *                   message: "مقام باید یکی از مقادیر 1، 2 یا 3 باشد"
+ *                   message: "Rank must be 1, 2, or 3"
  *                   statusCode: 400
  *       401:
  *         description: Unauthorized (User not logged in)
@@ -322,7 +251,7 @@ export default awardRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "لطفا ابتدا وارد حساب کاربری خود شوید"
+ *               message: "Please log in to your account first"
  *               statusCode: 401
  *       403:
  *         description: Forbidden (User does not have admin role)
@@ -332,7 +261,7 @@ export default awardRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "شما مجاز به انجام این عملیات نیستید"
+ *               message: "You are not authorized to perform this operation"
  *               statusCode: 403
  *       500:
  *         description: Internal Server Error
@@ -348,19 +277,7 @@ export default awardRouter;
  *   get:
  *     summary: Get a specific award by ID
  *     tags: [Award]
- *     description: |
- *       Retrieve detailed information of a single award using its MongoDB ObjectId.
- *       
- *       ### Frontend Developer Guide
- *       Even when fetching a single document by ID, you can use Vanta-API features:
- *       
- *       1. Field Selection (fields):
- *          - Description: Fetch only the exact fields you need from this specific award.
- *          - Example: /api/award/64a2b3c4d5e6f7a8b9c0d1e2?fields=title,rank
- *       
- *       2. Entity Population (populate):
- *          - Description: Expand references into full objects inside this specific award.
- *          - Example: /api/award/64a2b3c4d5e6f7a8b9c0d1e2?populate=winners
+ *     description: "Get the details of a specific record."
  *     parameters:
  *       - in: path
  *         name: id
@@ -373,13 +290,13 @@ export default awardRouter;
  *         name: fields
  *         schema:
  *           type: string
- *         description: "Comma-separated list of fields to include or exclude"
+ *         description: "Select fields"
  *         example: "title,rank"
  *       - in: query
  *         name: populate
  *         schema:
  *           type: string
- *         description: "Comma-separated list of relational fields to populate"
+ *         description: "Populate relations"
  *         example: "winners"
  *     responses:
  *       200:
@@ -392,9 +309,9 @@ export default awardRouter;
  *               success: true
  *               data:
  *                 _id: "64a2b3c4d5e6f7a8b9c0d1e2"
- *                 title: "جایزه نفر اول المپیاد علمی"
+ *                 title: "1st Place Science Olympiad Award"
  *                 rank: 1
- *                 description: "این جایزه به دانش‌آموزی تعلق می‌گیرد که بالاترین نمره را کسب کرده است."
+ *                 description: "This award is given to the student with the highest score."
  *                 winners: ["64a2b3c4d5e6f7a8b9c0d1e2"]
  *                 __v: 0
  *       404:
@@ -405,7 +322,7 @@ export default awardRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "جایزه یافت نشد"
+ *               message: "Award not found"
  *               statusCode: 404
  *       500:
  *         description: Internal Server Error
@@ -436,13 +353,13 @@ export default awardRouter;
  *             properties:
  *               title:
  *                 type: string
- *                 example: "جایزه نفر اول المپیاد علمی (نسخه جدید)"
+ *                 example: "1st Place Science Olympiad Award ((New Version))"
  *               rank:
  *                 type: integer
  *                 example: 2
  *               description:
  *                 type: string
- *                 example: "توضیحات آپدیت شده..."
+ *                 example: "Updated description..."
  *               winners:
  *                 type: array
  *                 items:
@@ -457,12 +374,12 @@ export default awardRouter;
  *               $ref: '#/components/schemas/AwardResponse'
  *             example:
  *               success: true
- *               message: "جایزه با موفقیت بروزرسانی شد"
+ *               message: "Award updated successfully"
  *               data:
  *                 _id: "64a2b3c4d5e6f7a8b9c0d1e2"
- *                 title: "جایزه نفر اول المپیاد علمی (نسخه جدید)"
+ *                 title: "1st Place Science Olympiad Award ((New Version))"
  *                 rank: 2
- *                 description: "توضیحات آپدیت شده..."
+ *                 description: "Updated description..."
  *                 winners: ["64a2b3c4d5e6f7a8b9c0d1e2"]
  *                 __v: 0
  *       400:
@@ -473,7 +390,7 @@ export default awardRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "مقام باید یکی از مقادیر 1، 2 یا 3 باشد"
+ *               message: "Rank must be 1, 2, or 3"
  *               statusCode: 400
  *       401:
  *         description: Unauthorized (User not logged in)
@@ -483,7 +400,7 @@ export default awardRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "لطفا ابتدا وارد حساب کاربری خود شوید"
+ *               message: "Please log in to your account first"
  *               statusCode: 401
  *       403:
  *         description: Forbidden (User does not have admin role)
@@ -493,7 +410,7 @@ export default awardRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "شما مجاز به انجام این عملیات نیستید"
+ *               message: "You are not authorized to perform this operation"
  *               statusCode: 403
  *       404:
  *         description: Award not found
@@ -503,7 +420,7 @@ export default awardRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "جایزه یافت نشد"
+ *               message: "Award not found"
  *               statusCode: 404
  *       500:
  *         description: Internal Server Error
@@ -538,7 +455,7 @@ export default awardRouter;
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: "جایزه با موفقیت حذف شد"
+ *                   example: "Award deleted successfully"
  *                 data:
  *                   nullable: true
  *                   example: null
@@ -550,7 +467,7 @@ export default awardRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "لطفا ابتدا وارد حساب کاربری خود شوید"
+ *               message: "Please log in to your account first"
  *               statusCode: 401
  *       403:
  *         description: Forbidden
@@ -560,7 +477,7 @@ export default awardRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "شما مجاز به انجام این عملیات نیستید"
+ *               message: "You are not authorized to perform this operation"
  *               statusCode: 403
  *       404:
  *         description: Award not found
@@ -570,7 +487,7 @@ export default awardRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "جایزه یافت نشد"
+ *               message: "Award not found"
  *               statusCode: 404
  *       500:
  *         description: Internal Server Error

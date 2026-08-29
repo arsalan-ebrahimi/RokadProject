@@ -1,10 +1,12 @@
 import { Router } from "express";
 import { create, getAll, getOne, remove, update } from "./EnrollmentCn.js";
+import { validateRequest } from "../../Utils/validateRequest.js";
+import { createEnrollmentValidator, updateEnrollmentValidator } from "./EnrollmentValidation.js";
 
 const enrollmentRouter = Router();
 
-enrollmentRouter.route("/").get(getAll).post(create);
-enrollmentRouter.route("/:id").get(getOne).patch(update).delete(remove);
+enrollmentRouter.route("/").get(getAll).post(validateRequest(createEnrollmentValidator), create);
+enrollmentRouter.route("/:id").get(getOne).patch(validateRequest(updateEnrollmentValidator), update).delete(remove);
 
 export default enrollmentRouter;
 /**

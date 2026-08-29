@@ -38,11 +38,11 @@ export default eventRouter;
  *         title:
  *           type: string
  *           description: Event title
- *           example: "جشنواره علمی پژوهشی"
+ *           example: "Scientific Research Festival"
  *         type:
  *           type: string
  *           description: Event type
- *           example: "مسابقه"
+ *           example: "Competition"
  *         date:
  *           type: string
  *           description: Event date
@@ -50,11 +50,13 @@ export default eventRouter;
  *         description:
  *           type: string
  *           description: Event description
- *           example: "توضیحات کامل درباره نحوه برگزاری رویداد..."
+ *           example: "Full description about the event..."
  *         branch:
- *           type: string
- *           description: School branch (دخترانه or پسرانه)
- *           example: "دخترانه"
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: School branch (Girls or Boys)
+ *           example: "Girls"
  *         __v:
  *           type: integer
  *           description: Version key
@@ -70,19 +72,21 @@ export default eventRouter;
  *       properties:
  *         title:
  *           type: string
- *           example: "جشنواره علمی پژوهشی"
+ *           example: "Scientific Research Festival"
  *         type:
  *           type: string
- *           example: "مسابقه"
+ *           example: "Competition"
  *         date:
  *           type: string
  *           example: "2026-09-10"
  *         description:
  *           type: string
- *           example: "توضیحات کامل درباره نحوه برگزاری رویداد..."
+ *           example: "Full description about the event..."
  *         branch:
- *           type: string
- *           example: "دخترانه"
+ *           type: array
+ *           items:
+ *             type: string
+ *           example: "Girls"
  *     EventResponse:
  *       type: object
  *       properties:
@@ -91,7 +95,7 @@ export default eventRouter;
  *           example: true
  *         message:
  *           type: string
- *           example: "رویداد با موفقیت ایجاد شد"
+ *           example: "Event created successfully"
  *         data:
  *           $ref: '#/components/schemas/Event'
  *     EventListResponse:
@@ -130,7 +134,7 @@ export default eventRouter;
  *           example: false
  *         message:
  *           type: string
- *           example: "متن خطا در اینجا نمایش داده می‌شود"
+ *           example: "Error message will be displayed here"
  *         statusCode:
  *           type: integer
  *           example: 400
@@ -145,122 +149,53 @@ export default eventRouter;
  * @swagger
  * tags:
  *   - name: Events
- *     description: Event Management Endpoints (Powered by Vanta-API)
+ *     description: Event Management Endpoints 
  */
 
 /**
  * @swagger
  * /api/event:
  *   get:
- *     summary: Retrieve all events with advanced Vanta-API features
+ *     summary: Retrieve all events with advanced features
  *     tags: [Events]
- *     description: |
- *       Fetch a list of events with full support for Vanta-API advanced querying features.
- *       
- *       ### 💡 Important: Dynamic Query Keys
- *       The parameter fields shown below (like `title[regex]` or `date[gte]`) are **DYNAMIC**. 
- *       We used `title` and `date` in the Swagger form just so you can easily test them. In your actual frontend code, **you can replace them with any field name from the model** (e.g., `branch[regex]=...`).
- *       
- *       ---
- *       
- *       ### Frontend Developer Guide
- *       
- *       1. Global Search (q):
- *          - Description: Performs a case-insensitive text search across all indexed string fields in the database schema.
- *          - Example: /api/event?q=جشنواره
- *       
- *       2. Pagination (page and limit):
- *          - Description: Splits large data sets into smaller chunks to optimize client rendering.
- *          - Example: /api/event?page=2&limit=5
- *       
- *       3. Field Limiting (fields):
- *          - Description: Projection operator to include specific fields, or exclude unneeded fields by adding a minus (-) prefix.
- *          - Example (Include): /api/event?fields=title,branch
- *          - Example (Exclude): /api/event?fields=-description
- *       
- *       4. Sorting (sort):
- *          - Description: Orders records by one or multiple fields. Add a minus (-) prefix for descending order.
- *          - Example: /api/event?sort=-date
- *       
- *       5. Entity Population (populate):
- *          - Description: Replaces referenced MongoDB ObjectIds with their fully populated target documents.
- *          - Example: /api/event?populate=author
- *       
- *       6. Flexible Regex Filtering ([regex]):
- *          - Description: Powerful pattern matching on string fields. It is NOT limited to prefixes; it supports standard regex patterns including substrings, start/end anchors (^, $), and OR logic (|).
- *          - Example (Substring Match): /api/event?title[regex]=علمی
- *          - Example (Starts With / Prefix): /api/event?title[regex]=^جشنواره
- *          - Example (Ends With / Suffix): /api/event?branch[regex]=دخترانه$
- *          - Example (Multiple Choices / OR): /api/event?branch[regex]=دخترانه|پسرانه
- *       
- *       7. Range Comparisons (gte, lte, gt, lt):
- *          - Description: Boundary filtering for numeric or date fields using standard relational operators (greater than [gt], greater than or equal to [gte], less than [lt], less than or equal to [lte]).
- *          - Example: /api/event?date[gte]=2026-01-01&date[lte]=2026-12-31
+ *     description: "Retrieve the list of records with filtering, pagination, and advanced search ."
  *     parameters:
  *       - in: query
  *         name: q
  *         schema:
  *           type: string
- *         description: "Global search query across searchable text fields"
- *         example: "جشنواره"
+ *         description: "Search text"
+ *         example: "Festival"
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
  *           default: 1
- *         description: "Active page number for pagination"
+ *         description: "Page number"
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
  *           default: 10
- *         description: "Total records returned per page"
+ *         description: "Items per page"
  *       - in: query
  *         name: sort
  *         schema:
  *           type: string
- *         description: "Sorting field name. Prepend with '-' for descending order"
+ *         description: "Sorting"
  *         example: "-date"
  *       - in: query
  *         name: fields
  *         schema:
  *           type: string
- *         description: "Comma-separated list of fields to include or exclude"
+ *         description: "Select fields"
  *         example: "title,branch"
  *       - in: query
  *         name: populate
  *         schema:
  *           type: string
- *         description: "Comma-separated list of relational fields to populate"
+ *         description: "Populate relations"
  *         example: "author"
- *       - in: query
- *         name: "title[regex]"
- *         schema:
- *           type: string
- *         description: "💡 DYNAMIC FIELD: 'title' is just an example! You can replace it with ANY text field (e.g., branch[regex]). Regex search. Supports standard patterns (^, $, |)"
- *         example: "^جشنواره"
- *       - in: query
- *         name: "date[gte]"
- *         schema:
- *           type: string
- *         description: "💡 DYNAMIC FIELD: 'date' is just an example! You can apply [gte] to ANY date/number field. Lower boundary filter (greater than or equal to [gte])"
- *         example: "2026-01-01"
- *       - in: query
- *         name: "date[gt]"
- *         schema:
- *           type: string
- *         description: "💡 DYNAMIC FIELD: 'date' is just an example! Strict lower boundary filter (greater than [gt])"
- *       - in: query
- *         name: "date[lte]"
- *         schema:
- *           type: string
- *         description: "💡 DYNAMIC FIELD: 'date' is just an example! Upper boundary filter (less than or equal to [lte])"
- *         example: "2026-12-31"
- *       - in: query
- *         name: "date[lt]"
- *         schema:
- *           type: string
- *         description: "💡 DYNAMIC FIELD: 'date' is just an example! Strict upper boundary filter (less than [lt])"
  *     responses:
  *       200:
  *         description: Successfully retrieved the list of events
@@ -276,7 +211,7 @@ export default eventRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "خطای سرور رخ داده است"
+ *               message: "Server error occurred"
  *               statusCode: 500
  * 
  *   post:
@@ -300,14 +235,14 @@ export default eventRouter;
  *               $ref: '#/components/schemas/EventResponse'
  *               example:
  *                 success: true
- *                 message: "رویداد با موفقیت ایجاد شد"
+ *                 message: "Event created successfully"
  *                 data:
  *                   _id: "64a2b3c4d5e6f7a8b9c0d1e2"
- *                   title: "جشنواره علمی پژوهشی"
- *                   type: "مسابقه"
+ *                   title: "Scientific Research Festival"
+ *                   type: "Competition"
  *                   date: "2026-09-10"
- *                   description: "توضیحات کامل درباره نحوه برگزاری رویداد..."
- *                   branch: "دخترانه"
+ *                   description: "Full description about the event..."
+ *                   branch: "Girls"
  *                   __v: 0
  *       400:
  *         description: Bad Request (Validation Error or Duplicate Title)
@@ -320,13 +255,13 @@ export default eventRouter;
  *                 summary: Duplicate Title Error
  *                 value:
  *                   success: false
- *                   message: "رویدادی با این عنوان قبلاً ثبت شده است"
+ *                   message: "An event with this title is already registered"
  *                   statusCode: 400
  *               ValidationError:
  *                 summary: Validation Error
  *                 value:
  *                   success: false
- *                   message: "فیلد عنوان الزامی است"
+ *                   message: "Title field is required"
  *                   statusCode: 400
  *       401:
  *         description: Unauthorized (User not logged in)
@@ -336,7 +271,7 @@ export default eventRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "لطفا ابتدا وارد حساب کاربری خود شوید"
+ *               message: "Please log in to your account first"
  *               statusCode: 401
  *       403:
  *         description: Forbidden (User does not have admin role)
@@ -346,7 +281,7 @@ export default eventRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "شما مجاز به انجام این عملیات نیستید"
+ *               message: "You are not authorized to perform this operation"
  *               statusCode: 403
  *       500:
  *         description: Internal Server Error
@@ -362,19 +297,7 @@ export default eventRouter;
  *   get:
  *     summary: Get a specific event by ID
  *     tags: [Events]
- *     description: |
- *       Retrieve detailed information of a single event using its MongoDB ObjectId.
- *       
- *       ### Frontend Developer Guide
- *       Even when fetching a single document by ID, you can use Vanta-API features:
- *       
- *       1. Field Selection (fields):
- *          - Description: Fetch only the exact fields you need from this specific event.
- *          - Example: /api/event/64a2b3c4d5e6f7a8b9c0d1e2?fields=title,branch
- *       
- *       2. Entity Population (populate):
- *          - Description: Expand references into full objects inside this specific event.
- *          - Example: /api/event/64a2b3c4d5e6f7a8b9c0d1e2?populate=author
+ *     description: "Get the details of a specific record."
  *     parameters:
  *       - in: path
  *         name: id
@@ -387,13 +310,13 @@ export default eventRouter;
  *         name: fields
  *         schema:
  *           type: string
- *         description: "Comma-separated list of fields to include or exclude"
+ *         description: "Select fields"
  *         example: "title,branch"
  *       - in: query
  *         name: populate
  *         schema:
  *           type: string
- *         description: "Comma-separated list of relational fields to populate"
+ *         description: "Populate relations"
  *     responses:
  *       200:
  *         description: Event fetched successfully
@@ -405,11 +328,11 @@ export default eventRouter;
  *               success: true
  *               data:
  *                 _id: "64a2b3c4d5e6f7a8b9c0d1e2"
- *                 title: "جشنواره علمی پژوهشی"
- *                 type: "مسابقه"
+ *                 title: "Scientific Research Festival"
+ *                 type: "Competition"
  *                 date: "2026-09-10"
- *                 description: "توضیحات کامل درباره نحوه برگزاری رویداد..."
- *                 branch: "دخترانه"
+ *                 description: "Full description about the event..."
+ *                 branch: "Girls"
  *                 __v: 0
  *       404:
  *         description: Event not found
@@ -419,7 +342,7 @@ export default eventRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "رویداد یافت نشد"
+ *               message: "Event not found"
  *               statusCode: 404
  *       500:
  *         description: Internal Server Error
@@ -450,19 +373,21 @@ export default eventRouter;
  *             properties:
  *               title:
  *                 type: string
- *                 example: "جشنواره علمی پژوهشی (نسخه جدید)"
+ *                 example: "Scientific Research Festival ((New Version))"
  *               type:
  *                 type: string
- *                 example: "مسابقه"
+ *                 example: "Competition"
  *               date:
  *                 type: string
  *                 example: "2026-09-15"
  *               description:
  *                 type: string
- *                 example: "توضیحات بروزرسانی شده..."
+ *                 example: "Updated description..."
  *               branch:
- *                 type: string
- *                 example: "پسرانه"
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: "Boys"
  *     responses:
  *       200:
  *         description: Event updated successfully
@@ -472,14 +397,14 @@ export default eventRouter;
  *               $ref: '#/components/schemas/EventResponse'
  *             example:
  *               success: true
- *               message: "رویداد با موفقیت بروزرسانی شد"
+ *               message: "Event updated successfully"
  *               data:
  *                 _id: "64a2b3c4d5e6f7a8b9c0d1e2"
- *                 title: "جشنواره علمی پژوهشی (نسخه جدید)"
- *                 type: "مسابقه"
+ *                 title: "Scientific Research Festival ((New Version))"
+ *                 type: "Competition"
  *                 date: "2026-09-15"
- *                 description: "توضیحات بروزرسانی شده..."
- *                 branch: "پسرانه"
+ *                 description: "Updated description..."
+ *                 branch: "Boys"
  *                 __v: 0
  *       400:
  *         description: Validation Error
@@ -489,7 +414,7 @@ export default eventRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "عنوان نمی‌تواند خالی باشد"
+ *               message: "Title cannot be empty"
  *               statusCode: 400
  *       401:
  *         description: Unauthorized (User not logged in)
@@ -499,7 +424,7 @@ export default eventRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "لطفا ابتدا وارد حساب کاربری خود شوید"
+ *               message: "Please log in to your account first"
  *               statusCode: 401
  *       403:
  *         description: Forbidden (User does not have admin role)
@@ -509,7 +434,7 @@ export default eventRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "شما مجاز به انجام این عملیات نیستید"
+ *               message: "You are not authorized to perform this operation"
  *               statusCode: 403
  *       404:
  *         description: Event not found
@@ -519,7 +444,7 @@ export default eventRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "رویداد یافت نشد"
+ *               message: "Event not found"
  *               statusCode: 404
  *       500:
  *         description: Internal Server Error
@@ -554,7 +479,7 @@ export default eventRouter;
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: "رویداد با موفقیت حذف شد"
+ *                   example: "Event deleted successfully"
  *                 data:
  *                   nullable: true
  *                   example: null
@@ -566,7 +491,7 @@ export default eventRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "لطفا ابتدا وارد حساب کاربری خود شوید"
+ *               message: "Please log in to your account first"
  *               statusCode: 401
  *       403:
  *         description: Forbidden
@@ -576,7 +501,7 @@ export default eventRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "شما مجاز به انجام این عملیات نیستید"
+ *               message: "You are not authorized to perform this operation"
  *               statusCode: 403
  *       404:
  *         description: Event not found
@@ -586,7 +511,7 @@ export default eventRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "رویداد یافت نشد"
+ *               message: "Event not found"
  *               statusCode: 404
  *       500:
  *         description: Internal Server Error

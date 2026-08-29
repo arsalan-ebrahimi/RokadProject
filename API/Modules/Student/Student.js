@@ -50,15 +50,22 @@ export default studentRouter;
  *         fullName:
  *           type: string
  *           description: Student full name
- *           example: "محمد رضایی"
+ *           example: "Mohammad Rezaei"
  *         job:
  *           type: string
  *           description: Student current job position
- *           example: "فرانت‌اند دولوپر"
+ *           example: "Frontend Developer"
  *         generation:
  *           type: integer
  *           description: Student generation number
  *           example: 3
+ *         major:
+ *           type: string
+ *           description: Major
+ *         schoolType:
+ *           type: string
+ *           enum: [Boys, Girls]
+ *           description: School type
  *         socialLinks:
  *           type: array
  *           items:
@@ -77,13 +84,19 @@ export default studentRouter;
  *       properties:
  *         fullName:
  *           type: string
- *           example: "محمد رضایی"
+ *           example: "Mohammad Rezaei"
  *         job:
  *           type: string
- *           example: "فرانت‌اند دولوپر"
+ *           example: "Frontend Developer"
  *         generation:
  *           type: integer
  *           example: 3
+ *         major:
+ *           type: string
+ *           example: "Mathematics and Physics"
+ *         schoolType:
+ *           type: string
+ *           example: "Boys"
  *         socialLinks:
  *           type: array
  *           items:
@@ -96,7 +109,7 @@ export default studentRouter;
  *           example: true
  *         message:
  *           type: string
- *           example: "دانش‌آموز با موفقیت ثبت شد"
+ *           example: "Student registered successfully"
  *         data:
  *           $ref: '#/components/schemas/Student'
  *     StudentListResponse:
@@ -135,7 +148,7 @@ export default studentRouter;
  *           example: false
  *         message:
  *           type: string
- *           example: "متن خطا در اینجا نمایش داده می‌شود"
+ *           example: "Error message will be displayed here"
  *         statusCode:
  *           type: integer
  *           example: 400
@@ -150,124 +163,53 @@ export default studentRouter;
  * @swagger
  * tags:
  *   - name: Students
- *     description: Student Management Endpoints (Powered by Vanta-API)
+ *     description: Student Management Endpoints 
  */
 
 /**
  * @swagger
  * /api/student:
  *   get:
- *     summary: Retrieve all students with advanced Vanta-API features
+ *     summary: Retrieve all students with advanced features
  *     tags: [Students]
- *     description: |
- *       Fetch a list of students with full support for Vanta-API advanced querying features.
- *       
- *       ### 💡 Important: Dynamic Query Keys
- *       The parameter fields shown below (like `fullName[regex]` or `generation[gte]`) are **DYNAMIC**. 
- *       We used `fullName` and `generation` in the Swagger form just so you can easily test them. In your actual frontend code, **you can replace them with any field name from the model** (e.g., `job[regex]=...`).
- *       
- *       ---
- *       
- *       ### Frontend Developer Guide
- *       
- *       1. Global Search (q):
- *          - Description: Performs a case-insensitive text search across all indexed string fields in the database schema.
- *          - Example: /api/student?q=رضایی
- *       
- *       2. Pagination (page and limit):
- *          - Description: Splits large data sets into smaller chunks to optimize client rendering.
- *          - Example: /api/student?page=2&limit=5
- *       
- *       3. Field Limiting (fields):
- *          - Description: Projection operator to include specific fields, or exclude unneeded fields by adding a minus (-) prefix.
- *          - Example (Include): /api/student?fields=fullName,job
- *          - Example (Exclude): /api/student?fields=-socialLinks
- *       
- *       4. Sorting (sort):
- *          - Description: Orders records by one or multiple fields. Add a minus (-) prefix for descending order.
- *          - Example: /api/student?sort=-generation
- *       
- *       5. Entity Population (populate):
- *          - Description: Replaces referenced MongoDB ObjectIds with their fully populated target documents.
- *          - Example: /api/student?populate=awards
- *       
- *       6. Flexible Regex Filtering ([regex]):
- *          - Description: Powerful pattern matching on string fields. It is NOT limited to prefixes; it supports standard regex patterns including substrings, start/end anchors (^, $), and OR logic (|).
- *          - Example (Substring Match): /api/student?fullName[regex]=رضایی
- *          - Example (Starts With / Prefix): /api/student?fullName[regex]=^محمد
- *          - Example (Ends With / Suffix): /api/student?job[regex]=دولوپر$
- *          - Example (Multiple Choices / OR): /api/student?job[regex]=فرانت‌اند|بک‌اند
- *       
- *       7. Range Comparisons (gte, lte, gt, lt):
- *          - Description: Boundary filtering for numeric fields (like generation) using standard relational operators (greater than [gt], greater than or equal to [gte], less than [lt], less than or equal to [lte]).
- *          - Example: /api/student?generation[gte]=1&generation[lte]=3
+ *     description: "Retrieve the list of records with filtering, pagination, and advanced search ."
  *     parameters:
  *       - in: query
  *         name: q
  *         schema:
  *           type: string
- *         description: "Global search query across searchable text fields"
- *         example: "رضایی"
+ *         description: "Search text"
+ *         example: "Rezaei"
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
  *           default: 1
- *         description: "Active page number for pagination"
+ *         description: "Page number"
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
  *           default: 10
- *         description: "Total records returned per page"
+ *         description: "Items per page"
  *       - in: query
  *         name: sort
  *         schema:
  *           type: string
- *         description: "Sorting field name. Prepend with '-' for descending order"
+ *         description: "Sorting"
  *         example: "-generation"
  *       - in: query
  *         name: fields
  *         schema:
  *           type: string
- *         description: "Comma-separated list of fields to include or exclude"
+ *         description: "Select fields"
  *         example: "fullName,job"
  *       - in: query
  *         name: populate
  *         schema:
  *           type: string
- *         description: "Comma-separated list of relational fields to populate"
+ *         description: "Populate relations"
  *         example: "awards"
- *       - in: query
- *         name: "fullName[regex]"
- *         schema:
- *           type: string
- *         description: "💡 DYNAMIC FIELD: 'fullName' is just an example! You can replace it with ANY text field (e.g., job[regex]). Regex search. Supports standard patterns (^, $, |)"
- *         example: "^محمد"
- *       - in: query
- *         name: "generation[gte]"
- *         schema:
- *           type: integer
- *         description: "💡 DYNAMIC FIELD: 'generation' is just an example! You can apply [gte] to ANY numeric/date field. Lower boundary filter (greater than or equal to [gte])"
- *         example: 1
- *       - in: query
- *         name: "generation[gt]"
- *         schema:
- *           type: integer
- *         description: "💡 DYNAMIC FIELD: 'generation' is just an example! Strict lower boundary filter (greater than [gt])"
- *         example: 1
- *       - in: query
- *         name: "generation[lte]"
- *         schema:
- *           type: integer
- *         description: "💡 DYNAMIC FIELD: 'generation' is just an example! Upper boundary filter (less than or equal to [lte])"
- *         example: 5
- *       - in: query
- *         name: "generation[lt]"
- *         schema:
- *           type: integer
- *         description: "💡 DYNAMIC FIELD: 'generation' is just an example! Strict upper boundary filter (less than [lt])"
- *         example: 5
  *     responses:
  *       200:
  *         description: Successfully retrieved the list of students
@@ -283,7 +225,7 @@ export default studentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "خطای سرور رخ داده است"
+ *               message: "Server error occurred"
  *               statusCode: 500
  * 
  *   post:
@@ -313,7 +255,7 @@ export default studentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "فیلد نام کامل الزامی است"
+ *               message: "Full name field is required"
  *               statusCode: 400
  *       401:
  *         description: Unauthorized (User not logged in)
@@ -323,7 +265,7 @@ export default studentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "لطفا ابتدا وارد حساب کاربری خود شوید"
+ *               message: "Please log in to your account first"
  *               statusCode: 401
  *       403:
  *         description: Forbidden (User does not have admin role)
@@ -333,7 +275,7 @@ export default studentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "شما مجاز به انجام این عملیات نیستید"
+ *               message: "You are not authorized to perform this operation"
  *               statusCode: 403
  *       500:
  *         description: Internal Server Error
@@ -349,19 +291,7 @@ export default studentRouter;
  *   get:
  *     summary: Get a specific student by ID
  *     tags: [Students]
- *     description: |
- *       Retrieve detailed information of a single student using its MongoDB ObjectId.
- *       
- *       ### Frontend Developer Guide
- *       Even when fetching a single document by ID, you can use Vanta-API features:
- *       
- *       1. Field Selection (fields):
- *          - Description: Fetch only the exact fields you need from this specific student.
- *          - Example: /api/student/64a2b3c4d5e6f7a8b9c0d1e2?fields=fullName,job
- *       
- *       2. Entity Population (populate):
- *          - Description: Expand references into full objects inside this specific student.
- *          - Example: /api/student/64a2b3c4d5e6f7a8b9c0d1e2?populate=awards
+ *     description: "Get the details of a specific record."
  *     parameters:
  *       - in: path
  *         name: id
@@ -374,13 +304,13 @@ export default studentRouter;
  *         name: fields
  *         schema:
  *           type: string
- *         description: "Comma-separated list of fields to include or exclude"
+ *         description: "Select fields"
  *         example: "fullName,job"
  *       - in: query
  *         name: populate
  *         schema:
  *           type: string
- *         description: "Comma-separated list of relational fields to populate"
+ *         description: "Populate relations"
  *     responses:
  *       200:
  *         description: Student fetched successfully
@@ -392,8 +322,8 @@ export default studentRouter;
  *               success: true
  *               data:
  *                 _id: "64a2b3c4d5e6f7a8b9c0d1e2"
- *                 fullName: "محمد رضایی"
- *                 job: "فرانت‌اند دولوپر"
+ *                 fullName: "Mohammad Rezaei"
+ *                 job: "Frontend Developer"
  *                 generation: 3
  *                 socialLinks:
  *                   - type: "github"
@@ -407,7 +337,7 @@ export default studentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "دانش‌آموز یافت نشد"
+ *               message: "Student not found"
  *               statusCode: 404
  *       500:
  *         description: Internal Server Error
@@ -438,10 +368,10 @@ export default studentRouter;
  *             properties:
  *               fullName:
  *                 type: string
- *                 example: "محمد رضایی (بروزرسانی شده)"
+ *                 example: "Mohammad Rezaei ((Updated))"
  *               job:
  *                 type: string
- *                 example: "فول‌استک دولوپر"
+ *                 example: "Full-stack Developer"
  *               generation:
  *                 type: integer
  *                 example: 3
@@ -458,11 +388,11 @@ export default studentRouter;
  *               $ref: '#/components/schemas/StudentResponse'
  *             example:
  *               success: true
- *               message: "اطلاعات دانش‌آموز با موفقیت بروزرسانی شد"
+ *               message: "Student information updated successfully"
  *               data:
  *                 _id: "64a2b3c4d5e6f7a8b9c0d1e2"
- *                 fullName: "محمد رضایی (بروزرسانی شده)"
- *                 job: "فول‌استک دولوپر"
+ *                 fullName: "Mohammad Rezaei ((Updated))"
+ *                 job: "Full-stack Developer"
  *                 generation: 3
  *                 socialLinks:
  *                   - type: "github"
@@ -476,7 +406,7 @@ export default studentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "نام کامل باید یک متن باشد"
+ *               message: "Full name must be a string"
  *               statusCode: 400
  *       401:
  *         description: Unauthorized (User not logged in)
@@ -486,7 +416,7 @@ export default studentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "لطفا ابتدا وارد حساب کاربری خود شوید"
+ *               message: "Please log in to your account first"
  *               statusCode: 401
  *       403:
  *         description: Forbidden (User does not have admin role)
@@ -496,7 +426,7 @@ export default studentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "شما مجاز به انجام این عملیات نیستید"
+ *               message: "You are not authorized to perform this operation"
  *               statusCode: 403
  *       404:
  *         description: Student not found
@@ -506,7 +436,7 @@ export default studentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "دانش‌آموز یافت نشد"
+ *               message: "Student not found"
  *               statusCode: 404
  *       500:
  *         description: Internal Server Error
@@ -541,7 +471,7 @@ export default studentRouter;
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: "دانش‌آموز با موفقیت حذف شد"
+ *                   example: "Student deleted successfully"
  *                 data:
  *                   nullable: true
  *                   example: null
@@ -553,7 +483,7 @@ export default studentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "لطفا ابتدا وارد حساب کاربری خود شوید"
+ *               message: "Please log in to your account first"
  *               statusCode: 401
  *       403:
  *         description: Forbidden
@@ -563,7 +493,7 @@ export default studentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "شما مجاز به انجام این عملیات نیستید"
+ *               message: "You are not authorized to perform this operation"
  *               statusCode: 403
  *       404:
  *         description: Student not found
@@ -573,7 +503,7 @@ export default studentRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "دانش‌آموز یافت نشد"
+ *               message: "Student not found"
  *               statusCode: 404
  *       500:
  *         description: Internal Server Error

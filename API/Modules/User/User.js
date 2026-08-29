@@ -32,7 +32,7 @@ export default userRouter;
  *         fullName:
  *           type: string
  *           description: User full name
- *           example: "علی محمدی"
+ *           example: "Ali Mohammadi"
  *         phoneNumber:
  *           type: string
  *           description: User phone number (Iranian format)
@@ -55,7 +55,7 @@ export default userRouter;
  *       properties:
  *         fullName:
  *           type: string
- *           example: "علی محمدی"
+ *           example: "Ali Mohammadi"
  *         password:
  *           type: string
  *           example: "secret123"
@@ -74,7 +74,7 @@ export default userRouter;
  *           example: true
  *         message:
  *           type: string
- *           example: "اطلاعات کاربر با موفقیت بروزرسانی شد"
+ *           example: "User information updated successfully"
  *         data:
  *           $ref: '#/components/schemas/User'
  *     UserListResponse:
@@ -113,7 +113,7 @@ export default userRouter;
  *           example: false
  *         message:
  *           type: string
- *           example: "متن خطا در اینجا نمایش داده می‌شود"
+ *           example: "Error message will be displayed here"
  *         statusCode:
  *           type: integer
  *           example: 400
@@ -128,7 +128,7 @@ export default userRouter;
  * @swagger
  * tags:
  *   - name: Users
- *     description: User Management Endpoints (Powered by Vanta-API)
+ *     description: User Management Endpoints 
  */
 
 /**
@@ -137,93 +137,44 @@ export default userRouter;
  *   get:
  *     summary: Retrieve all users (Admin only)
  *     tags: [Users]
- *     description: |
- *       Fetch a list of users with full support for Vanta-API advanced querying features. Requires Admin role and Bearer token.
- *       
- *       ### 💡 Important: Dynamic Query Keys
- *       The parameter fields shown below (like `fullName[regex]` or `phoneNumber[gte]`) are **DYNAMIC**. 
- *       We used `fullName` and `phoneNumber` in the Swagger form just so you can easily test them. In your actual frontend code, **you can replace them with any field name from the model** (e.g., `role[regex]=...`).
- *       
- *       ---
- *       
- *       ### Frontend Developer Guide
- *       
- *       1. Global Search (q):
- *          - Description: Performs a case-insensitive text search across all indexed string fields in the database schema.
- *          - Example: /api/user?q=محمدی
- *       
- *       2. Pagination (page and limit):
- *          - Description: Splits large data sets into smaller chunks to optimize client rendering.
- *          - Example: /api/user?page=2&limit=5
- *       
- *       3. Field Limiting (fields):
- *          - Description: Projection operator to include specific fields, or exclude unneeded fields by adding a minus (-) prefix.
- *          - Example (Include): /api/user?fields=fullName,phoneNumber
- *          - Example (Exclude): /api/user?fields=-role
- *       
- *       4. Sorting (sort):
- *          - Description: Orders records by one or multiple fields. Add a minus (-) prefix for descending order.
- *          - Example: /api/user?sort=-phoneNumber
- *       
- *       5. Entity Population (populate):
- *          - Description: Replaces referenced MongoDB ObjectIds with their fully populated target documents.
- *          - Example: /api/user?populate=favoriteProducts
- *       
- *       6. Flexible Regex Filtering ([regex]):
- *          - Description: Powerful pattern matching on string fields. It is NOT limited to prefixes; it supports standard regex patterns including substrings, start/end anchors (^, $), and OR logic (|).
- *          - Example (Substring Match): /api/user?fullName[regex]=محمدی
- *          - Example (Starts With / Prefix): /api/user?fullName[regex]=^علی
- *          - Example (Ends With / Suffix): /api/user?phoneNumber[regex]=789$
- *          - Example (Multiple Choices / OR): /api/user?role[regex]=admin|superAdmin
- *       
- *       7. Range Comparisons (gte, lte, gt, lt):
- *          - Description: Boundary filtering for numeric or string fields using standard relational operators (greater than [gt], greater than or equal to [gte], less than [lt], less than or equal to [lte]).
- *          - Example: /api/user?phoneNumber[gte]=09100000000&phoneNumber[lte]=09199999999
- *     security:
- *       - bearerAuth: []
+ *     description: "Retrieve the list of records with filtering, pagination, and advanced search ."
  *     parameters:
  *       - in: query
  *         name: q
  *         schema:
  *           type: string
- *         description: "Global search query across searchable text fields"
- *         example: "محمدی"
+ *         description: "Search text"
+ *         example: "Mohammadi"
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
  *           default: 1
- *         description: "Active page number for pagination"
+ *         description: "Page number"
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
  *           default: 10
- *         description: "Total records returned per page"
+ *         description: "Items per page"
  *       - in: query
  *         name: sort
  *         schema:
  *           type: string
- *         description: "Sorting field name. Prepend with '-' for descending order"
+ *         description: "Sorting"
  *         example: "-phoneNumber"
  *       - in: query
  *         name: fields
  *         schema:
  *           type: string
- *         description: "Comma-separated list of fields to include or exclude"
+ *         description: "Select fields"
  *         example: "fullName,phoneNumber"
  *       - in: query
  *         name: populate
  *         schema:
  *           type: string
- *         description: "Comma-separated list of relational fields to populate"
+ *         description: "Populate relations"
  *         example: "favoriteProducts"
- *       - in: query
- *         name: "fullName[regex]"
- *         schema:
- *           type: string
- *         description: "💡 DYNAMIC FIELD: 'fullName' is just an example! You can replace it with ANY text field. Regex search. Supports standard patterns (^, $, |)"
- *         example: "^علی"
  *     responses:
  *       200:
  *         description: Successfully retrieved the list of users
@@ -257,21 +208,7 @@ export default userRouter;
  *   get:
  *     summary: Get a specific user by ID (or own profile if regular user)
  *     tags: [Users]
- *     description: |
- *       Retrieve detailed information of a user. Regular users can only access their own profile. Requires authentication.
- *       
- *       ### Frontend Developer Guide
- *       Even when fetching a single user profile, you can use Vanta-API features:
- *       
- *       1. Field Selection (fields):
- *          - Description: Fetch only the exact fields you need.
- *          - Example: /api/user/64a2b3c4d5e6f7a8b9c0d1e2?fields=fullName,phoneNumber
- *       
- *       2. Entity Population (populate):
- *          - Description: Expand references into full objects (e.g., favoriteProducts, boughtProducts, cartId).
- *          - Example: /api/user/64a2b3c4d5e6f7a8b9c0d1e2?populate=favoriteProducts
- *     security:
- *       - bearerAuth: []
+ *     description: "Get the details of a specific record."
  *     parameters:
  *       - in: path
  *         name: id
@@ -284,13 +221,13 @@ export default userRouter;
  *         name: fields
  *         schema:
  *           type: string
- *         description: "Comma-separated list of fields to include or exclude"
+ *         description: "Select fields"
  *         example: "fullName,phoneNumber"
  *       - in: query
  *         name: populate
  *         schema:
  *           type: string
- *         description: "Comma-separated list of relational fields to populate"
+ *         description: "Populate relations"
  *         example: "favoriteProducts,boughtProducts"
  *     responses:
  *       200:
@@ -313,7 +250,7 @@ export default userRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "کاربر یافت نشد"
+ *               message: "User not found"
  *               statusCode: 404
  *       500:
  *         description: Internal Server Error
@@ -344,7 +281,7 @@ export default userRouter;
  *             properties:
  *               fullName:
  *                 type: string
- *                 example: "علی محمدی (ویرایش‌شده)"
+ *                 example: "Ali Mohammadi ((Edited))"
  *               password:
  *                 type: string
  *                 example: "newSecret456"
@@ -364,7 +301,7 @@ export default userRouter;
  *               $ref: '#/components/schemas/UserResponse'
  *             example:
  *               success: true
- *               message: "اطلاعات کاربر با موفقیت بروزرسانی شد"
+ *               message: "User information updated successfully"
  *       400:
  *         description: Validation Error
  *         content:
@@ -373,7 +310,7 @@ export default userRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "رمز عبور باید حداقل ۶ کاراکتر باشد"
+ *               message: "Password must be at least 6 characters"
  *               statusCode: 400
  *       401:
  *         description: Unauthorized (User not logged in)
@@ -389,7 +326,7 @@ export default userRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "شما مجاز به ویرایش اطلاعات این کاربر نیستید"
+ *               message: "You are not authorized to edit this user's info"
  *               statusCode: 403
  *       404:
  *         description: User not found
@@ -399,7 +336,7 @@ export default userRouter;
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
  *               success: false
- *               message: "کاربر یافت نشد"
+ *               message: "User not found"
  *               statusCode: 404
  *       500:
  *         description: Internal Server Error
