@@ -19,6 +19,7 @@ import commentRouter from "./Modules/Comment/Comment.js";
 import awardRouter from "./Modules/Award/Award.js";
 import studentRouter from "./Modules/Student/Student.js"; 
 import eventRouter from "./Modules/Event/Event.js"; 
+import seoRouter from "./Modules/Seo/Seo.js"; 
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use("/api/blog", blogRouter);
 app.use("/api/enrollment", enrollmentRouter);
 app.use("/api/student", studentRouter); 
 app.use("/api/event", eventRouter); 
+app.use("/api/seo", seoRouter); 
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 

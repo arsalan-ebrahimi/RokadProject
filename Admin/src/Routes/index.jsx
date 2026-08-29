@@ -40,7 +40,7 @@ import UpdateStudent from "../Pages/Student/UpdateStudent";
 // Award Components
 // ==========================================
 import Award from "../Pages/Award";
-import AwardPage from "../Pages/Award/AawardPage"; // Notice the spelling 'AawardPage' based on your previous code
+import AwardPage from "../Pages/Award/AawardPage"; 
 import CreateAward from "../Pages/Award/CreateAward";
 import UpdateAward from "../Pages/Award/UpdateAward";
 
@@ -51,6 +51,11 @@ import CommentLayout from "../Pages/Comment";
 import CommentPage from "../Pages/Comment/CommentPage";
 import CreateComment from "../Pages/Comment/CreateComment";
 import UpdateComment from "../Pages/Comment/UpdateComment";
+
+// ==========================================
+// Seo Components
+// ==========================================
+import SeoSettings from "../Pages/SeoSettings"; 
 
 // ==========================================
 // Application Router Configuration
@@ -119,6 +124,11 @@ const router = createBrowserRouter([
           { path: "create", element: <CreateComment /> },
           { path: "update/:id", element: <UpdateComment /> },
         ],
+      },
+      {
+        // Seo Settings Section
+        path: "seo",
+        element: <SeoSettings />,
       },
     ],
   },
