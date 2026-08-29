@@ -30,6 +30,7 @@ export const getAll = catchAsync(async (req, res, next) => {
 
   const features = new ApiFeatures(Enrollment, req.query, req.role)
     .filter()
+    .search(['firstName', 'lastName', 'nationalCode', 'mobileNumber'])
     .sort()
     .limitFields()
     .paginate()
@@ -49,9 +50,7 @@ export const getOne = catchAsync(async (req, res, next) => {
   const features = new ApiFeatures(Enrollment, req.query)
     .addManualFilters(filter)
     .filter()
-    .sort()
     .limitFields()
-    .paginate()
     .populate();
 
   const result = await features.execute();

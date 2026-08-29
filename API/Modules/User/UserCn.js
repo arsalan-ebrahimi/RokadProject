@@ -4,8 +4,8 @@ import bcryptjs from "bcryptjs";
 
 export const getAll = catchAsync(async (req, res, next) => {
   const features = new ApiFeatures(User, req.query, req.role)
-    .search()
     .filter()
+    .search(['fullName', 'phoneNumber'])
     .sort()
     .limitFields()
     .paginate()

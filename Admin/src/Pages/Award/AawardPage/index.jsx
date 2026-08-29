@@ -12,6 +12,8 @@ import fetchData from "../../../Utils/fetchData";
 import AwardCard from "../AwardCard";
 import Notify from "../../../Utils/notify";
 import Confirm from "../../../Utils/Confirm";
+import Filter from "../../../Components/Filter";
+import Search from "../../../Components/Search";
 import Loading from "../../../Components/Loading";
 
 // ==========================================
@@ -29,26 +31,51 @@ export default function AwardPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState({});
 
   // Since it's a vertical list (flex-col), 10 is a good limit
   const LIMIT = 10;
 
+  const awardFilterConfig = [
+    {
+      field: "rank",
+      label: "مقام",
+      options: [
+        { label: "اول", value: 1 },
+        { label: "دوم", value: 2 },
+        { label: "سوم", value: 3 },
+      ]
+    }
+  ];
+
   // ----------------------------------------
   // Fetch Data Function
   // ----------------------------------------
-  const fetchAwards = async (pageNumber) => {
+  const fetchAwards = async (pageNumber, query, currentFilters = {}) => {
     if (pageNumber === 1) setLoading(true);
     else setLoadingMore(true);
 
-    const data = await fetchData(
-      `award?limit=${LIMIT}&page=${pageNumber}&sort=-_id`,
-    );
+    let url = `award?limit=${LIMIT}&page=${pageNumber}&sort=-_id`;
+    if (query) {
+      url += `&q=${query}`;
+    }
+
+    Object.keys(currentFilters).forEach(key => {
+      if (currentFilters[key]) {
+        url += `&${key}=${encodeURIComponent(currentFilters[key])}`;
+      }
+    });
+
+    const data = await fetchData(url);
 
     if (data && data.success !== false) {
       const fetchedAwards = Array.isArray(data) ? data : data.data || [];
 
       if (fetchedAwards.length < LIMIT) {
         setHasMore(false);
+      } else {
+        setHasMore(true);
       }
 
       if (pageNumber === 1) {
@@ -71,8 +98,8 @@ export default function AwardPage() {
   };
 
   useEffect(() => {
-    fetchAwards(page);
-  }, [page]);
+    fetchAwards(page, searchQuery, filters);
+  }, [page, searchQuery, filters]);
 
   // ----------------------------------------
   // Infinite Scroll Listener
@@ -97,6 +124,18 @@ export default function AwardPage() {
   // ----------------------------------------
   // Action Handlers
   // ----------------------------------------
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    setPage(1);
+    setHasMore(true);
+  };
+
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+    setPage(1);
+    setHasMore(true);
+  };
+
   const handleEditAward = (id) => {
     if (id) navigate(`update/${id}`);
   };
@@ -128,17 +167,26 @@ export default function AwardPage() {
   return (
     <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8 border-b pb-4">
-        <h1 className="text-2xl font-bold text-[#1b234d]">
-          مدیریت افتخارات و جوایز
-        </h1>
-        <button
-          className="flex items-center gap-2 bg-[#51b5a5] hover:bg-teal-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-          onClick={handleAddAward}
-        >
-          <AddIcon />
-          <span>افزودن جایزه</span>
-        </button>
+      <div className="flex flex-col mb-8 border-b pb-4 gap-4">
+        <div className="flex justify-between items-center w-full">
+          <h1 className="text-2xl font-bold text-secondary">
+            مدیریت افتخارات و جوایز
+          </h1>
+          <button
+            className="flex items-center gap-2 bg-primary hover:bg-teal-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+            onClick={handleAddAward}
+          >
+            <AddIcon />
+            <span>افزودن جایزه</span>
+          </button>
+        </div>
+
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+          <div className="w-full md:w-auto overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
+            <Filter filterConfig={awardFilterConfig} onFilterChange={handleFilterChange} />
+          </div>
+          <Search onSearch={handleSearch} placeholder="جستجوی افتخارات..." />
+        </div>
       </div>
 
       {/* Initial Full Page Loading */}

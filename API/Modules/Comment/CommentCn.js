@@ -22,6 +22,7 @@ export const create = catchAsync(async (req, res, next) => {
 export const getAll = catchAsync(async (req, res, next) => {
   const features = new ApiFeatures(Comment, req.query, req.role)
     .filter()
+    .search(['author', 'content'])
     .sort()
     .limitFields()
     .paginate()

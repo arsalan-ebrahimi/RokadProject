@@ -12,6 +12,7 @@ import fetchData from "../../../Utils/fetchData";
 import BlogCard from "../BlogCard";
 import Notify from "../../../Utils/notify";
 import Confirm from "../../../Utils/Confirm";
+import Search from "../../../Components/Search";
 import Loading from "../../../Components/Loading";
 
 // ==========================================
@@ -29,6 +30,7 @@ export default function BlogPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Grid has up to 4 columns, so 12 is optimal
   const LIMIT = 12;
@@ -36,12 +38,12 @@ export default function BlogPage() {
   // ----------------------------------------
   // Fetch Data Function
   // ----------------------------------------
-  const fetchBlogs = async (pageNumber) => {
+  const fetchBlogs = async (pageNumber, query) => {
     if (pageNumber === 1) setLoading(true);
     else setLoadingMore(true);
 
     const data = await fetchData(
-      `blog?limit=${LIMIT}&page=${pageNumber}&sort=-_id`,
+      `blog?limit=${LIMIT}&page=${pageNumber}&sort=-_id${query ? `&q=${query}` : ""}`
     );
 
     if (data && data.success !== false) {
@@ -49,6 +51,8 @@ export default function BlogPage() {
 
       if (fetchedBlogs.length < LIMIT) {
         setHasMore(false);
+      } else {
+        setHasMore(true);
       }
 
       if (pageNumber === 1) {
@@ -71,8 +75,8 @@ export default function BlogPage() {
   };
 
   useEffect(() => {
-    fetchBlogs(page);
-  }, [page]);
+    fetchBlogs(page, searchQuery);
+  }, [page, searchQuery]);
 
   // ----------------------------------------
   // Infinite Scroll Listener
@@ -97,6 +101,12 @@ export default function BlogPage() {
   // ----------------------------------------
   // Action Handlers
   // ----------------------------------------
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    setPage(1);
+    setHasMore(true);
+  };
+
   const handleEditBlog = (data) => {
     const blogId = typeof data === "object" ? data._id : data;
     if (blogId) navigate(`update/${blogId}`);
@@ -131,10 +141,13 @@ export default function BlogPage() {
   return (
     <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
       {/* Page Header */}
-      <div className="flex justify-between items-center mb-8 border-b pb-4">
-        <h1 className="text-2xl font-bold text-[#1b234d]">مدیریت بلاگ‌ها</h1>
+      <div className="flex flex-col md:flex-row justify-between items-center mb-8 border-b pb-4 gap-4">
+        <h1 className="text-2xl font-bold text-secondary">مدیریت بلاگ‌ها</h1>
+
+        <Search onSearch={handleSearch} placeholder="جستجوی بلاگ..." />
+
         <button
-          className="flex items-center gap-2 bg-[#51b5a5] hover:bg-teal-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+          className="flex items-center gap-2 bg-primary hover:bg-teal-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
           onClick={handleAddBlog}
         >
           <AddIcon />
