@@ -37,23 +37,23 @@ export default function StudentCard({ student, onEdit, onDelete }) {
       </div>
 
       {/* Card Body */}
-      <div className="p-4 flex flex-col flex-grow">
-        <div className="flex items-center gap-2 mb-2.5 min-h-[1.5rem]">
+      <div className="p-4 flex flex-col flex-grow min-h-0">
+        <div className="flex items-center gap-2 mb-2.5 min-h-[1.5rem] max-h-[1.5rem] shrink-0">
           <Badge variant="indigo" size="sm">
             نسل {student.generation}
           </Badge>
         </div>
 
-        <h2 className="text-base md:text-lg font-bold text-secondary line-clamp-1 mb-1">
+        <h2 className="text-base md:text-lg font-bold text-secondary line-clamp-1 leading-[1.4] min-h-[1.4em] mb-1 break-words">
           {student.fullName}
         </h2>
 
-        <p className="text-xs md:text-sm text-text-secondary font-medium mb-3 line-clamp-2 leading-snug min-h-[2.5em]">
+        <p className="text-xs md:text-sm text-text-secondary font-medium mb-3 line-clamp-2 leading-[1.4] min-h-[2.8em] break-words overflow-hidden">
           {student.job}
         </p>
 
         {/* Social Links */}
-        <div className="flex flex-wrap gap-1.5 mb-4 flex-grow min-h-[2rem] items-start">
+        <div className="flex flex-wrap gap-1.5 mb-4 min-h-[2rem] max-h-[3.75rem] overflow-y-auto hide-scrollbar items-start content-start">
           {student.socialLinks &&
             student.socialLinks.map((social, index) => (
               <a
@@ -70,7 +70,7 @@ export default function StudentCard({ student, onEdit, onDelete }) {
         </div>
 
         {/* Card Actions */}
-        <div className="flex justify-end items-center gap-1 mt-auto pt-3 border-t border-border-light">
+        <div className="flex justify-end items-center gap-1 mt-auto shrink-0 pt-3 border-t border-border-light">
           <Button
             variant="info-ghost"
             size="icon-sm"
