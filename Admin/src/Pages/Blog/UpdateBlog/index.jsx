@@ -8,7 +8,7 @@ import { getImageUrl } from "../../../Utils/getImageUrl";
 import Loading from "../../../Components/Loading";
 import { Button, Input, Textarea, PageHeader, Card, ImageUpload } from "../../../Components/UI";
 
-const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/;
+const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/;
 const blogUpdateSchema = Yup.object({
   title: Yup.string()
     .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")

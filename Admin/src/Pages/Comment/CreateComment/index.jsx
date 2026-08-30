@@ -7,7 +7,7 @@ import Notify from "../../../Utils/notify";
 import { DEFAULT_AVATARS } from "../../../Constants/defaultAvatars";
 import { Button, Input, Textarea, PageHeader, Card } from "../../../Components/UI";
 
-const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/;
+const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/;
 const commentValidationSchema = Yup.object({
   author: Yup.string()
     .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")

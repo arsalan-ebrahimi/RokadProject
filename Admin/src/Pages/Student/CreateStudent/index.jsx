@@ -7,7 +7,7 @@ import axiosInstance from "../../../Utils/axiosInstance";
 import Notify from "../../../Utils/notify";
 import { Button, Input, Select, PageHeader, Card, ImageUpload } from "../../../Components/UI";
 
-const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/;
+const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/;
 const studentValidationSchema = Yup.object({
   fullName: Yup.string()
     .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")

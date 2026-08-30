@@ -1,12 +1,12 @@
 import Joi from "joi";
 
 export const createStudentValidator = Joi.object({
-  fullName: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).required().messages({
+  fullName: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).required().messages({
     "string.base": "نام کامل باید یک متن باشد",
     "string.empty": "نام کامل نمی‌تواند خالی باشد",
     "any.required": "فیلد نام کامل الزامی است",
   }),
-  job: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).required().messages({
+  job: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).required().messages({
     "string.base": "شغل باید یک متن باشد",
     "string.empty": "شغل نمی‌تواند خالی باشد",
     "any.required": "فیلد شغل الزامی است",
@@ -15,12 +15,12 @@ export const createStudentValidator = Joi.object({
     "number.base": "نسل باید یک عدد باشد",
     "any.required": "فیلد نسل الزامی است",
   }),
-  schoolType: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).required().messages({
+  schoolType: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).required().messages({
     "string.base": "نوع مدرسه باید یک متن باشد",
     "string.empty": "نوع مدرسه نمی‌تواند خالی باشد",
     "any.required": "فیلد نوع مدرسه الزامی است",
   }),
-  major: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).required().messages({
+  major: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).required().messages({
     "string.base": "رشته تحصیلی باید یک متن باشد",
     "string.empty": "رشته تحصیلی نمی‌تواند خالی باشد",
     "any.required": "فیلد رشته تحصیلی الزامی است",
@@ -33,7 +33,7 @@ export const createStudentValidator = Joi.object({
   socialLinks: Joi.array().items(
     Joi.object({
       _id: Joi.any(), 
-      type: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).required().messages({
+      type: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).required().messages({
         "string.base": "نوع شبکه اجتماعی باید متن باشد",
         "string.empty": "نوع شبکه اجتماعی نمی‌تواند خالی باشد",
         "any.required": "فیلد نوع الزامی است",
@@ -50,22 +50,22 @@ export const createStudentValidator = Joi.object({
 });
 
 export const updateStudentValidator = Joi.object({
-  fullName: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).messages({
+  fullName: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).messages({
     "string.base": "نام کامل باید یک متن باشد",
     "string.empty": "نام کامل نمی‌تواند خالی باشد",
   }),
-  job: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).messages({
+  job: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).messages({
     "string.base": "شغل باید یک متن باشد",
     "string.empty": "شغل نمی‌تواند خالی باشد",
   }),
   generation: Joi.number().messages({
     "number.base": "نسل باید یک عدد باشد",
   }),
-  schoolType: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).messages({
+  schoolType: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).messages({
     "string.base": "نوع مدرسه باید یک متن باشد",
     "string.empty": "نوع مدرسه نمی‌تواند خالی باشد",
   }),
-  major: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).messages({
+  major: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).messages({
     "string.base": "رشته تحصیلی باید یک متن باشد",
     "string.empty": "رشته تحصیلی نمی‌تواند خالی باشد",
   }),
@@ -76,7 +76,7 @@ export const updateStudentValidator = Joi.object({
   socialLinks: Joi.array().items(
     Joi.object({
       _id: Joi.any(), 
-      type: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).required().messages({
+      type: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).required().messages({
         "string.base": "نوع شبکه اجتماعی باید متن باشد",
         "string.empty": "نوع شبکه اجتماعی نمی‌تواند خالی باشد",
         "any.required": "فیلد نوع الزامی است",

@@ -7,7 +7,7 @@ import Notify from "../../../Utils/notify";
 import Loading from "../../../Components/Loading";
 import { Button, Input, Select, Checkbox, Textarea, PageHeader, Card } from "../../../Components/UI";
 
-const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/;
+const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/;
 const awardUpdateSchema = Yup.object({
   title: Yup.string()
     .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
