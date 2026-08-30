@@ -1,55 +1,45 @@
-// ==========================================
-// Dependencies & Libraries
-// ==========================================
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useNavigate } from "react-router-dom";
-
-// ==========================================
-// Utilities & Components
-// ==========================================
-import fetchData from "../../../Utils/fetchData";
+import axiosInstance from "../../../Utils/axiosInstance";
 import Notify from "../../../Utils/notify";
-import Loading from "../../../Components/Loading";
+import { Button, Input, Checkbox, Textarea, PageHeader, Card, ImageUpload } from "../../../Components/UI";
 
-// ----------------------------------------
-// Validation Schema for Formik
-// ----------------------------------------
-const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_()،,.\u200C]+$/;
+const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/;
 const eventCreateSchema = Yup.object({
-  title: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("عنوان رویداد الزامی است"),
-  type: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("نوع رویداد الزامی است"),
-  date: Yup.string().matches(safeTextRegex, "مقدار غیرمجاز").required("تاریخ رویداد الزامی است"),
-  description: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("توضیحات رویداد الزامی است"),
-  branch: Yup.string().matches(safeTextRegex, "مقدار غیرمجاز")
-    .oneOf(["دخترانه", "پسرانه"], "شعبه باید انتخاب شود")
+  title: Yup.string()
+    .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
+    .required("عنوان رویداد الزامی است"),
+  type: Yup.string()
+    .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
+    .required("نوع رویداد الزامی است"),
+  date: Yup.string()
+    .matches(safeTextRegex, "مقدار غیرمجاز")
+    .required("تاریخ رویداد الزامی است"),
+  description: Yup.string()
+    .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
+    .min(10, "توضیحات باید حداقل ۱۰ کاراکتر باشد")
+    .required("توضیحات رویداد الزامی است"),
+  branch: Yup.array()
+    .of(Yup.string().oneOf(["دخترانه", "پسرانه"], "شعبه نامعتبر است"))
+    .min(1, "حداقل یک شعبه را انتخاب کنید")
     .required("مشخص کردن شعبه الزامی است"),
   img: Yup.mixed().required("انتخاب تصویر رویداد الزامی است"),
 });
 
-// ==========================================
-// Component: CreateEvent
-// Description: Form to create a new event
-// ==========================================
 export default function CreateEvent() {
   const navigate = useNavigate();
-  
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // ----------------------------------------
-  // Formik Setup
-  // ----------------------------------------
   const formik = useFormik({
     initialValues: {
       title: "",
       type: "",
       date: "",
       description: "",
-      branch: "",
+      branch: [],
       img: null,
     },
     validationSchema: eventCreateSchema,
@@ -59,10 +49,7 @@ export default function CreateEvent() {
         const formData = new FormData();
         formData.append("file", values.img);
 
-        const uploadData = await fetchData("upload", {
-          method: "POST",
-          body: formData,
-        });
+        const uploadData = await axiosInstance.post("upload", formData);
 
         if (!uploadData || !uploadData.success) {
           throw new Error(uploadData?.message || "آپلود تصویر با خطا مواجه شد");
@@ -74,17 +61,13 @@ export default function CreateEvent() {
           date: values.date,
           description: values.description,
           branch: values.branch,
-          img: uploadData.data, // نام فایل آپلود شده
+          img: uploadData.data,
         };
 
-        const response = await fetchData("event", {
-          method: "POST", 
-          body: JSON.stringify(payload),
-        });
+        const response = await axiosInstance.post("event", payload);
 
-        // 🟢 رفع مشکل ارور در صورت موفقیت: بررسی دقیق‌تر
         if (response && (response.success || response.success !== false)) {
-          Notify("success", "رویداد با موفقیت ایجاد شد!");
+          Notify("success", "رویداد با موفقیت ایجاد شد.");
           navigate("/event");
         } else {
           throw new Error(response?.message || "ثبت رویداد با خطا مواجه شد");
@@ -97,158 +80,111 @@ export default function CreateEvent() {
     },
   });
 
-  // ----------------------------------------
-  // Handlers & Protections
-  // ----------------------------------------
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.name.toLowerCase().startsWith("default-")) {
-        Notify("error", "نام فایل مجاز نیست. لطفاً نام فایل را تغییر دهید.");
-        e.target.value = ""; 
-        return;
-      }
-      // Image format validation (Security Layer)
-      const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/svg+xml", "image/webp"];
-      if (!allowedTypes.includes(file.type)) {
-        Notify("error", "فرمت فایل مجاز نیست. لطفاً یک تصویر با فرمت JPG، PNG، SVG یا WEBP انتخاب کنید.");
-        e.target.value = "";
-        return;
-      }
-      formik.setFieldValue("img", file);
-      setImagePreview(URL.createObjectURL(file)); 
-    }
+  const handleImageSelect = (file) => {
+    formik.setFieldValue("img", file);
+    setImagePreview(URL.createObjectURL(file));
   };
 
-  const inputClass = (error) =>
-    `w-full border rounded-lg px-4 py-2.5 outline-none transition-all ${
-      error ? "border-red-500" : "border-gray-300 focus:border-primary"
-    }`;
-
-  // ----------------------------------------
-  // Render Component
-  // ----------------------------------------
   return (
-    <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
-      
-      <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-secondary">افزودن رویداد جدید</h1>
-        <button
-          type="button"
-          onClick={() => navigate("/event")}
-          className="flex items-center gap-2 text-gray-500 hover:text-secondary transition-colors font-medium"
-        >
-          <span>بازگشت</span>
-          <ArrowForwardIcon fontSize="small" />
-        </button>
-      </div>
+    <div dir="rtl" className="p-6 md:p-8 w-full bg-background min-h-screen">
+      <PageHeader
+        title="افزودن رویداد جدید"
+        subtitle="ثبت مشخصات و جزئیات رویدادهای آموزشی، فرهنگی و ورزشی"
+        backTo="/event"
+      />
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 max-w-4xl mx-auto">
+      <Card className="p-6 md:p-8 max-w-4xl mx-auto shadow-sm">
         <form onSubmit={formik.handleSubmit} className="flex flex-col gap-6">
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-gray-700">عنوان رویداد</label>
-              <input
-                type="text"
-                {...formik.getFieldProps("title")}
-                className={inputClass(formik.touched.title && formik.errors.title)}
-              />
-              {formik.touched.title && formik.errors.title && (
-                <div className="text-red-500 text-xs mt-1">{formik.errors.title}</div>
-              )}
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <Input
+              label="عنوان رویداد"
+              placeholder="مثال: کارگاه آموزش هوش مصنوعی"
+              error={formik.touched.title && formik.errors.title}
+              {...formik.getFieldProps("title")}
+            />
 
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-gray-700">نوع رویداد</label>
-              <input
-                type="text"
-                {...formik.getFieldProps("type")}
-                className={inputClass(formik.touched.type && formik.errors.type)}
-              />
-              {formik.touched.type && formik.errors.type && (
-                <div className="text-red-500 text-xs mt-1">{formik.errors.type}</div>
-              )}
-            </div>
+            <Input
+              label="نوع رویداد"
+              placeholder="مثال: کارگاه، همایش، مسابقه"
+              error={formik.touched.type && formik.errors.type}
+              {...formik.getFieldProps("type")}
+            />
 
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-gray-700">تاریخ رویداد</label>
-              <input
-                type="text"
-                {...formik.getFieldProps("date")}
-                className={inputClass(formik.touched.date && formik.errors.date)}
-              />
-              {formik.touched.date && formik.errors.date && (
-                <div className="text-red-500 text-xs mt-1">{formik.errors.date}</div>
-              )}
-            </div>
+            <Input
+              label="تاریخ رویداد"
+              placeholder="مثال: 1404/07/20"
+              error={formik.touched.date && formik.errors.date}
+              {...formik.getFieldProps("date")}
+            />
 
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-gray-700">شعبه</label>
-              <select
-                {...formik.getFieldProps("branch")}
-                className={`bg-white ${inputClass(formik.touched.branch && formik.errors.branch)}`}
-              >
-                <option value="">انتخاب کنید</option>
-                <option value="دخترانه">دخترانه</option>
-                <option value="پسرانه">پسرانه</option>
-              </select>
+            <div className="flex flex-col gap-1.5 w-full text-right">
+              <label className="text-xs md:text-sm font-semibold text-text-primary select-none">
+                شعبه
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                {["دخترانه", "پسرانه"].map((branchOption) => {
+                  const isSelected = formik.values.branch?.includes(branchOption);
+                  return (
+                    <Checkbox
+                      key={branchOption}
+                      variant="card"
+                      checked={isSelected}
+                      onChange={(e) => {
+                        const isChecked = e.target.checked;
+                        const current = Array.isArray(formik.values.branch)
+                          ? formik.values.branch
+                          : [];
+                        const updated = isChecked
+                          ? [...current, branchOption]
+                          : current.filter((b) => b !== branchOption);
+                        formik.setFieldValue("branch", updated);
+                        formik.setFieldTouched("branch", true, false);
+                      }}
+                      label={`شعبه ${branchOption}`}
+                    />
+                  );
+                })}
+              </div>
               {formik.touched.branch && formik.errors.branch && (
-                <div className="text-red-500 text-xs mt-1">{formik.errors.branch}</div>
+                <span className="text-xs text-error font-medium animate-fadeIn">
+                  {typeof formik.errors.branch === "string"
+                    ? formik.errors.branch
+                    : formik.errors.branch[0] || "حداقل یک شعبه را انتخاب کنید"}
+                </span>
               )}
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-700">توضیحات</label>
-            <textarea
-              rows="5"
-              {...formik.getFieldProps("description")}
-              className={`resize-y ${inputClass(formik.touched.description && formik.errors.description)}`}
-            ></textarea>
-            {formik.touched.description && formik.errors.description && (
-              <div className="text-red-500 text-xs mt-1">{formik.errors.description}</div>
-            )}
+          <Textarea
+            label="توضیحات"
+            rows={5}
+            placeholder="توضیحات کامل رویداد..."
+            error={formik.touched.description && formik.errors.description}
+            {...formik.getFieldProps("description")}
+          />
+
+          <div className="border-t border-border/80 pt-5">
+            <ImageUpload
+              label="آپلود تصویر رویداد"
+              imagePreview={imagePreview}
+              onChange={handleImageSelect}
+              error={formik.touched.img && formik.errors.img}
+              placeholder="برای آپلود تصویر رویداد کلیک کنید"
+            />
           </div>
 
-          {/* Image Upload Area */}
-          <div className="flex flex-col gap-2 border-t pt-4">
-            <label className="text-sm font-semibold text-gray-700">آپلود تصویر رویداد</label>
-            <div className="w-full h-48 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-3 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer relative overflow-hidden">
-              <input
-                id="img"
-                type="file"
-                accept="image/jpeg, image/png, image/svg+xml, image/webp"
-                onChange={handleImageChange}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-              />
-              {imagePreview ? (
-                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-              ) : (
-                <>
-                  <CloudUploadIcon className="text-gray-400" fontSize="large" />
-                  <p className="text-sm font-medium text-gray-600">برای آپلود تصویر کلیک کنید</p>
-                </>
-              )}
-            </div>
-            {formik.touched.img && formik.errors.img && (
-              <div className="text-red-500 text-xs mt-1">{formik.errors.img}</div>
-            )}
-          </div>
-
-          <div className="flex justify-end mt-4">
-            <button
+          <div className="flex justify-end pt-4 border-t border-border/80">
+            <Button
               type="submit"
-              disabled={isSubmitting}
-              className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 min-w-btn-wide flex justify-center items-center ${
-                isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-teal-600"
-              }`}
+              variant="primary"
+              size="lg"
+              isLoading={isSubmitting}
             >
-              {isSubmitting ? <Loading color="var(--color-white)" size={8} /> : "ایجاد رویداد"}
-            </button>
+              ایجاد رویداد
+            </Button>
           </div>
         </form>
-      </div>
+      </Card>
     </div>
   );
 }

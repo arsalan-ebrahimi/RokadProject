@@ -1,91 +1,96 @@
-// ==========================================
-// Dependencies & Icons
-// ==========================================
 import React from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import { getImageUrl } from "../../../Utils/getImageUrl";
+import { Card, Badge, Button } from "../../../Components/UI";
 
-// ==========================================
-// Utilities
-// ==========================================
-import { getImageUrl } from "../../../Utils/getImageUrl"; 
-
-// ==========================================
-// Component: EventCard
-// Description: Renders individual event details with image
-// ==========================================
 export default function EventCard({ event, onEdit, onDelete }) {
-  
-  const getBranchBadgeStyle = (branch) => {
-    return branch === "دخترانه" 
-      ? "bg-pink-50 text-pink-600 border-pink-200"
-      : "bg-blue-50 text-blue-600 border-blue-200";
-  };
-
-  // Generate valid URL for the image
   const imageUrl = getImageUrl(event.img);
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
-      
-      {/* Event Image Thumbnail */}
-      <div className="h-48 w-full bg-gray-200 relative">
+    <Card hoverable className="overflow-hidden flex flex-col group h-full">
+      {/* Event Thumbnail */}
+      <div className="h-48 w-full bg-bg-light relative overflow-hidden border-b border-border/60">
         {event.img ? (
-          <img src={imageUrl} alt={event.title} className="w-full h-full object-cover" />
+          <img
+            src={imageUrl}
+            alt={event.title}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-400">بدون تصویر</div>
+          <div className="w-full h-full flex items-center justify-center text-text-muted text-xs font-medium">
+            بدون تصویر
+          </div>
         )}
       </div>
 
       {/* Content Section */}
       <div className="p-4 flex flex-col flex-grow">
-        
         {/* Badges */}
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-xs px-2 py-0.5 rounded-full border bg-gray-50 text-gray-600 border-gray-200">
+        <div className="flex flex-wrap items-center gap-1.5 mb-2.5 min-h-[1.75rem]">
+          <Badge variant="neutral" size="sm">
             {event.type}
-          </span>
-          <span className={`text-xs px-2 py-0.5 rounded-full border ${getBranchBadgeStyle(event.branch)}`}>
-            شعبه {event.branch}
-          </span>
+          </Badge>
+          {Array.isArray(event.branch) ? (
+            event.branch.map((b, idx) => (
+              <Badge
+                key={idx}
+                variant={b === "دخترانه" ? "pink" : "info"}
+                size="sm"
+              >
+                شعبه {b}
+              </Badge>
+            ))
+          ) : (
+            event.branch && (
+              <Badge
+                variant={event.branch === "دخترانه" ? "pink" : "info"}
+                size="sm"
+              >
+                شعبه {event.branch}
+              </Badge>
+            )
+          )}
         </div>
 
         {/* Title */}
-        <h2 className="text-lg font-bold text-secondary line-clamp-1 mb-2">
+        <h2 className="text-base md:text-lg font-bold text-secondary line-clamp-2 leading-[1.4] min-h-[2.8em] mb-1">
           {event.title}
         </h2>
 
         {/* Date */}
-        <div className="flex items-center gap-1 text-sm text-gray-500 mb-3">
-          <CalendarTodayIcon fontSize="small" className="text-gray-400" />
+        <div className="flex items-center gap-1.5 text-xs text-text-muted mb-2.5">
+          <CalendarTodayIcon fontSize="inherit" />
           <span>{event.date}</span>
         </div>
 
         {/* Description */}
-        <p className="text-sm text-gray-600 line-clamp-3 mb-4 flex-grow">
+        <p className="text-xs md:text-sm text-text-secondary line-clamp-3 mb-4 flex-grow leading-relaxed">
           {event.description}
         </p>
 
         {/* Action Toolbar */}
-        <div className="flex justify-end gap-2 mt-auto pt-3 border-t border-gray-100">
-          <button
+        <div className="flex justify-end items-center gap-1 mt-auto pt-3 border-t border-border-light">
+          <Button
+            variant="info-ghost"
+            size="icon-sm"
             onClick={() => onEdit(event._id)}
-            className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
             title="ویرایش"
           >
             <EditIcon fontSize="small" />
-          </button>
-          <button
+          </Button>
+
+          <Button
+            variant="danger-ghost"
+            size="icon-sm"
             onClick={() => onDelete(event._id)}
-            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
             title="حذف"
           >
             <DeleteOutlineIcon fontSize="small" />
-          </button>
+          </Button>
         </div>
-
       </div>
-    </div>
+    </Card>
   );
 }
