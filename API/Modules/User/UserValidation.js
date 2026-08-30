@@ -1,16 +1,16 @@
 import Joi from "joi";
 
 export const updateUserValidator = Joi.object({
-  fullName: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_()،,.\u200C]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).allow("").messages({
+  fullName: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).allow("").messages({
     "string.base": "نام و نام خانوادگی باید یک متن باشد",
   }),
   password: Joi.string().min(6).messages({
     "string.min": "رمز عبور باید حداقل ۶ کاراکتر باشد",
   }),
-  birthDate: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_()،,.\u200C]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).allow("").messages({
+  birthDate: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).allow("").messages({
     "string.base": "تاریخ تولد باید یک متن باشد",
   }),
-  role: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_()،,.\u200C]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).valid("user", "admin", "superAdmin").messages({
+  role: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).valid("user", "admin", "superAdmin").messages({
     "any.only": "نقش کاربر نامعتبر است",
   })
 });

@@ -1,12 +1,12 @@
 import Joi from "joi";
 
 export const createBlogValidator = Joi.object({
-  title: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_()،,.\u200C]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).required().messages({
+  title: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).required().messages({
     "string.base": "عنوان باید یک متن باشد",
     "string.empty": "عنوان نمی‌تواند خالی باشد",
     "any.required": "فیلد عنوان الزامی است",
   }),
-  description: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_()،,.\u200C]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).required().messages({
+  description: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/).min(10).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد", "string.min": "توضیحات باید حداقل ۱۰ کاراکتر باشد" }).required().messages({
     "string.base": "توضیحات باید یک متن باشد",
     "string.empty": "توضیحات نمی‌تواند خالی باشد",
     "any.required": "فیلد توضیحات الزامی است",
@@ -16,7 +16,7 @@ export const createBlogValidator = Joi.object({
     "string.empty": "تصویر نمی‌تواند خالی باشد",
     "any.required": "فیلد تصویر الزامی است",
   }),
-  date: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_()،,.\u200C]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).required().messages({
+  date: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).required().messages({
     "string.base": "تاریخ باید یک متن باشد",
     "string.empty": "تاریخ نمی‌تواند خالی باشد",
     "any.required": "فیلد تاریخ الزامی است",
@@ -24,11 +24,11 @@ export const createBlogValidator = Joi.object({
 });
 
 export const updateBlogValidator = Joi.object({
-  title: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_()،,.\u200C]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).messages({
+  title: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).messages({
     "string.base": "عنوان باید یک متن باشد",
     "string.empty": "عنوان نمی‌تواند خالی باشد",
   }),
-  description: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_()،,.\u200C]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).messages({
+  description: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/).min(10).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد", "string.min": "توضیحات باید حداقل ۱۰ کاراکتر باشد" }).messages({
     "string.base": "توضیحات باید یک متن باشد",
     "string.empty": "توضیحات نمی‌تواند خالی باشد",
   }),
@@ -36,7 +36,7 @@ export const updateBlogValidator = Joi.object({
     "string.base": "تصویر باید یک آدرس متنی باشد",
     "string.empty": "تصویر نمی‌تواند خالی باشد",
   }),
-  date: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_()،,.\u200C]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).messages({
+  date: Joi.string().pattern(/^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/).messages({ "string.pattern.base": "این فیلد نباید شامل کاراکترهای خاص و غیرمجاز باشد" }).messages({
     "string.base": "تاریخ باید یک متن باشد",
     "string.empty": "تاریخ نمی‌تواند خالی باشد",
   }),
