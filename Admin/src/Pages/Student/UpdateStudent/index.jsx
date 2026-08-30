@@ -1,44 +1,42 @@
-// ==========================================
-// Dependencies & Libraries
-// ==========================================
 import React, { useState, useEffect } from "react";
 import { useFormik, FieldArray, FormikProvider } from "formik";
 import * as Yup from "yup";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { useNavigate, useParams } from "react-router-dom";
-
-// ==========================================
-// Utilities
-// ==========================================
-import fetchData from "../../../Utils/fetchData";
+import axiosInstance from "../../../Utils/axiosInstance";
 import Notify from "../../../Utils/notify";
 import { getImageUrl } from "../../../Utils/getImageUrl";
 import Loading from "../../../Components/Loading";
+import { Button, Input, Select, PageHeader, Card, ImageUpload } from "../../../Components/UI";
 
-// ----------------------------------------
-// Validation Schema
-// ----------------------------------------
-const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_()،,.\u200C]+$/;
+const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/;
 const studentUpdateSchema = Yup.object({
-  fullName: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("وارد کردن نام کامل الزامی است"),
-  job: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("وارد کردن شغل الزامی است"),
-  generation: Yup.number().typeError("نسل باید عدد باشد").required("تعیین نسل الزامی است"),
-  schoolType: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("نوع مدرسه الزامی است"),
-  major: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("رشته تحصیلی الزامی است"),
+  fullName: Yup.string()
+    .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
+    .required("وارد کردن نام کامل الزامی است"),
+  job: Yup.string()
+    .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
+    .required("وارد کردن شغل الزامی است"),
+  generation: Yup.number()
+    .typeError("نسل باید عدد باشد")
+    .required("تعیین نسل الزامی است"),
+  schoolType: Yup.string()
+    .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
+    .required("نوع مدرسه الزامی است"),
+  major: Yup.string()
+    .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
+    .required("رشته تحصیلی الزامی است"),
   socialLinks: Yup.array().of(
     Yup.object({
-      type: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("نوع شبکه الزامی است"),
+      type: Yup.string()
+        .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
+        .required("نوع شبکه الزامی است"),
       link: Yup.string().required("لینک الزامی است"),
     })
   ),
 });
 
-// ==========================================
-// Component: UpdateStudent
-// ==========================================
 export default function UpdateStudent() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -57,14 +55,11 @@ export default function UpdateStudent() {
     socialLinks: [],
   });
 
-  // ----------------------------------------
-  // Fetch Existing Data on Mount
-  // ----------------------------------------
   useEffect(() => {
     const getStudentData = async () => {
       setLoading(true);
       try {
-        const response = await fetchData(`student/${id}`);
+        const response = await axiosInstance.get(`student/${id}`);
 
         let rawData = response?.data?.data || response?.data || response;
         let data = Array.isArray(rawData) ? rawData[0] : rawData;
@@ -84,11 +79,11 @@ export default function UpdateStudent() {
             setImagePreview(getImageUrl(data.img));
           }
         } else {
-          Notify("error", "اطلاعات دانش‌آموز یافت نشد یا فرمت دیتا اشتباه است.");
+          Notify("error", "اطلاعات دانش‌آموز یافت نشد.");
         }
       } catch (error) {
         console.error("Fetch Student Error:", error);
-        Notify("error", "خطا در ارتباط با سرور");
+        Notify("error", error.message || "خطا در ارتباط با سرور");
       }
 
       setLoading(false);
@@ -97,9 +92,6 @@ export default function UpdateStudent() {
     if (id) getStudentData();
   }, [id]);
 
-  // ----------------------------------------
-  // Formik Setup
-  // ----------------------------------------
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialValues,
@@ -113,10 +105,7 @@ export default function UpdateStudent() {
           const formData = new FormData();
           formData.append("file", values.img);
 
-          const uploadData = await fetchData("upload", {
-            method: "POST",
-            body: formData,
-          });
+          const uploadData = await axiosInstance.post("upload", formData);
 
           if (!uploadData || !uploadData.success) {
             throw new Error(uploadData?.message || "آپلود تصویر با خطا مواجه شد");
@@ -134,13 +123,10 @@ export default function UpdateStudent() {
           socialLinks: values.socialLinks,
         };
 
-        const response = await fetchData(`student/${id}`, {
-          method: "PATCH", 
-          body: JSON.stringify(payload),
-        });
+        const response = await axiosInstance.patch(`student/${id}`, payload);
 
         if (response && (response.success || response.status === "success")) {
-          Notify("success", "دانش‌آموز با موفقیت ویرایش شد!");
+          Notify("success", "اطلاعات دانش‌آموز با موفقیت ویرایش شد.");
           navigate("/student");
         } else {
           throw new Error(response?.message || "ویرایش با خطا مواجه شد");
@@ -153,132 +139,85 @@ export default function UpdateStudent() {
     },
   });
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/svg+xml", "image/webp"];
-      if (!allowedTypes.includes(file.type)) {
-        Notify("error", "فرمت فایل غیرمجاز است. فقط JPG, JPEG, PNG, SVG, WEBP مجاز است.");
-        e.target.value = "";
-        return;
-      }
-      if (file.name.toLowerCase().startsWith("default-")) {
-        Notify("error", "نام فایل مجاز نیست. لطفاً نام فایل را تغییر دهید.");
-        e.target.value = ""; 
-        return;
-      }
-      formik.setFieldValue("img", file);
-      setImagePreview(URL.createObjectURL(file)); 
-    }
+  const handleImageSelect = (file) => {
+    formik.setFieldValue("img", file);
+    setImagePreview(URL.createObjectURL(file));
   };
-
-  const inputClass = (error) =>
-    `w-full border bg-white rounded-lg px-4 py-2.5 outline-none transition-all ${
-      error ? "border-red-500" : "border-gray-300 focus:border-primary"
-    }`;
 
   if (loading) {
     return (
-      <div dir="rtl" className="flex justify-center items-center min-h-screen bg-gray-50">
+      <div dir="rtl" className="flex justify-center items-center min-h-[70vh]">
         <Loading size={12} />
       </div>
     );
   }
 
-  // ----------------------------------------
-  // Render Component
-  // ----------------------------------------
   return (
-    <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
-      <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-secondary">ویرایش اطلاعات دانش‌آموز</h1>
-        <button
-          type="button"
-          onClick={() => navigate("/student")}
-          className="flex items-center gap-2 text-gray-500 hover:text-secondary transition-colors font-medium"
-        >
-          <span>بازگشت</span>
-          <ArrowForwardIcon fontSize="small" />
-        </button>
-      </div>
+    <div dir="rtl" className="p-6 md:p-8 w-full bg-background min-h-screen">
+      <PageHeader
+        title="ویرایش اطلاعات دانش‌آموز"
+        subtitle="ویرایش جزئیات، رزومه و تصویر دانش‌آموز"
+        backTo="/student"
+      />
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 max-w-4xl mx-auto">
+      <Card className="p-6 md:p-8 max-w-4xl mx-auto shadow-sm">
         <FormikProvider value={formik}>
-          <form onSubmit={formik.handleSubmit} className="flex flex-col gap-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold text-gray-700">نام کامل</label>
-                <input
-                  type="text"
-                  {...formik.getFieldProps("fullName")}
-                  className={inputClass(formik.touched.fullName && formik.errors.fullName)}
-                />
-                {formik.touched.fullName && formik.errors.fullName && (
-                  <div className="text-red-500 text-xs mt-1">{formik.errors.fullName}</div>
-                )}
-              </div>
+          <form onSubmit={formik.handleSubmit} className="flex flex-col gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <Input
+                label="نام کامل"
+                error={formik.touched.fullName && formik.errors.fullName}
+                {...formik.getFieldProps("fullName")}
+              />
 
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold text-gray-700">شغل فعلی</label>
-                <input
-                  type="text"
-                  {...formik.getFieldProps("job")}
-                  className={inputClass(formik.touched.job && formik.errors.job)}
-                />
-                {formik.touched.job && formik.errors.job && (
-                  <div className="text-red-500 text-xs mt-1">{formik.errors.job}</div>
-                )}
-              </div>
+              <Input
+                label="شغل فعلی"
+                error={formik.touched.job && formik.errors.job}
+                {...formik.getFieldProps("job")}
+              />
 
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold text-gray-700">نسل</label>
-                <input
-                  type="number"
-                  {...formik.getFieldProps("generation")}
-                  className={inputClass(formik.touched.generation && formik.errors.generation)}
-                />
-                {formik.touched.generation && formik.errors.generation && (
-                  <div className="text-red-500 text-xs mt-1">{formik.errors.generation}</div>
-                )}
-              </div>
+              <Input
+                type="number"
+                label="نسل"
+                error={formik.touched.generation && formik.errors.generation}
+                {...formik.getFieldProps("generation")}
+              />
 
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold text-gray-700">نوع مدرسه</label>
-                <select
-                  {...formik.getFieldProps("schoolType")}
-                  className={inputClass(formik.touched.schoolType && formik.errors.schoolType)}
-                >
-                  <option value="">انتخاب کنید</option>
-                  <option value="هنرستان پسرانه رکاد">هنرستان پسرانه رکاد</option>
-                  <option value="هنرستان دخترانه رکاد">هنرستان دخترانه رکاد</option>
-                </select>
-                {formik.touched.schoolType && formik.errors.schoolType && (
-                  <div className="text-red-500 text-xs mt-1">{formik.errors.schoolType}</div>
-                )}
-              </div>
+              <Select
+                label="نوع مدرسه"
+                error={formik.touched.schoolType && formik.errors.schoolType}
+                options={["هنرستان پسرانه رکاد", "هنرستان دخترانه رکاد"]}
+                {...formik.getFieldProps("schoolType")}
+              />
 
-              <div className="col-span-1 md:col-span-2 flex flex-col gap-2">
-                <label className="text-sm font-semibold text-gray-700">رشته تحصیلی</label>
-                <select
+              <div className="col-span-1 md:col-span-2">
+                <Select
+                  label="رشته تحصیلی"
+                  error={formik.touched.major && formik.errors.major}
+                  options={[
+                    {
+                      label: "تولید و توسعه پایگاه‌های اینترنتی (برنامه نویسی و طراحی سایت)",
+                      value: "تولید و توسعه پایگاه‌های اینترنتی (برنامه نویسی و طراحی سایت)",
+                    },
+                    {
+                      label: "تولید محتوای چندرسانه‌ای (طراحی گرافیک و تولید محتوای ویدئویی و صوتی)",
+                      value: "تولید محتوای چندرسانه‌ای (طراحی گرافیک و تولید محتوای ویدئویی و صوتی)",
+                    },
+                  ]}
                   {...formik.getFieldProps("major")}
-                  className={inputClass(formik.touched.major && formik.errors.major)}
-                >
-                  <option value="">انتخاب کنید</option>
-                  <option value="تولید و توسعه پایگاه‌های اینترنتی (برنامه نویسی و طراحی سایت)">تولید و توسعه پایگاه‌های اینترنتی (برنامه نویسی و طراحی سایت)</option>
-                  <option value="تولید محتوای چندرسانه‌ای (طراحی گرافیک و تولید محتوای ویدئویی و صوتی)">تولید محتوای چندرسانه‌ای (طراحی گرافیک و تولید محتوای ویدئویی و صوتی)</option>
-                </select>
-                {formik.touched.major && formik.errors.major && (
-                  <div className="text-red-500 text-xs mt-1">{formik.errors.major}</div>
-                )}
+                />
               </div>
             </div>
 
-            <div className="flex flex-col gap-4 border-t pt-4">
-              <label className="text-sm font-semibold text-gray-700">شبکه‌های اجتماعی</label>
+            {/* Social Links Section */}
+            <div className="flex flex-col gap-3 border-t border-border/80 pt-5">
+              <label className="text-xs md:text-sm font-semibold text-text-primary select-none">
+                شبکه‌های اجتماعی و رزومه
+              </label>
+
               <FieldArray name="socialLinks">
                 {({ push, remove }) => (
-                  <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-3">
                     {formik.values.socialLinks.map((social, index) => {
                       const typeError = formik.errors.socialLinks?.[index]?.type;
                       const linkError = formik.errors.socialLinks?.[index]?.link;
@@ -286,86 +225,79 @@ export default function UpdateStudent() {
                       const touchedLink = formik.touched.socialLinks?.[index]?.link;
 
                       return (
-                        <div key={index} className="flex flex-col md:flex-row gap-4 items-start bg-gray-50 p-4 rounded-lg border border-gray-200">
-                          <div className="w-full md:w-1/3 flex flex-col gap-1">
-                            <input
+                        <div
+                          key={index}
+                          className="flex flex-col md:flex-row gap-3 items-center bg-bg-light/60 p-3.5 rounded-xl border border-border"
+                        >
+                          <div className="w-full md:w-1/3">
+                            <Input
                               placeholder="نوع (مثال: Github)"
+                              error={touchedType && typeError}
                               {...formik.getFieldProps(`socialLinks[${index}].type`)}
-                              className={inputClass(touchedType && typeError)}
                             />
-                            {touchedType && typeError && <span className="text-red-500 text-xs">{typeError}</span>}
                           </div>
-                          <div className="w-full flex flex-col gap-1">
-                            <input
+
+                          <div className="w-full">
+                            <Input
                               dir="ltr"
                               placeholder="https://..."
+                              error={touchedLink && linkError}
                               {...formik.getFieldProps(`socialLinks[${index}].link`)}
-                              className={inputClass(touchedLink && linkError)}
                             />
-                            {touchedLink && linkError && <span className="text-red-500 text-xs">{linkError}</span>}
                           </div>
-                          <button
-                            type="button"
+
+                          <Button
+                            variant="danger-ghost"
+                            size="icon-sm"
                             onClick={() => remove(index)}
-                            className="p-2.5 text-red-500 bg-red-100 hover:bg-red-200 rounded-lg transition-colors mt-1 md:mt-0"
                             title="حذف این لینک"
+                            className="shrink-0"
                           >
                             <DeleteOutlineIcon fontSize="small" />
-                          </button>
+                          </Button>
                         </div>
                       );
                     })}
-                    <button
-                      type="button"
+
+                    <Button
+                      variant="primary-subtle"
+                      size="sm"
                       onClick={() => push({ type: "", link: "" })}
-                      className="self-start flex items-center gap-2 text-primary bg-teal-50 px-4 py-2 rounded-lg font-medium hover:bg-teal-100 transition-colors"
+                      icon={<AddIcon fontSize="small" />}
+                      className="self-start mt-1"
                     >
-                      <AddIcon fontSize="small" />
                       افزودن لینک
-                    </button>
+                    </Button>
                   </div>
                 )}
               </FieldArray>
             </div>
 
-            <div className="flex flex-col gap-2 border-t pt-4">
-              <label className="text-sm font-semibold text-gray-700">تغییر تصویر دانش‌آموز</label>
-              <div className="w-full md:w-1/2 h-48 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-3 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer relative overflow-hidden">
-                <input
-                  id="img"
-                  type="file"
-                  accept="image/jpeg, image/png, image/svg+xml, image/webp"
-                  onChange={handleImageChange}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                />
-                {imagePreview ? (
-                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                ) : (
-                  <>
-                    <CloudUploadIcon className="text-gray-400" fontSize="large" />
-                    <p className="text-sm font-medium text-gray-600">برای تغییر تصویر کلیک کنید</p>
-                  </>
-                )}
-              </div>
-              {formik.touched.img && formik.errors.img && (
-                <div className="text-red-500 text-xs mt-1">{formik.errors.img}</div>
-              )}
+            {/* Image Upload */}
+            <div className="border-t border-border/80 pt-5">
+              <ImageUpload
+                label="تغییر تصویر دانش‌آموز"
+                imagePreview={imagePreview}
+                onChange={handleImageSelect}
+                error={formik.touched.img && formik.errors.img}
+                placeholder="برای تغییر تصویر کلیک کنید"
+              />
             </div>
 
-            <div className="flex justify-end mt-4">
-              <button
+            {/* Submit Button */}
+            <div className="flex justify-end pt-4 border-t border-border/80">
+              <Button
                 type="submit"
-                disabled={isSubmitting}
-                className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 min-w-btn-wide flex justify-center items-center ${
-                  isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-teal-600"
-                }`}
+                variant="primary"
+                size="lg"
+                isLoading={isSubmitting}
               >
-                {isSubmitting ? <Loading color="var(--color-white)" size={8} /> : "ذخیره تغییرات"}
-              </button>
+                ذخیره تغییرات
+              </Button>
             </div>
           </form>
         </FormikProvider>
-      </div>
+      </Card>
     </div>
   );
 }
