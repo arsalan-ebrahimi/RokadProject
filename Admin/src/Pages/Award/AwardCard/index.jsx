@@ -1,45 +1,39 @@
-// ==========================================
-// Dependencies & Icons
-// ==========================================
 import React from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import { Card, Button } from "../../../Components/UI";
 
-// ==========================================
-// Component: AwardCard
-// Description: Renders individual award details and action buttons
-// ==========================================
 export default function AwardCard({ award, onEdit, onDelete }) {
-  
   const getRankDetails = (rank) => {
     switch (Number(rank)) {
       case 1:
         return {
-          bg: "bg-yellow-100",
-          text: "text-yellow-600",
-          border: "border-yellow-300",
-          label: "1",
+          bg: "bg-amber-50 text-amber-600 border-amber-300",
+          iconColor: "text-amber-500",
+          label: "مقام اول",
+          badge: "۱",
         };
       case 2:
         return {
-          bg: "bg-slate-200",
-          text: "text-slate-600",
-          border: "border-slate-300",
-          label: "2",
+          bg: "bg-slate-100 text-slate-600 border-slate-300",
+          iconColor: "text-slate-500",
+          label: "مقام دوم",
+          badge: "۲",
         };
       case 3:
         return {
-          bg: "bg-orange-100",
-          text: "text-orange-700",
-          border: "border-orange-300",
-          label: "3",
+          bg: "bg-orange-50 text-orange-600 border-orange-300",
+          iconColor: "text-orange-500",
+          label: "مقام سوم",
+          badge: "۳",
         };
       default:
         return {
-          bg: "bg-blue-50",
-          text: "text-blue-500",
-          border: "border-blue-200",
-          label: rank || "-",
+          bg: "bg-info-light text-info border-info-border",
+          iconColor: "text-info",
+          label: `مقام ${rank || "-"}`,
+          badge: rank || "-",
         };
     }
   };
@@ -47,45 +41,55 @@ export default function AwardCard({ award, onEdit, onDelete }) {
   const rankDetails = getRankDetails(award.rank);
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center justify-between hover:shadow-md transition-shadow mb-4">
-      
-      {/* Award Information Display */}
+    <Card hoverable className="p-4 flex items-center justify-between gap-4">
+      {/* Award Information */}
       <div className="flex items-center gap-4 flex-grow">
-        
         {/* Dynamic Rank Circle */}
-        <div 
-          className={`w-12 h-12 flex items-center justify-center rounded-full text-xl font-black border-2 shrink-0 shadow-sm ${rankDetails.bg} ${rankDetails.text} ${rankDetails.border}`}
-          title={`مقام ${rankDetails.label}`}
+        <div
+          className={`w-12 h-12 flex items-center justify-center rounded-2xl text-lg font-black border shrink-0 shadow-xs ${rankDetails.bg}`}
+          title={rankDetails.label}
         >
-          {rankDetails.label}
+          {rankDetails.badge}
         </div>
 
-        {/* Title and Label */}
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-medium text-gray-500">عنوان جایزه:</span>
-          <h2 className="text-lg font-bold text-secondary line-clamp-1">
+        {/* Title and Description */}
+        <div className="flex flex-col gap-0.5 flex-grow">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-semibold text-text-muted">
+              {rankDetails.label}
+            </span>
+          </div>
+          <h2 className="text-base md:text-lg font-bold text-secondary line-clamp-1">
             {award.title}
           </h2>
+          {award.description && (
+            <p className="text-xs text-text-secondary line-clamp-1">
+              {award.description}
+            </p>
+          )}
         </div>
       </div>
 
-      {/* Action Buttons: Edit and Delete */}
-      <div className="flex items-center gap-2 shrink-0">
-        <button
+      {/* Action Buttons */}
+      <div className="flex items-center gap-1 shrink-0">
+        <Button
+          variant="info-ghost"
+          size="icon-sm"
           onClick={() => onEdit(award._id)}
-          className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
           title="ویرایش"
         >
           <EditIcon fontSize="small" />
-        </button>
-        <button
+        </Button>
+
+        <Button
+          variant="danger-ghost"
+          size="icon-sm"
           onClick={() => onDelete(award._id)}
-          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
           title="حذف"
         >
           <DeleteOutlineIcon fontSize="small" />
-        </button>
+        </Button>
       </div>
-    </div>
+    </Card>
   );
 }
