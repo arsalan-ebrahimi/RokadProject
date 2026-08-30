@@ -1,43 +1,29 @@
-// ==========================================
-// Dependencies & Icons
-// ==========================================
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-
-// ==========================================
-// Utilities
-// ==========================================
-import fetchData from "../../../Utils/fetchData";
+import axiosInstance from "../../../Utils/axiosInstance";
 import Notify from "../../../Utils/notify";
-import Loading from "../../../Components/Loading"; 
+import { Button, Input, Textarea, PageHeader, Card, ImageUpload } from "../../../Components/UI";
 
-// ----------------------------------------
-// Validation Schema for Formik
-// ----------------------------------------
-const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_()،,.\u200C]+$/;
+const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/;
 const blogValidationSchema = Yup.object({
-  title: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("وارد کردن عنوان بلاگ الزامی است"),
-  date: Yup.string().matches(safeTextRegex, "مقدار غیرمجاز").required("انتخاب تاریخ انتشار الزامی است"),
-  description: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
+  title: Yup.string()
+    .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
+    .required("وارد کردن عنوان بلاگ الزامی است"),
+  date: Yup.string()
+    .matches(safeTextRegex, "مقدار غیرمجاز")
+    .required("انتخاب تاریخ انتشار الزامی است"),
+  description: Yup.string()
+    .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
     .min(10, "توضیحات باید حداقل ۱۰ کاراکتر باشد")
     .required("وارد کردن توضیحات الزامی است"),
   img: Yup.mixed().required("انتخاب تصویر شاخص الزامی است"),
 });
 
-// ==========================================
-// Component: CreateBlog
-// Description: Form to create a new blog and upload its thumbnail
-// ==========================================
 export default function CreateBlog() {
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // ----------------------------------------
-  // Formik Setup
-  // ----------------------------------------
   const formik = useFormik({
     initialValues: {
       title: "",
@@ -52,10 +38,7 @@ export default function CreateBlog() {
         const formData = new FormData();
         formData.append("file", values.img);
 
-        const uploadData = await fetchData("upload", {
-          method: "POST",
-          body: formData,
-        });
+        const uploadData = await axiosInstance.post("upload", formData);
 
         if (!uploadData || !uploadData.success) {
           throw new Error(uploadData?.message || "آپلود عکس با خطا مواجه شد");
@@ -70,14 +53,11 @@ export default function CreateBlog() {
           img: uploadedFilename,
         };
 
-        const blogData = await fetchData("blog", {
-          method: "POST",
-          body: JSON.stringify(blogPayload),
-        });
+        const blogData = await axiosInstance.post("blog", blogPayload);
 
         if (blogData && blogData.success) {
-          Notify("success", "بلاگ با موفقیت ثبت شد!");
-          window.history.back(); 
+          Notify("success", "بلاگ با موفقیت ثبت شد.");
+          window.history.back();
         } else {
           throw new Error(blogData?.message || "ثبت بلاگ با خطا مواجه شد");
         }
@@ -89,133 +69,67 @@ export default function CreateBlog() {
     },
   });
 
-  // ----------------------------------------
-  // Handlers & Protections
-  // ----------------------------------------
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.name.toLowerCase().startsWith("default-")) {
-        Notify("error", "نام فایل مجاز نیست. لطفاً نام فایل را تغییر دهید.");
-        e.target.value = ""; 
-        return;
-      }
-      // Image format validation (Security Layer)
-      const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/svg+xml", "image/webp"];
-      if (!allowedTypes.includes(file.type)) {
-        Notify("error", "فرمت فایل مجاز نیست. لطفاً یک تصویر با فرمت JPG، PNG، SVG یا WEBP انتخاب کنید.");
-        e.target.value = "";
-        return;
-      }
-      formik.setFieldValue("img", file);
-      setImagePreview(URL.createObjectURL(file)); 
-    }
+  const handleImageSelect = (file) => {
+    formik.setFieldValue("img", file);
+    setImagePreview(URL.createObjectURL(file));
   };
 
-  const inputClass = (error) =>
-    `w-full border rounded-lg px-4 py-2.5 outline-none transition-all ${
-      error ? "border-red-500" : "border-gray-300 focus:border-primary"
-    }`;
-
-  // ----------------------------------------
-  // Render Component
-  // ----------------------------------------
   return (
-    <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
-      
-      <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-secondary">افزودن بلاگ جدید</h1>
-        <button
-          type="button"
-          onClick={() => window.history.back()}
-          className="flex items-center gap-2 text-gray-500 hover:text-secondary transition-colors font-medium"
-        >
-          <span>بازگشت</span>
-          <ArrowForwardIcon fontSize="small" />
-        </button>
-      </div>
+    <div dir="rtl" className="p-6 md:p-8 w-full bg-background min-h-screen">
+      <PageHeader
+        title="افزودن بلاگ جدید"
+        subtitle="نگارش مقاله و انتشار در بخش مقالات و وبلاگ"
+        backTo="/blog"
+      />
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 max-w-4xl mx-auto">
+      <Card className="p-6 md:p-8 max-w-4xl mx-auto shadow-sm">
         <form onSubmit={formik.handleSubmit} className="flex flex-col gap-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-gray-700">عنوان بلاگ</label>
-              <input
-                type="text"
-                placeholder="مثال: معرفی رشته شبکه و نرم افزار"
-                {...formik.getFieldProps("title")}
-                className={inputClass(formik.touched.title && formik.errors.title)}
-              />
-              {formik.touched.title && formik.errors.title && (
-                <div className="text-red-500 text-xs mt-1">{formik.errors.title}</div>
-              )}
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <Input
+              label="عنوان بلاگ"
+              placeholder="مثال: معرفی رشته شبکه و نرم‌افزار"
+              error={formik.touched.title && formik.errors.title}
+              {...formik.getFieldProps("title")}
+            />
 
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-gray-700">تاریخ انتشار</label>
-              <input
-                type="text"
-                placeholder="مثال: 1404/06/15"
-                {...formik.getFieldProps("date")}
-                className={inputClass(formik.touched.date && formik.errors.date)}
-              />
-              {formik.touched.date && formik.errors.date && (
-                <div className="text-red-500 text-xs mt-1">{formik.errors.date}</div>
-              )}
-            </div>
+            <Input
+              label="تاریخ انتشار"
+              placeholder="مثال: 1404/06/15"
+              error={formik.touched.date && formik.errors.date}
+              {...formik.getFieldProps("date")}
+            />
           </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-700">توضیحات و متن مقاله</label>
-            <textarea
-              rows="6"
-              placeholder="متن کامل بلاگ را اینجا بنویسید..."
-              {...formik.getFieldProps("description")}
-              className={`resize-y ${inputClass(formik.touched.description && formik.errors.description)}`}
-            ></textarea>
-            {formik.touched.description && formik.errors.description && (
-              <div className="text-red-500 text-xs mt-1">{formik.errors.description}</div>
-            )}
+          <Textarea
+            label="توضیحات و متن مقاله"
+            rows={5}
+            placeholder="متن کامل بلاگ را اینجا بنویسید..."
+            error={formik.touched.description && formik.errors.description}
+            {...formik.getFieldProps("description")}
+          />
+
+          <div className="border-t border-border/80 pt-5">
+            <ImageUpload
+              label="تصویر شاخص"
+              imagePreview={imagePreview}
+              onChange={handleImageSelect}
+              error={formik.touched.img && formik.errors.img}
+              placeholder="برای آپلود تصویر شاخص بلاگ کلیک کنید"
+            />
           </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-700">تصویر شاخص</label>
-            <div className="w-full h-48 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-3 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer relative overflow-hidden">
-              <input
-                id="img"
-                type="file"
-                accept="image/jpeg, image/png, image/svg+xml, image/webp"
-                onChange={handleImageChange}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-              />
-              {imagePreview ? (
-                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-              ) : (
-                <>
-                  <CloudUploadIcon className="text-gray-400" fontSize="large" />
-                  <p className="text-sm font-medium text-gray-600">برای آپلود تصویر کلیک کنید</p>
-                </>
-              )}
-            </div>
-            {formik.touched.img && formik.errors.img && (
-              <div className="text-red-500 text-xs mt-1">{formik.errors.img}</div>
-            )}
-          </div>
-
-          <div className="flex justify-end mt-4">
-            <button
+          <div className="flex justify-end pt-4 border-t border-border/80">
+            <Button
               type="submit"
-              disabled={isSubmitting}
-              className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 min-w-btn-wide flex justify-center items-center ${
-                isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-teal-600"
-              }`}
+              variant="primary"
+              size="lg"
+              isLoading={isSubmitting}
             >
-              {isSubmitting ? <Loading color="var(--color-white)" size={8} /> : "ثبت و انتشار بلاگ"}
-            </button>
+              ثبت و انتشار بلاگ
+            </Button>
           </div>
         </form>
-      </div>
+      </Card>
     </div>
   );
 }
