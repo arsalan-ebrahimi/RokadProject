@@ -1,42 +1,30 @@
-// ==========================================
-// Dependencies & Libraries
-// ==========================================
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-
-// ==========================================
-// Utilities & Constants
-// ==========================================
-import fetchData from "../../../Utils/fetchData";
+import axiosInstance from "../../../Utils/axiosInstance";
 import Notify from "../../../Utils/notify";
 import { DEFAULT_AVATARS } from "../../../Constants/defaultAvatars";
-import Loading from "../../../Components/Loading"; 
+import { Button, Input, Textarea, PageHeader, Card } from "../../../Components/UI";
 
-// ----------------------------------------
-// Validation Schema
-// ----------------------------------------
-const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_()،,.\u200C]+$/;
+const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?]+$/;
 const commentValidationSchema = Yup.object({
-  author: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("نام نویسنده الزامی است"),
-  content: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("متن نظر الزامی است"),
-  role: Yup.string().matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست").required("نقش نویسنده الزامی است"),
-  img: Yup.mixed().required("انتخاب تصویر الزامی است"),
+  author: Yup.string()
+    .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
+    .required("نام نویسنده الزامی است"),
+  content: Yup.string()
+    .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
+    .required("متن نظر الزامی است"),
+  role: Yup.string()
+    .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
+    .required("نقش نویسنده الزامی است"),
+  img: Yup.mixed().required("انتخاب تصویر یا آواتار الزامی است"),
 });
 
-// ==========================================
-// Component: CreateComment
-// Description: Form to create a new comment with custom or default avatars
-// ==========================================
 export default function CreateComment() {
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // ----------------------------------------
-  // Formik Setup
-  // ----------------------------------------
   const formik = useFormik({
     initialValues: {
       author: "",
@@ -50,15 +38,11 @@ export default function CreateComment() {
       try {
         let finalImageName = values.img;
 
-        // Upload if custom file selected
         if (values.img instanceof File) {
           const formData = new FormData();
           formData.append("file", values.img);
 
-          const uploadData = await fetchData("upload", {
-            method: "POST",
-            body: formData,
-          });
+          const uploadData = await axiosInstance.post("upload", formData);
 
           if (!uploadData || !uploadData.success) {
             throw new Error(uploadData?.message || "آپلود عکس با خطا مواجه شد");
@@ -73,13 +57,10 @@ export default function CreateComment() {
           img: finalImageName,
         };
 
-        const response = await fetchData("comment", {
-          method: "POST",
-          body: JSON.stringify(payload),
-        });
+        const response = await axiosInstance.post("comment", payload);
 
         if (response && response.success !== false) {
-          Notify("success", "نظر با موفقیت ثبت شد!");
+          Notify("success", "نظر با موفقیت ثبت شد.");
           window.history.back();
         } else {
           throw new Error(response?.message || "ثبت نظر با خطا مواجه شد");
@@ -92,26 +73,28 @@ export default function CreateComment() {
     },
   });
 
-  // ----------------------------------------
-  // Handlers & Protections
-  // ----------------------------------------
   const handleCustomImageChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (file) {
-      const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/svg+xml", "image/webp"];
+      const allowedTypes = [
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/svg+xml",
+        "image/webp",
+      ];
       if (!allowedTypes.includes(file.type)) {
         Notify("error", "فرمت فایل غیرمجاز است. فقط JPG, JPEG, PNG, SVG, WEBP مجاز است.");
         e.target.value = "";
         return;
       }
-      // Protection against backend conflict
       if (file.name.toLowerCase().startsWith("default-")) {
         Notify("error", "نام فایل مجاز نیست. لطفاً نام فایل را تغییر دهید.");
-        e.target.value = ""; 
+        e.target.value = "";
         return;
       }
       formik.setFieldValue("img", file);
-      setImagePreview(URL.createObjectURL(file)); 
+      setImagePreview(URL.createObjectURL(file));
     }
   };
 
@@ -120,129 +103,119 @@ export default function CreateComment() {
     setImagePreview(`/default-avatars/${filename}`);
   };
 
-  const inputClass = (error) =>
-    `w-full border rounded-lg px-4 py-2.5 outline-none transition-all ${
-      error ? "border-red-500" : "border-gray-300 focus:border-primary"
-    }`;
-
-  // ----------------------------------------
-  // Render Component
-  // ----------------------------------------
   return (
-    <div dir="rtl" className="p-8 w-full bg-gray-50 min-h-screen">
-      <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-secondary">افزودن نظر جدید</h1>
-        <button
-          type="button"
-          onClick={() => window.history.back()}
-          className="flex items-center gap-2 text-gray-500 hover:text-secondary transition-colors font-medium"
-        >
-          <span>بازگشت</span>
-          <ArrowForwardIcon fontSize="small" />
-        </button>
-      </div>
+    <div dir="rtl" className="p-6 md:p-8 w-full bg-background min-h-screen">
+      <PageHeader
+        title="افزودن نظر جدید"
+        subtitle="ثبت نظر دانش‌آموزان، والدین و همکاران گرامی"
+        backTo="/comment"
+      />
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 max-w-4xl mx-auto">
+      <Card className="p-6 md:p-8 max-w-4xl mx-auto shadow-sm">
         <form onSubmit={formik.handleSubmit} className="flex flex-col gap-6">
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-gray-700">نام نویسنده</label>
-              <input
-                type="text"
-                placeholder="مثال: محمد محمدی"
-                {...formik.getFieldProps("author")}
-                className={inputClass(formik.touched.author && formik.errors.author)}
-              />
-              {formik.touched.author && formik.errors.author && (
-                <div className="text-red-500 text-xs mt-1">{formik.errors.author}</div>
-              )}
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <Input
+              label="نام نویسنده"
+              placeholder="مثال: محمد محمدی"
+              error={formik.touched.author && formik.errors.author}
+              {...formik.getFieldProps("author")}
+            />
 
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-gray-700">نقش</label>
-              <input
-                type="text"
-                placeholder="مثال: پدر دانش آموز"
-                {...formik.getFieldProps("role")}
-                className={inputClass(formik.touched.role && formik.errors.role)}
-              />
-              {formik.touched.role && formik.errors.role && (
-                <div className="text-red-500 text-xs mt-1">{formik.errors.role}</div>
-              )}
-            </div>
+            <Input
+              label="نقش"
+              placeholder="مثال: اولیای دانش‌آموز، معلم، مدیر"
+              error={formik.touched.role && formik.errors.role}
+              {...formik.getFieldProps("role")}
+            />
           </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-700">متن نظر</label>
-            <textarea
-              rows="4"
-              placeholder="متن نظر را اینجا بنویسید..."
-              {...formik.getFieldProps("content")}
-              className={`w-full border rounded-lg px-4 py-3 outline-none transition-all resize-y ${
-                formik.touched.content && formik.errors.content ? "border-red-500" : "border-gray-300 focus:border-primary"
-              }`}
-            ></textarea>
-            {formik.touched.content && formik.errors.content && (
-              <div className="text-red-500 text-xs mt-1">{formik.errors.content}</div>
-            )}
-          </div>
+          <Textarea
+            label="متن نظر"
+            rows={4}
+            placeholder="متن کامل نظر یا بازخورد را اینجا بنویسید..."
+            error={formik.touched.content && formik.errors.content}
+            {...formik.getFieldProps("content")}
+          />
 
           {/* Avatar Selection Area */}
-          <div className="flex flex-col gap-4 border-t pt-4">
-            <label className="text-sm font-semibold text-gray-700">انتخاب آواتار یا آپلود تصویر شخصی</label>
-            
-            <div className="flex gap-4 flex-wrap">
-              {DEFAULT_AVATARS.map((avatar) => (
-                <img 
-                  key={`avatar-${avatar.id}`}
-                  src={`/default-avatars/${avatar.filename}`} 
-                  alt={avatar.alt}
-                  onClick={() => handleSelectDefaultAvatar(avatar.filename)}
-                  className={`w-14 h-14 object-cover rounded-full cursor-pointer transition-all hover:scale-105 border-2 ${
-                    formik.values.img === avatar.filename ? "border-primary shadow-md" : "border-transparent"
-                  }`}
-                />
-              ))}
+          <div className="flex flex-col gap-3 border-t border-border/80 pt-5">
+            <label className="text-xs md:text-sm font-semibold text-text-primary select-none">
+              انتخاب آواتار پیش‌فرض یا آپلود تصویر اختصاصی
+            </label>
+
+            <div className="flex gap-3 flex-wrap">
+              {DEFAULT_AVATARS.map((avatar) => {
+                const isSelected = formik.values.img === avatar.filename;
+                return (
+                  <div
+                    key={`avatar-${avatar.id}`}
+                    onClick={() => handleSelectDefaultAvatar(avatar.filename)}
+                    className={`w-14 h-14 rounded-full cursor-pointer transition-all hover:scale-105 p-0.5 border-2 ${
+                      isSelected
+                        ? "border-primary shadow-sm ring-4 ring-primary/20 scale-105"
+                        : "border-border hover:border-border-hover"
+                    }`}
+                  >
+                    <img
+                      src={`/default-avatars/${avatar.filename}`}
+                      alt={avatar.alt}
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  </div>
+                );
+              })}
             </div>
 
-            <span className="text-xs text-gray-400 font-bold my-1">یا</span>
+            <span className="text-xs text-text-muted font-bold my-1">یا</span>
 
-            <div className="w-full md:w-1/2 h-32 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer relative overflow-hidden">
+            <div className="w-full md:w-1/2 h-32 border-2 border-dashed border-border hover:border-primary rounded-xl flex flex-col items-center justify-center gap-2 bg-bg-light/60 hover:bg-teal-50/30 transition-colors cursor-pointer relative overflow-hidden group">
               <input
                 id="custom-img"
                 type="file"
-                accept="image/jpeg, image/png, image/svg+xml, image/webp"
+                accept="image/jpeg, image/jpg, image/png, image/svg+xml, image/webp"
                 onChange={handleCustomImageChange}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               />
               {imagePreview && formik.values.img instanceof File ? (
-                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-              ) : (
                 <>
-                  <CloudUploadIcon className="text-gray-400" />
-                  <p className="text-xs font-medium text-gray-600">آپلود عکس شخصی</p>
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold">
+                    تغییر عکس شخصی
+                  </div>
                 </>
+              ) : (
+                <div className="flex flex-col items-center justify-center gap-1.5 p-3 text-center">
+                  <CloudUploadIcon className="text-primary" />
+                  <p className="text-xs font-semibold text-text-secondary">
+                    آپلود عکس شخصی
+                  </p>
+                </div>
               )}
             </div>
+
             {formik.touched.img && formik.errors.img && (
-              <div className="text-red-500 text-xs mt-1">{formik.errors.img}</div>
+              <span className="text-xs text-error font-medium animate-fadeIn">
+                {formik.errors.img}
+              </span>
             )}
           </div>
 
-          <div className="flex justify-end mt-4">
-            <button
+          <div className="flex justify-end pt-4 border-t border-border/80">
+            <Button
               type="submit"
-              disabled={isSubmitting}
-              className={`text-white px-8 py-3 rounded-lg font-medium transition-colors active:scale-95 min-w-btn-wide flex justify-center items-center ${
-                isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-teal-600"
-              }`}
+              variant="primary"
+              size="lg"
+              isLoading={isSubmitting}
             >
-              {isSubmitting ? <Loading color="var(--color-white)" size={8} /> : "ثبت نظر"}
-            </button>
+              ثبت نظر
+            </Button>
           </div>
         </form>
-      </div>
+      </Card>
     </div>
   );
 }

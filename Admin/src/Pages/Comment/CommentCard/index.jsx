@@ -1,79 +1,80 @@
-// ==========================================
-// Dependencies & Icons
-// ==========================================
 import React from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { getImageUrl } from "../../../Utils/getImageUrl";
+import { Card, Badge, Button } from "../../../Components/UI";
 
-// ==========================================
-// Utilities
-// ==========================================
-import { getImageUrl } from "../../../Utils/getImageUrl"; // Dynamic URL helper
-
-// ==========================================
-// Component: CommentCard
-// Description: Renders an individual comment item
-// ==========================================
 export default function CommentCard({ comment, onEdit, onDelete }) {
-  
-  // Helper to determine styling for role badges
-  const getRoleBadgeStyle = (role) => {
+  const getRoleBadgeVariant = (role) => {
     switch (role) {
-      case "معلم": return "bg-blue-50 text-blue-600 border-blue-200";
-      case "اولیا": return "bg-green-50 text-green-600 border-green-200";
-      case "دانش آموز": return "bg-orange-50 text-orange-600 border-orange-200";
-      default: return "bg-gray-50 text-gray-600 border-gray-200";
+      case "معلم":
+        return "info";
+      case "مدیر مدرسه":
+      case "مدیر":
+        return "primary";
+      case "معاون":
+      case "مشاور":
+        return "purple";
+      case "اولیا":
+      case "پدر دانش‌آموز":
+      case "مادر دانش‌آموز":
+        return "success";
+      case "دانش‌آموز":
+      case "دانش آموز":
+        return "warning";
+      default:
+        return "neutral";
     }
   };
 
-  // Determine correct image URL using our global helper
   const avatarUrl = getImageUrl(comment.img);
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-col md:flex-row items-start md:items-center justify-between hover:shadow-md transition-shadow mb-4 gap-4">
-      
-      {/* Content display */}
+    <Card hoverable className="p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      {/* Content details */}
       <div className="flex flex-col gap-2 flex-grow">
-        
         {/* Header containing Avatar, Name, Role */}
         <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-2 text-secondary font-bold">
-                <img 
-                  src={avatarUrl} 
-                  alt={comment.author} 
-                  className="w-10 h-10 object-cover rounded-full border border-gray-200" 
-                />
-                <span>{comment.author}</span>
-            </div>
-            
-            <span className={`text-xs px-2 py-0.5 rounded-full border ${getRoleBadgeStyle(comment.role)}`}>
-                {comment.role}
-            </span>
+          <div className="flex items-center gap-2.5 text-secondary font-bold">
+            <img
+              src={avatarUrl}
+              alt={comment.author}
+              className="w-10 h-10 object-cover rounded-full border border-border shadow-2xs"
+            />
+            <span className="text-sm md:text-base">{comment.author}</span>
+          </div>
+
+          <Badge variant={getRoleBadgeVariant(comment.role)} size="sm">
+            {comment.role}
+          </Badge>
         </div>
 
-        {/* The actual comment message */}
-        <p className="text-sm text-gray-600 leading-relaxed mt-2">
-            {comment.content}
+        {/* The comment text */}
+        <p className="text-xs md:text-sm text-text-secondary leading-relaxed mt-1">
+          {comment.content}
         </p>
       </div>
 
       {/* Action Toolbar */}
-      <div className="flex items-center gap-2 self-end md:self-center shrink-0">
-        <button
+      <div className="flex items-center gap-1 self-end md:self-center shrink-0">
+        <Button
+          variant="info-ghost"
+          size="icon-sm"
           onClick={() => onEdit(comment._id)}
-          className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
           title="ویرایش"
         >
           <EditIcon fontSize="small" />
-        </button>
-        <button
+        </Button>
+
+        <Button
+          variant="danger-ghost"
+          size="icon-sm"
           onClick={() => onDelete(comment._id)}
-          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
           title="حذف"
         >
           <DeleteOutlineIcon fontSize="small" />
-        </button>
+        </Button>
       </div>
-    </div>
+    </Card>
   );
 }
