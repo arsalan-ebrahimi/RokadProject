@@ -40,7 +40,7 @@ import UpdateStudent from "../Pages/Student/UpdateStudent";
 // Award Components
 // ==========================================
 import Award from "../Pages/Award";
-import AwardPage from "../Pages/Award/AawardPage"; 
+import AwardPage from "../Pages/Award/AwardPage"; 
 import CreateAward from "../Pages/Award/CreateAward";
 import UpdateAward from "../Pages/Award/UpdateAward";
 

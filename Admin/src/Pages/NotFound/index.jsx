@@ -1,49 +1,48 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { Button } from "../../Components/UI";
 
-/**
- * 404 Not Found Page Component
- * Styled to match the soft, minimal, and modern theme of the application
- */
 export default function NotFound() {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-bg-light p-4" dir="rtl">
-      <div className="max-w-lg w-full bg-white rounded-3xl shadow-sm ring-1 ring-black/5 p-8 md:p-14 text-center flex flex-col items-center">
-        
-        {/* Brand Logo - Optional but keeps the user connected to the brand */}
-        <div className="flex justify-center mb-8">
-          <img 
-            src="/Logo-Type-green.png" 
-            alt="لوگو رکاد" 
-            className="h-12 w-auto object-contain opacity-80" 
+      <div className="max-w-lg w-full bg-surface rounded-2xl shadow-lg border border-border/80 p-8 md:p-12 text-center flex flex-col items-center">
+        {/* Brand Logo */}
+        <div className="flex justify-center mb-6">
+          <img
+            src="/Logo-Type-green.png"
+            alt="لوگو رکاد"
+            className="h-10 w-auto object-contain opacity-80"
           />
         </div>
-        
+
         {/* Large 404 Text */}
-        <h1 className="text-8xl md:text-9xl font-black text-primary drop-shadow-sm mb-4 tracking-widest">
+        <h1 className="text-7xl md:text-8xl font-black text-primary mb-3 tracking-wider">
           404
         </h1>
-        
+
         {/* Main Heading */}
-        <h2 className="text-2xl font-bold text-gray-800 mb-3">
+        <h2 className="text-xl md:text-2xl font-bold text-secondary mb-2">
           صفحه مورد نظر پیدا نشد!
         </h2>
-        
-        {/* Description Paragraph */}
-        <p className="text-gray-500 text-sm md:text-base leading-8 mb-10">
-          متأسفانه صفحه‌ای که به دنبال آن هستید وجود ندارد، ممکن است آدرس را اشتباه وارد کرده باشید یا صفحه حذف شده باشد.
-        </p>
-        
-        {/* Back to Home Button */}
-        <button 
-          onClick={() => navigate('/')}
-          className="w-full sm:w-auto px-10 h-btn-tall bg-primary hover:bg-primary-hover text-white font-bold rounded-2xl transition-all duration-300 shadow-lg shadow-primary/30 hover:shadow-xl hover:-translate-y-1 flex justify-center items-center text-lg"
-        >
-          بازگشت به صفحه اصلی
-        </button>
 
+        {/* Description */}
+        <p className="text-text-secondary text-sm leading-relaxed mb-8 max-w-sm">
+          متأسفانه صفحه‌ای که به دنبال آن هستید وجود ندارد یا به آدرس دیگری منتقل شده است.
+        </p>
+
+        {/* Back to Home Button */}
+        <Button
+          variant="primary"
+          size="tall"
+          onClick={() => navigate("/")}
+          icon={<ArrowForwardIcon fontSize="small" />}
+          className="px-8 shadow-md hover:shadow-lg shadow-primary/20"
+        >
+          بازگشت به داشبورد
+        </Button>
       </div>
     </div>
   );

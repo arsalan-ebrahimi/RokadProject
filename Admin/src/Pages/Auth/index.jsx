@@ -1,65 +1,38 @@
-// ==========================================
-// Dependencies & Libraries
-// ==========================================
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-
-// ==========================================
-// Icons
-// ==========================================
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-
-// ==========================================
-// Store Actions & Utilities
-// ==========================================
-import { login } from "../../Store/Slices/authSlice"; 
-import fetchData from "../../Utils/fetchData";
-import Loading from "../../Components/Loading"; 
+import { login } from "../../Store/Slices/authSlice";
+import axiosInstance from "../../Utils/axiosInstance";
 import Notify from "../../Utils/notify";
+import { Button } from "../../Components/UI";
 
-// ==========================================
-// Component: AdminLogin
-// Description: Handles admin authentication logic
-// ==========================================
 export default function AdminLogin() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  // State to toggle password visibility
   const [showPassword, setShowPassword] = useState(false);
 
-  // ----------------------------------------
-  // Formik Configuration
-  // ----------------------------------------
   const formik = useFormik({
     initialValues: { phoneNumber: "", password: "" },
-    
     validationSchema: Yup.object({
       phoneNumber: Yup.string()
-        .matches(/^09\d{9}$/, "شماره همراه معتبر نیست")
+        .matches(/^09\d{9}$/, "شماره همراه معتبر نیست (مثال: 09123456789)")
         .required("شماره همراه الزامی است"),
       password: Yup.string()
         .required("رمز عبور الزامی است")
-        .min(6, "رمز عبور بسیار کوتاه است"),
+        .min(6, "رمز عبور باید حداقل ۶ کاراکتر باشد"),
     }),
 
     onSubmit: async (values, { setSubmitting }) => {
       try {
         const formattedPhone = values.phoneNumber.replace(/^0/, "+98");
 
-        const response = await fetchData("auth/login-password", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            phoneNumber: formattedPhone,
-            password: values.password,
-          }),
+        const response = await axiosInstance.post("auth/login-password", {
+          phoneNumber: formattedPhone,
+          password: values.password,
         });
 
         if (response && response.success) {
@@ -68,7 +41,7 @@ export default function AdminLogin() {
           if (userRole === "admin" || userRole === "superAdmin") {
             dispatch(login(response.data.token));
             Notify("success", `خوش آمدید ${response.data.user?.fullName || "مدیر"}`);
-            navigate("/"); 
+            navigate("/");
           } else {
             Notify("error", "شما اجازه دسترسی به پنل مدیریت را ندارید.");
           }
@@ -77,115 +50,116 @@ export default function AdminLogin() {
         }
       } catch (error) {
         console.error("Authentication Error:", error);
-        Notify("error", "خطا در برقراری ارتباط با سرور. لطفاً وضعیت شبکه را بررسی کنید.");
+        Notify("error", error.message || "خطا در برقراری ارتباط با سرور.");
       } finally {
         setSubmitting(false);
       }
     },
   });
 
-  // ----------------------------------------
-  // Render Component
-  // ----------------------------------------
   return (
     <div className="min-h-screen flex items-center justify-center bg-bg-light p-4" dir="rtl">
-      {/* Slightly refined card shadow and border */}
-      <div className="max-w-md w-full bg-white rounded-card shadow-xl shadow-gray-200/40 border border-gray-100 p-8 md:p-10">
-        
+      <div className="max-w-md w-full bg-surface rounded-2xl shadow-lg border border-border/80 p-8 md:p-10 transition-all">
         {/* Brand Logo */}
         <div className="flex justify-center mb-8">
           <img
             src="/Logo-Type-green.png"
             alt="Rokad Admin Panel"
-            className="h-16 w-auto object-contain"
+            className="h-14 w-auto object-contain"
           />
         </div>
 
         {/* Header Texts */}
-        <h2 className="text-2xl font-bold text-center text-secondary mb-2">
+        <h2 className="text-2xl font-extrabold text-center text-secondary mb-2">
           ورود به پنل مدیریت
         </h2>
-        <p className="text-center text-gray-500 mb-8 text-sm">
+        <p className="text-center text-text-secondary mb-8 text-sm">
           لطفاً شماره همراه و رمز عبور خود را وارد کنید
         </p>
 
         {/* Login Form */}
         <form onSubmit={formik.handleSubmit} className="space-y-5">
-          
-          {/* Phone Number Input Group */}
-          <div className="flex flex-col relative">
+          {/* Phone Number Input */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-text-primary select-none">
+              شماره همراه
+            </label>
             <input
               type="text"
               name="phoneNumber"
-              placeholder="شماره همراه (مثلاً 0912...)"
+              placeholder="09123456789"
               dir="ltr"
-              className={`w-full px-5 py-4 rounded-2xl bg-gray-50/50 outline-none transition-all text-left font-sans border focus:bg-white ${
+              className={`w-full px-4 py-3 rounded-xl bg-bg-light/60 outline-none transition-all duration-200 text-left font-sans border text-sm focus:bg-white ${
                 formik.touched.phoneNumber && formik.errors.phoneNumber
-                  ? "border-red-400 focus:ring-4 focus:ring-red-500/10"
-                  : "border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                  ? "border-error focus:border-error focus:ring-4 focus:ring-error/10"
+                  : "border-border hover:border-border-hover focus:border-primary focus:ring-4 focus:ring-primary/10"
               }`}
               {...formik.getFieldProps("phoneNumber")}
             />
             {formik.touched.phoneNumber && formik.errors.phoneNumber && (
-              <div className="text-red-500 text-xs mt-2 pr-2 font-medium">
+              <span className="text-error text-xs font-medium pr-1">
                 {formik.errors.phoneNumber}
-              </div>
+              </span>
             )}
           </div>
 
-          {/* Password Input Group */}
-          <div className="flex flex-col relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              placeholder="رمز عبور"
-              dir="ltr"
-              className={`w-full pl-5 pr-12 py-4 rounded-2xl bg-gray-50/50 outline-none transition-all text-left font-sans tracking-widest border focus:bg-white ${
-                formik.touched.password && formik.errors.password
-                  ? "border-red-400 focus:ring-4 focus:ring-red-500/10"
-                  : "border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10"
-              }`}
-              {...formik.getFieldProps("password")}
-            />
-            
-            {/* Minimal eye icon for password visibility */}
-            <div className="absolute right-4 top-[18px]">
+          {/* Password Input */}
+          <div className="flex flex-col gap-1.5 relative">
+            <label className="text-xs font-semibold text-text-primary select-none">
+              رمز عبور
+            </label>
+            <div className="relative flex items-center">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="••••••••"
+                dir="ltr"
+                className={`w-full pl-4 pr-11 py-3 rounded-xl bg-bg-light/60 outline-none transition-all duration-200 text-left font-sans tracking-widest border text-sm focus:bg-white ${
+                  formik.touched.password && formik.errors.password
+                    ? "border-error focus:border-error focus:ring-4 focus:ring-error/10"
+                    : "border-border hover:border-border-hover focus:border-primary focus:ring-4 focus:ring-primary/10"
+                }`}
+                {...formik.getFieldProps("password")}
+              />
+
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="text-gray-400 hover:text-primary transition-colors focus:outline-none"
-                tabIndex="-1"
+                className="absolute right-3 text-text-muted hover:text-primary transition-colors focus:outline-none cursor-pointer"
+                tabIndex={-1}
               >
-                {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                {showPassword ? (
+                  <VisibilityOff fontSize="small" />
+                ) : (
+                  <Visibility fontSize="small" />
+                )}
               </button>
             </div>
 
             {formik.touched.password && formik.errors.password && (
-              <div className="text-red-500 text-xs mt-2 pr-2 font-medium">
+              <span className="text-error text-xs font-medium pr-1">
                 {formik.errors.password}
-              </div>
+              </span>
             )}
           </div>
 
           {/* Submit Button */}
-          <div className="pt-2">
-            <button
-              disabled={formik.isSubmitting}
+          <div className="pt-3">
+            <Button
               type="submit"
-              className={`w-full h-btn-tall font-bold py-3 rounded-2xl transition-all duration-300 flex justify-center items-center text-lg ${
-                formik.isSubmitting 
-                  ? "bg-[#9cdcd1] cursor-not-allowed" 
-                  : "bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20 hover:-translate-y-1 hover:shadow-primary/30"
-              }`}
+              variant="primary"
+              size="tall"
+              isLoading={formik.isSubmitting}
+              className="w-full text-base font-bold shadow-md hover:shadow-lg shadow-primary/20 hover:-translate-y-0.5"
             >
-              {formik.isSubmitting ? <Loading color="var(--color-white)" size={8} /> : "ورود به داشبورد"}
-            </button>
+              ورود به داشبورد
+            </Button>
           </div>
         </form>
 
         {/* Footer Support Text */}
-        <div className="mt-8 text-center pt-6 border-t border-gray-50">
-          <p className="text-xs text-gray-400">
+        <div className="mt-8 text-center pt-6 border-t border-border-light">
+          <p className="text-xs text-text-muted">
             در صورت فراموشی رمز عبور با پشتیبانی فنی تماس بگیرید.
           </p>
         </div>
