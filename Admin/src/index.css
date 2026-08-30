@@ -1,16 +1,373 @@
 @import "tailwindcss";
 
-@theme {
-  --color-primary: #51b5a5;
+/* ==========================================
+   IRANSansX Font Faces (Local Assets)
+   Place font files in /public/fonts/ directory:
+   - IRANSansX-Regular.woff2 / .woff
+   - IRANSansX-Medium.woff2 / .woff
+   - IRANSansX-DemiBold.woff2 / .woff
+   - IRANSansX-Bold.woff2 / .woff
+   - IRANSansX-Black.woff2 / .woff
+   - IRANSansXFaNum-Regular.woff2 / .woff
+   - IRANSansXFaNum-Bold.woff2 / .woff
+   ========================================== */
+@font-face {
+  font-family: "IRANSansX";
+  font-style: normal;
+  font-weight: 400;
+  src: url("/fonts/IRANSansX-Regular.woff2") format("woff2"),
+    url("/fonts/IRANSansX-Regular.woff") format("woff");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IRANSansX";
+  font-style: normal;
+  font-weight: 500;
+  src: url("/fonts/IRANSansX-Medium.woff2") format("woff2"),
+    url("/fonts/IRANSansX-Medium.woff") format("woff");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IRANSansX";
+  font-style: normal;
+  font-weight: 600;
+  src: url("/fonts/IRANSansX-DemiBold.woff2") format("woff2"),
+    url("/fonts/IRANSansX-DemiBold.woff") format("woff");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IRANSansX";
+  font-style: normal;
+  font-weight: 700;
+  src: url("/fonts/IRANSansX-Bold.woff2") format("woff2"),
+    url("/fonts/IRANSansX-Bold.woff") format("woff");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IRANSansX";
+  font-style: normal;
+  font-weight: 900;
+  src: url("/fonts/IRANSansX-Black.woff2") format("woff2"),
+    url("/fonts/IRANSansX-Black.woff") format("woff");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IRANSansXFaNum";
+  font-style: normal;
+  font-weight: 400;
+  src: url("/fonts/IRANSansXFaNum-Regular.woff2") format("woff2"),
+    url("/fonts/IRANSansXFaNum-Regular.woff") format("woff");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IRANSansXFaNum";
+  font-style: normal;
+  font-weight: 700;
+  src: url("/fonts/IRANSansXFaNum-Bold.woff2") format("woff2"),
+    url("/fonts/IRANSansXFaNum-Bold.woff") format("woff");
+  font-display: swap;
+}
+
+/* ==========================================
+   Vazirmatn Font Faces (Local Assets)
+   Place font files in /public/fonts/ directory:
+   - Vazirmatn-Light.woff2 (300)
+   - Vazirmatn-Regular.woff2 (400)
+   - Vazirmatn-Medium.woff2 (500)
+   - Vazirmatn-SemiBold.woff2 (600)
+   - Vazirmatn-Bold.woff2 (700)
+   - Vazirmatn-ExtraBold.woff2 (800)
+   - Vazirmatn-Black.woff2 (900)
+   ========================================== */
+@font-face {
+  font-family: "Vazirmatn";
+  font-style: normal;
+  font-weight: 300;
+  src: url("/fonts/Vazirmatn-Light.woff2") format("woff2");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  font-style: normal;
+  font-weight: 400;
+  src: url("/fonts/Vazirmatn-Regular.woff2") format("woff2");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  font-style: normal;
+  font-weight: 500;
+  src: url("/fonts/Vazirmatn-Medium.woff2") format("woff2");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  font-style: normal;
+  font-weight: 600;
+  src: url("/fonts/Vazirmatn-SemiBold.woff2") format("woff2");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  font-style: normal;
+  font-weight: 700;
+  src: url("/fonts/Vazirmatn-Bold.woff2") format("woff2");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  font-style: normal;
+  font-weight: 800;
+  src: url("/fonts/Vazirmatn-ExtraBold.woff2") format("woff2");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  font-style: normal;
+  font-weight: 900;
+  src: url("/fonts/Vazirmatn-Black.woff2") format("woff2");
+  font-display: swap;
+}
+
+/* ==========================================
+   CSS Custom Properties (:root)
+   ========================================== */
+:root {
+  /* Brand & Primary */
+  --color-primary: #52b8ab;
+  --color-primary-hover: #347e75;
+  --color-primary-active: #2e7068;
+  --color-primary-light: #f2faf9;
+  --color-primary-muted: #e4f4f2;
+  --color-primary-subtle: rgba(82, 184, 171, 0.12);
+  --color-primary-border: #d6eeeb;
+
+  /* Secondary */
   --color-secondary: #1b234d;
-  --color-white: #ffffff;
+  --color-secondary-hover: #131938;
+  --color-secondary-light: #f8fafc;
+  --color-secondary-muted: #e2e8f0;
+
+  /* Surfaces & Backgrounds */
+  --color-background: #f8fafc;
+  --color-bg-page: #ffffff;
+  --color-bg-subtle: #f6f6f6;
   --color-bg-light: #f4f6f8;
-  --color-primary-hover: #439a8c;
+  --color-bg-brand-soft: #f2faf9;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f1f5f9;
+  --color-surface-muted: #f8fafc;
+  --color-white: #ffffff;
+
+  /* Text */
+  --color-text-primary: #292827;
+  --color-text-secondary: #525252;
+  --color-text-muted: #94a3b8;
+  --color-text-accent: #347e75;
+  --color-text-on-brand: #ffffff;
+  --color-text-white: #ffffff;
+
+  /* Borders */
+  --color-border: #e2e8f0;
+  --color-border-subtle: #edecec;
+  --color-border-default: #d0cfcd;
+  --color-border-light: #f1f5f9;
+  --color-border-hover: #cbd5e1;
+  --color-border-strong: #292827;
+  --color-border-brand: #58bdaf;
+
+  /* Feedback */
+  --color-success: #10b981;
+  --color-success-hover: #059669;
+  --color-success-light: #ecfdf5;
+  --color-success-border: #a7f3d0;
+  --color-success-text: #047857;
+
+  --color-error: #ef4444;
+  --color-error-hover: #dc2626;
+  --color-error-light: #fef2f2;
+  --color-error-border: #fecaca;
+  --color-error-text: #b91c1c;
+
+  --color-warning: #f59e0b;
+  --color-warning-hover: #d97706;
+  --color-warning-light: #fffbeb;
+  --color-warning-border: #fde68a;
+  --color-warning-text: #b45309;
+
+  --color-info: #3b82f6;
+  --color-info-hover: #2563eb;
+  --color-info-light: #eff6ff;
+  --color-info-border: #bfdbfe;
+  --color-info-text: #1d4ed8;
+
+  /* Typography */
+  --font-sans: "IRANSansX", "Vazirmatn", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-numeric: "IRANSansXFaNum", "IRANSansX", "Vazirmatn", sans-serif;
+
+  --font-size-icon-lg: 48px;
+}
+
+/* ==========================================
+   Tailwind CSS v4 @theme Configuration
+   ========================================== */
+@theme {
+  /* Color utilities mapping */
+  --color-primary: #52b8ab;
+  --color-primary-hover: #347e75;
+  --color-primary-active: #2e7068;
+  --color-primary-light: #f2faf9;
+  --color-primary-muted: #e4f4f2;
+  --color-primary-subtle: rgba(82, 184, 171, 0.12);
+  --color-primary-border: #d6eeeb;
+
+  --color-secondary: #1b234d;
+  --color-secondary-hover: #131938;
+  --color-secondary-light: #f8fafc;
+  --color-secondary-muted: #e2e8f0;
+
+  --color-background: #f8fafc;
+  --color-bg-page: #ffffff;
+  --color-bg-subtle: #f6f6f6;
+  --color-bg-light: #f4f6f8;
+  --color-bg-brand-soft: #f2faf9;
+
+  --color-surface: #ffffff;
+  --color-surface-hover: #f1f5f9;
+  --color-surface-muted: #f8fafc;
+  --color-white: #ffffff;
+
+  --color-text-primary: #292827;
+  --color-text-secondary: #525252;
+  --color-text-muted: #94a3b8;
+  --color-text-accent: #347e75;
+  --color-text-on-brand: #ffffff;
+  --color-text-white: #ffffff;
+
+  --color-border: #e2e8f0;
+  --color-border-subtle: #edecec;
+  --color-border-default: #d0cfcd;
+  --color-border-light: #f1f5f9;
+  --color-border-hover: #cbd5e1;
+  --color-border-strong: #292827;
+  --color-border-brand: #58bdaf;
+
+  --color-success: #10b981;
+  --color-success-hover: #059669;
+  --color-success-light: #ecfdf5;
+  --color-success-border: #a7f3d0;
+  --color-success-text: #047857;
+
+  --color-error: #ef4444;
+  --color-error-hover: #dc2626;
+  --color-error-light: #fef2f2;
+  --color-error-border: #fecaca;
+  --color-error-text: #b91c1c;
+
+  --color-warning: #f59e0b;
+  --color-warning-hover: #d97706;
+  --color-warning-light: #fffbeb;
+  --color-warning-border: #fde68a;
+  --color-warning-text: #b45309;
+
+  --color-info: #3b82f6;
+  --color-info-hover: #2563eb;
+  --color-info-light: #eff6ff;
+  --color-info-border: #bfdbfe;
+  --color-info-text: #1d4ed8;
+
+  --color-teal-50: #f2faf9;
+  --color-teal-100: #e4f4f2;
+  --color-teal-200: #d6eeeb;
+  --color-teal-500: #58bdaf;
+  --color-teal-600: #52b8ab;
+  --color-teal-700: #347e75;
+  --color-teal-800: #2e7068;
+
+  --font-sans: "IRANSansX", "Vazirmatn", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-numeric: "IRANSansXFaNum", "IRANSansX", "Vazirmatn", sans-serif;
 
   --spacing-btn-wide: 150px;
-  --spacing-btn-tall: 55px;
-  
-  --font-size-icon-lg: 50px;
-  
-  --radius-card: 2rem;
+  --spacing-btn-tall: 52px;
+}
+
+/* ==========================================
+   Base Layer & Global Typography
+   ========================================== */
+@layer base {
+
+  *,
+  ::before,
+  ::after {
+    box-sizing: border-box;
+    border-color: var(--color-border);
+  }
+
+  html {
+    font-family: var(--font-sans);
+    -webkit-text-size-adjust: 100%;
+    tab-size: 4;
+  }
+
+  body {
+    margin: 0;
+    line-height: inherit;
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  input,
+  button,
+  textarea,
+  select {
+    font-family: inherit;
+  }
+}
+
+/* Utility class for Persian numerals */
+.font-numeric {
+  font-family: var(--font-numeric);
+}
+
+/* Custom subtle scrollbar */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
