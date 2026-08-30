@@ -43,7 +43,7 @@ export default function AwardCard({ award, onEdit, onDelete }) {
   return (
     <Card hoverable className="p-4 flex items-center justify-between gap-4">
       {/* Award Information */}
-      <div className="flex items-center gap-4 flex-grow">
+      <div className="flex items-center gap-4 flex-grow min-w-0">
         {/* Dynamic Rank Circle */}
         <div
           className={`w-12 h-12 flex items-center justify-center rounded-2xl text-lg font-black border shrink-0 shadow-xs ${rankDetails.bg}`}
@@ -53,17 +53,17 @@ export default function AwardCard({ award, onEdit, onDelete }) {
         </div>
 
         {/* Title and Description */}
-        <div className="flex flex-col gap-0.5 flex-grow">
+        <div className="flex flex-col gap-0.5 flex-grow min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-semibold text-text-muted">
               {rankDetails.label}
             </span>
           </div>
-          <h2 className="text-base md:text-lg font-bold text-secondary line-clamp-1">
+          <h2 className="text-base md:text-lg font-bold text-secondary line-clamp-1 leading-[1.4] min-h-[1.4em] break-words">
             {award.title}
           </h2>
           {award.description && (
-            <p className="text-xs text-text-secondary line-clamp-1">
+            <p className="text-xs text-text-secondary line-clamp-2 leading-relaxed min-h-[1.4em] break-words overflow-hidden">
               {award.description}
             </p>
           )}
