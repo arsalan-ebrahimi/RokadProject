@@ -32,16 +32,16 @@ export default function CommentCard({ comment, onEdit, onDelete }) {
   return (
     <Card hoverable className="p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
       {/* Content details */}
-      <div className="flex flex-col gap-2 flex-grow">
+      <div className="flex flex-col gap-2 flex-grow min-w-0">
         {/* Header containing Avatar, Name, Role */}
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-2.5 text-secondary font-bold">
+          <div className="flex items-center gap-2.5 text-secondary font-bold min-w-0">
             <img
               src={avatarUrl}
               alt={comment.author}
-              className="w-10 h-10 object-cover rounded-full border border-border shadow-2xs"
+              className="w-10 h-10 object-cover rounded-full border border-border shadow-2xs shrink-0"
             />
-            <span className="text-sm md:text-base">{comment.author}</span>
+            <span className="text-sm md:text-base line-clamp-1">{comment.author}</span>
           </div>
 
           <Badge variant={getRoleBadgeVariant(comment.role)} size="sm">
@@ -50,7 +50,7 @@ export default function CommentCard({ comment, onEdit, onDelete }) {
         </div>
 
         {/* The comment text */}
-        <p className="text-xs md:text-sm text-text-secondary leading-relaxed mt-1">
+        <p className="text-xs md:text-sm text-text-secondary leading-relaxed mt-1 line-clamp-3 break-words overflow-hidden">
           {comment.content}
         </p>
       </div>
