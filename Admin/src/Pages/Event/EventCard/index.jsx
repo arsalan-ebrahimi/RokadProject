@@ -26,9 +26,14 @@ export default function EventCard({ event, onEdit, onDelete }) {
       </div>
 
       {/* Content Section */}
-      <div className="p-4 flex flex-col flex-grow">
+      <div className="p-4 flex flex-col flex-grow min-h-0">
+        {/* Title */}
+        <h2 className="text-base md:text-lg font-bold text-secondary line-clamp-2 leading-[1.4] min-h-[2.8em] mb-2 break-words">
+          {event.title}
+        </h2>
+
         {/* Badges */}
-        <div className="flex flex-wrap items-center gap-1.5 mb-2.5 min-h-[1.75rem]">
+        <div className="flex flex-wrap items-center gap-1.5 mb-2.5 min-h-[1.75rem] max-h-[3.75rem] overflow-y-auto hide-scrollbar content-start">
           <Badge variant="neutral" size="sm">
             {event.type}
           </Badge>
@@ -54,24 +59,19 @@ export default function EventCard({ event, onEdit, onDelete }) {
           )}
         </div>
 
-        {/* Title */}
-        <h2 className="text-base md:text-lg font-bold text-secondary line-clamp-2 leading-[1.4] min-h-[2.8em] mb-1">
-          {event.title}
-        </h2>
-
         {/* Date */}
-        <div className="flex items-center gap-1.5 text-xs text-text-muted mb-2.5">
+        <div className="flex items-center gap-1.5 text-xs text-text-muted mb-2.5 shrink-0">
           <CalendarTodayIcon fontSize="inherit" />
           <span>{event.date}</span>
         </div>
 
         {/* Description */}
-        <p className="text-xs md:text-sm text-text-secondary line-clamp-3 mb-4 flex-grow leading-relaxed">
+        <p className="text-xs md:text-sm text-text-secondary line-clamp-2 md:line-clamp-3 leading-relaxed mb-4 min-h-[2.8em] break-words overflow-hidden">
           {event.description}
         </p>
 
         {/* Action Toolbar */}
-        <div className="flex justify-end items-center gap-1 mt-auto pt-3 border-t border-border-light">
+        <div className="flex justify-end items-center gap-1 mt-auto shrink-0 pt-3 border-t border-border-light">
           <Button
             variant="info-ghost"
             size="icon-sm"
