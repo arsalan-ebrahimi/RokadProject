@@ -1,3 +1,8 @@
+// ==========================================
+// Component: EventCard
+// Presentation card for events displaying thumbnail, category/branch badges, date, and actions
+// ==========================================
+
 import React from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -5,6 +10,13 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { getImageUrl } from "../../../Utils/getImageUrl";
 import { Card, Badge, Button } from "../../../Components/UI";
 
+/**
+ * Card component presenting event details with action buttons.
+ * @param {Object} props
+ * @param {Object} props.event - Event entity data
+ * @param {Function} props.onEdit - Callback when edit is triggered
+ * @param {Function} props.onDelete - Callback when delete is triggered
+ */
 export default function EventCard({ event, onEdit, onDelete }) {
   const imageUrl = getImageUrl(event.img);
 

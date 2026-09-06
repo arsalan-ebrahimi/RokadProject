@@ -1,3 +1,8 @@
+// ==========================================
+// Page Component: UpdateStudent
+// Form for editing existing student records, updating social links, and managing profile image replacement
+// ==========================================
+
 import React, { useState, useEffect } from "react";
 import { useFormik, FieldArray, FormikProvider } from "formik";
 import * as Yup from "yup";
@@ -10,7 +15,12 @@ import { getImageUrl } from "../../../Utils/getImageUrl";
 import Loading from "../../../Components/Loading";
 import { Button, Input, Select, PageHeader, Card, ImageUpload } from "../../../Components/UI";
 
+// Regular expression to restrict input to safe alphanumeric characters and standard Persian/Latin punctuation
 const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/;
+
+/**
+ * Yup validation schema for updating a student record.
+ */
 const studentUpdateSchema = Yup.object({
   fullName: Yup.string()
     .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
@@ -37,6 +47,9 @@ const studentUpdateSchema = Yup.object({
   ),
 });
 
+/**
+ * UpdateStudent page component for modifying student details.
+ */
 export default function UpdateStudent() {
   const { id } = useParams();
   const navigate = useNavigate();

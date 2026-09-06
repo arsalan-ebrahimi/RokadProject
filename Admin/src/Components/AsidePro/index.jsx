@@ -1,6 +1,14 @@
+// ==========================================
+// Layout Component: AsidePro (Sidebar Container)
+// Sticky sidebar hosting the admin brand logo and collapsible menu sections
+// ==========================================
+
 import React from "react";
 import { AsideMenuPro } from "./AsideMenuPro";
 
+/**
+ * Sidebar navigation container component.
+ */
 export default function AsidePro() {
   const items = ["مدیریت"];
 

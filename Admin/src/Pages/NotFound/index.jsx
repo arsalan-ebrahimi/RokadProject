@@ -1,8 +1,16 @@
+// ==========================================
+// Page Component: NotFound (404 Fallback)
+// Fallback page rendered for undefined or invalid route paths
+// ==========================================
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { Button } from "../../Components/UI";
 
+/**
+ * 404 Error fallback page component.
+ */
 export default function NotFound() {
   const navigate = useNavigate();
 

@@ -1,6 +1,24 @@
+// ==========================================
+// UI Component: Button
+// Versatile button supporting multiple sizes, semantic variants, icons, and loading state
+// ==========================================
+
 import React, { forwardRef } from "react";
 import Loading from "../../Loading";
 
+/**
+ * Reusable Button component with built-in loading and theme styling.
+ * @param {Object} props
+ * @param {React.ReactNode} [props.children] - Button label/content
+ * @param {'button'|'submit'|'reset'} [props.type='button'] - HTML button type
+ * @param {'primary'|'secondary'|'outline'|'danger'|'danger-outline'|'ghost'|'danger-ghost'|'info-ghost'|'primary-subtle'} [props.variant='primary'] - Visual style variant
+ * @param {'sm'|'md'|'lg'|'tall'|'icon'|'icon-sm'} [props.size='md'] - Size variant
+ * @param {boolean} [props.isLoading=false] - Whether button is in loading state
+ * @param {boolean} [props.disabled=false] - Whether button is disabled
+ * @param {React.ReactNode} [props.icon=null] - Leading icon element
+ * @param {string} [props.className=''] - Additional custom CSS classes
+ * @param {Function} [props.onClick] - Click event handler
+ */
 export const Button = forwardRef(
   (
     {

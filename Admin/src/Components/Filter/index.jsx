@@ -1,6 +1,18 @@
+// ==========================================
+// Component: Filter
+// Dynamic multi-field filter control panel for data lists
+// ==========================================
+
 import React, { useState, useEffect } from "react";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
+/**
+ * Reusable dynamic filter bar generating select inputs based on config.
+ * @param {Object} props
+ * @param {Array<{field: string, label?: string, options: Array<string|{label: string, value: any}>}>} [props.filterConfig=[]] - Configuration array for each filter item
+ * @param {Function} props.onFilterChange - Callback triggered when active filters change
+ * @param {string} [props.className=""] - Custom CSS classes
+ */
 export default function Filter({ filterConfig = [], onFilterChange, className = "" }) {
   const [selectedFilters, setSelectedFilters] = useState({});
 

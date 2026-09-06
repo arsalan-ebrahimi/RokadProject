@@ -1,4 +1,13 @@
+// ==========================================
+// Utility: Notification & Toast System
+// Custom RTL wrapper around react-hot-toast with project design tokens
+// ==========================================
+
 import toast from "react-hot-toast";
+
+// ==========================================
+// Toast Theme & Style Configuration
+// ==========================================
 
 const BASE_TOAST_STYLE = {
   direction: "rtl",
@@ -44,6 +53,17 @@ const TOAST_VARIANTS = {
   },
 };
 
+// ==========================================
+// Main Notify Function & Helper Shortcuts
+// ==========================================
+
+/**
+ * Triggers a styled toast notification with RTL layout and custom branding.
+ * @param {'success'|'error'|'warning'|'info'|'loading'} [type="success"] - Notification type variant
+ * @param {string} [message=""] - Message content to display
+ * @param {Object|string} [options={}] - Custom options or unique toast ID
+ * @returns {string} Toast ID
+ */
 const Notify = (type = "success", message = "", options = {}) => {
   const opts = typeof options === "string" ? { id: options } : (options ?? {});
   const variant = TOAST_VARIANTS[type] ?? TOAST_VARIANTS.info;
@@ -61,6 +81,7 @@ const Notify = (type = "success", message = "", options = {}) => {
   return (variant.handler ?? toast)(message, toastOptions);
 };
 
+// Convenient helper method shortcuts
 Notify.success = (message, options) => Notify("success", message, options);
 Notify.error = (message, options) => Notify("error", message, options);
 Notify.warning = (message, options) => Notify("warning", message, options);
@@ -72,4 +93,5 @@ Notify.promise = (promise, msgs, options = {}) =>
   toast.promise(promise, msgs, { position: "top-center", ...options });
 
 export default Notify;
+
 

@@ -1,3 +1,8 @@
+// ==========================================
+// Page Component: Home (Dashboard Overview)
+// Landing hub featuring quick-access cards to all management modules, SEO shortcuts, and logout
+// ==========================================
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -12,6 +17,9 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Button } from "../../Components/UI";
 
+/**
+ * Main dashboard landing page component.
+ */
 export default function Home() {
   const navigate = useNavigate();
   const dispatch = useDispatch();

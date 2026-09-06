@@ -1,11 +1,21 @@
+// ==========================================
+// Utility: Custom Confirmation Dialog
+// Unified SweetAlert2 modal styled with RTL and project design tokens
+// ==========================================
+
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 
 const MySwal = withReactContent(Swal);
 
 /**
- * Utility: Custom Confirmation Dialog
- * Renders a unified, professional SweetAlert2 modal using project design tokens
+ * Triggers a customizable SweetAlert2 confirmation dialog.
+ * @param {string} [title="آیا اطمینان دارید؟"] - Dialog title
+ * @param {string} [text="این عملیات غیرقابل بازگشت است."] - Dialog message text
+ * @param {string} [confirmText="بله، حذف کن"] - Text for confirm button
+ * @param {string} [icon="warning"] - SweetAlert2 icon name ('warning'|'error'|'info'|'question')
+ * @param {string} [confirmColor="#ef4444"] - Hex color for confirmation button
+ * @returns {Promise<boolean>} True if confirmed by the user, false if dismissed or cancelled
  */
 const confirm = async (
   title = "آیا اطمینان دارید؟",

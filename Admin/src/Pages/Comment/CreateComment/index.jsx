@@ -1,3 +1,8 @@
+// ==========================================
+// Page Component: CreateComment
+// Form for creating testimonials with support for preset default avatars or custom file upload
+// ==========================================
+
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -7,7 +12,12 @@ import Notify from "../../../Utils/notify";
 import { DEFAULT_AVATARS } from "../../../Constants/defaultAvatars";
 import { Button, Input, Textarea, PageHeader, Card } from "../../../Components/UI";
 
+// Regular expression to restrict input to safe alphanumeric characters and standard Persian/Latin punctuation
 const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/;
+
+/**
+ * Yup validation schema for creating a testimonial comment.
+ */
 const commentValidationSchema = Yup.object({
   author: Yup.string()
     .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
@@ -21,6 +31,9 @@ const commentValidationSchema = Yup.object({
   img: Yup.mixed().required("انتخاب تصویر یا آواتار الزامی است"),
 });
 
+/**
+ * CreateComment page component for submitting new testimonials.
+ */
 export default function CreateComment() {
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);

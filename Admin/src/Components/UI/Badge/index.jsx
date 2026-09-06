@@ -1,5 +1,19 @@
+// ==========================================
+// UI Component: Badge
+// Compact label chip supporting various semantic colors, sizes, and status indicator dots
+// ==========================================
+
 import React from "react";
 
+/**
+ * Reusable Badge / Chip component.
+ * @param {Object} props
+ * @param {React.ReactNode} props.children - Badge text/content
+ * @param {'primary'|'secondary'|'success'|'danger'|'warning'|'info'|'neutral'|'pink'|'indigo'|'purple'|'yellow'} [props.variant='primary'] - Color variant
+ * @param {'sm'|'md'} [props.size='sm'] - Size variant
+ * @param {boolean} [props.dot=false] - Whether to render a leading status dot indicator
+ * @param {string} [props.className=''] - Additional CSS classes
+ */
 export function Badge({
   children,
   variant = "primary",

@@ -1,3 +1,8 @@
+// ==========================================
+// Page Component: CreateEvent
+// Form for creating a new school event with branch multi-selection and image upload
+// ==========================================
+
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -6,7 +11,12 @@ import axiosInstance from "../../../Utils/axiosInstance";
 import Notify from "../../../Utils/notify";
 import { Button, Input, Checkbox, Textarea, PageHeader, Card, ImageUpload } from "../../../Components/UI";
 
+// Regular expression to restrict input to safe alphanumeric characters and standard Persian/Latin punctuation
 const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/;
+
+/**
+ * Yup validation schema for creating a new event.
+ */
 const eventCreateSchema = Yup.object({
   title: Yup.string()
     .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
@@ -28,6 +38,9 @@ const eventCreateSchema = Yup.object({
   img: Yup.mixed().required("انتخاب تصویر رویداد الزامی است"),
 });
 
+/**
+ * CreateEvent page component for publishing events.
+ */
 export default function CreateEvent() {
   const navigate = useNavigate();
   const [imagePreview, setImagePreview] = useState(null);

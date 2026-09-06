@@ -1,3 +1,8 @@
+// ==========================================
+// Page Component: SeoSettings
+// Form management for global website SEO meta tags, Open Graph properties, and Twitter Cards
+// ==========================================
+
 import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -6,7 +11,12 @@ import Notify from "../../Utils/notify";
 import Loading from "../../Components/Loading";
 import { Button, Input, Textarea, PageHeader, Card } from "../../Components/UI";
 
+// Regular expression to restrict input to safe alphanumeric characters and standard Persian/Latin punctuation
 const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/;
+
+/**
+ * Yup validation schema for site-wide SEO metadata fields.
+ */
 const SeoSchema = Yup.object({
   title: Yup.string()
     .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
@@ -28,6 +38,9 @@ const SeoSchema = Yup.object({
   twitterImage: Yup.string(),
 });
 
+/**
+ * SeoSettings page component for configuring site-wide metadata.
+ */
 export default function SeoSettings() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);

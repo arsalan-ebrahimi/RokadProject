@@ -1,9 +1,21 @@
+// ==========================================
+// Component: AwardCard
+// Presentation card for school awards featuring rank badge styling (1st, 2nd, 3rd) and action buttons
+// ==========================================
+
 import React from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { Card, Button } from "../../../Components/UI";
 
+/**
+ * Card displaying individual award rank, title, and action buttons.
+ * @param {Object} props
+ * @param {Object} props.award - Award entity data
+ * @param {Function} props.onEdit - Edit trigger callback
+ * @param {Function} props.onDelete - Delete trigger callback
+ */
 export default function AwardCard({ award, onEdit, onDelete }) {
   const getRankDetails = (rank) => {
     switch (Number(rank)) {

@@ -1,3 +1,8 @@
+// ==========================================
+// Page Component: CreateStudent
+// Form for registering new student profiles, portfolio social links, and profile avatar uploads
+// ==========================================
+
 import React, { useState } from "react";
 import { useFormik, FieldArray, FormikProvider } from "formik";
 import * as Yup from "yup";
@@ -7,7 +12,12 @@ import axiosInstance from "../../../Utils/axiosInstance";
 import Notify from "../../../Utils/notify";
 import { Button, Input, Select, PageHeader, Card, ImageUpload } from "../../../Components/UI";
 
+// Regular expression to restrict input to safe alphanumeric characters and standard Persian/Latin punctuation
 const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/;
+
+/**
+ * Yup validation schema for creating a student record.
+ */
 const studentValidationSchema = Yup.object({
   fullName: Yup.string()
     .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
@@ -35,6 +45,9 @@ const studentValidationSchema = Yup.object({
   ),
 });
 
+/**
+ * CreateStudent page component for adding student alumni.
+ */
 export default function CreateStudent() {
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);

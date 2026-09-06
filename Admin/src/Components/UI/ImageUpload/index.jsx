@@ -1,7 +1,24 @@
+// ==========================================
+// UI Component: ImageUpload
+// Drag-and-drop file upload zone with mime-type validation, format check, and preview overlay
+// ==========================================
+
 import React from "react";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Notify from "../../../Utils/notify";
 
+/**
+ * Reusable Image Upload zone component with preview and validation.
+ * @param {Object} props
+ * @param {string} [props.label="تصویر"] - Input label
+ * @param {string} [props.error=null] - Validation error message
+ * @param {string} [props.imagePreview=null] - URL/blob preview of currently selected or existing image
+ * @param {Function} props.onChange - Callback receiving the validated File instance
+ * @param {string} [props.height="h-48"] - Tailwind height class
+ * @param {string} [props.id="img-upload"] - Input element ID
+ * @param {string} [props.className=""] - Additional container CSS classes
+ * @param {string} [props.placeholder="برای آپلود تصویر کلیک کنید"] - Placeholder text when empty
+ */
 export function ImageUpload({
   label = "تصویر",
   error = null,

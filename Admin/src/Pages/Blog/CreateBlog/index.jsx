@@ -1,3 +1,8 @@
+// ==========================================
+// Page Component: CreateBlog
+// Form for creating and publishing a new blog post with featured image upload
+// ==========================================
+
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -5,7 +10,12 @@ import axiosInstance from "../../../Utils/axiosInstance";
 import Notify from "../../../Utils/notify";
 import { Button, Input, Textarea, PageHeader, Card, ImageUpload } from "../../../Components/UI";
 
+// Regular expression to restrict input to safe alphanumeric characters and standard Persian/Latin punctuation
 const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/;
+
+/**
+ * Yup validation schema for creating a blog post.
+ */
 const blogValidationSchema = Yup.object({
   title: Yup.string()
     .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
@@ -20,6 +30,9 @@ const blogValidationSchema = Yup.object({
   img: Yup.mixed().required("انتخاب تصویر شاخص الزامی است"),
 });
 
+/**
+ * CreateBlog page component handling blog creation and image upload.
+ */
 export default function CreateBlog() {
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);

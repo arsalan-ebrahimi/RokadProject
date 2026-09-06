@@ -1,5 +1,17 @@
+// ==========================================
+// Layout Component: AsideItemPro
+// Interactive sidebar navigation button with active indicator pill
+// ==========================================
+
 import React from "react";
 
+/**
+ * Individual sidebar navigation link button.
+ * @param {Object} props
+ * @param {string} props.title - Nav item display label
+ * @param {Function} props.onClick - Click handler navigating to the item route
+ * @param {boolean} [props.isActive=false] - Whether current route matches this item
+ */
 export function AsideItemPro({ title, onClick, isActive = false }) {
   return (
     <button

@@ -1,3 +1,8 @@
+// ==========================================
+// Page Component: AwardPage (Awards & Honors List)
+// Displays school awards, honors, and competition rankings with rank filtering and deletion handling
+// ==========================================
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
@@ -10,6 +15,9 @@ import Search from "../../../Components/Search";
 import Loading from "../../../Components/Loading";
 import { Button, PageHeader, Card } from "../../../Components/UI";
 
+/**
+ * Awards directory page with rank filtering, search, and infinite scrolling.
+ */
 export default function AwardPage() {
   const navigate = useNavigate();
 

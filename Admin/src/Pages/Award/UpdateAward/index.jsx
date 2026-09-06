@@ -1,3 +1,8 @@
+// ==========================================
+// Page Component: UpdateAward
+// Form for editing existing awards, syncing winner IDs, and managing recipient selections
+// ==========================================
+
 import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -7,7 +12,12 @@ import Notify from "../../../Utils/notify";
 import Loading from "../../../Components/Loading";
 import { Button, Input, Select, Checkbox, Textarea, PageHeader, Card } from "../../../Components/UI";
 
+// Regular expression to restrict input to safe alphanumeric characters and standard Persian/Latin punctuation
 const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/;
+
+/**
+ * Yup validation schema for updating an award record.
+ */
 const awardUpdateSchema = Yup.object({
   title: Yup.string()
     .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
@@ -25,6 +35,9 @@ const awardUpdateSchema = Yup.object({
     .required("انتخاب برنده الزامی است"),
 });
 
+/**
+ * UpdateAward page component for modifying award details and winners.
+ */
 export default function UpdateAward() {
   const { id } = useParams();
   const navigate = useNavigate();

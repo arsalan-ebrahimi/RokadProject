@@ -1,3 +1,8 @@
+// ==========================================
+// Page Component: BlogPage (Blog List)
+// Displays paginated/infinite-scrolling list of blog articles with live search and delete confirmation
+// ==========================================
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
@@ -9,6 +14,9 @@ import Search from "../../../Components/Search";
 import Loading from "../../../Components/Loading";
 import { Button, PageHeader, Card } from "../../../Components/UI";
 
+/**
+ * Blog list page with search, infinite scrolling, and CRUD actions.
+ */
 export default function BlogPage() {
   const navigate = useNavigate();
 

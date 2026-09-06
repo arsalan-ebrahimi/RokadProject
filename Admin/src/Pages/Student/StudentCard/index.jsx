@@ -1,3 +1,8 @@
+// ==========================================
+// Component: StudentCard
+// Presentation card displaying student profile, generation badge, current job, and external portfolio links
+// ==========================================
+
 import React from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -6,6 +11,13 @@ import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import { getImageUrl } from "../../../Utils/getImageUrl";
 import { Card, Badge, Button } from "../../../Components/UI";
 
+/**
+ * Card component for displaying student summary and social links.
+ * @param {Object} props
+ * @param {Object} props.student - Student entity data
+ * @param {Function} props.onEdit - Edit trigger callback
+ * @param {Function} props.onDelete - Delete trigger callback
+ */
 export default function StudentCard({ student, onEdit, onDelete }) {
   const imageUrl = getImageUrl(student.img);
 

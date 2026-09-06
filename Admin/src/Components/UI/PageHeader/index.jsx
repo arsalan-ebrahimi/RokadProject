@@ -1,8 +1,25 @@
+// ==========================================
+// UI Component: PageHeader
+// Standardized header bar for admin pages with title, subtitle, back navigation, and action buttons
+// ==========================================
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import Button from "../Button";
 
+/**
+ * Reusable PageHeader component for consistent page titles and navigation.
+ * @param {Object} props
+ * @param {string} props.title - Primary page title
+ * @param {string} [props.subtitle=null] - Subtitle or explanatory text
+ * @param {React.ReactNode} [props.action=null] - Custom action elements/buttons rendered on the left/action area
+ * @param {string} [props.backTo=null] - Route path to navigate on back click
+ * @param {string} [props.backLabel="بازگشت"] - Label for the back button
+ * @param {Function} [props.onBack=null] - Custom callback for back button click
+ * @param {React.ReactNode} [props.children=null] - Additional elements rendered underneath header (e.g. search/filters)
+ * @param {string} [props.className=""] - Custom CSS classes
+ */
 export function PageHeader({
   title,
   subtitle = null,

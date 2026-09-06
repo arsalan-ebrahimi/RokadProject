@@ -1,8 +1,14 @@
 // ==========================================
+// Routing Configuration: App Router
+// Centralized React Router setup with nested dashboard layouts and public auth route
+// ==========================================
+
+// ==========================================
 // Dependencies
 // ==========================================
 import React from "react";
 import { createBrowserRouter } from "react-router-dom";
+
 
 // ==========================================
 // Layouts & Static Pages

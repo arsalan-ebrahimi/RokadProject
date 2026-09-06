@@ -1,3 +1,8 @@
+// ==========================================
+// Page Component: UpdateComment
+// Form for editing existing testimonials, avatar selection, and image uploads
+// ==========================================
+
 import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -10,7 +15,12 @@ import { getImageUrl } from "../../../Utils/getImageUrl";
 import Loading from "../../../Components/Loading";
 import { Button, Input, Textarea, PageHeader, Card } from "../../../Components/UI";
 
+// Regular expression to restrict input to safe alphanumeric characters and standard Persian/Latin punctuation
 const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/;
+
+/**
+ * Yup validation schema for editing a testimonial comment.
+ */
 const commentUpdateSchema = Yup.object({
   author: Yup.string()
     .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
@@ -23,6 +33,9 @@ const commentUpdateSchema = Yup.object({
     .required("نقش نویسنده الزامی است"),
 });
 
+/**
+ * UpdateComment page component for editing testimonials.
+ */
 export default function UpdateComment() {
   const { id } = useParams();
   const navigate = useNavigate();

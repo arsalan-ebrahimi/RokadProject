@@ -1,3 +1,8 @@
+// ==========================================
+// Page Component: CreateAward
+// Form for recording awards/honors and linking recipient students from the alumni directory
+// ==========================================
+
 import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -6,7 +11,12 @@ import axiosInstance from "../../../Utils/axiosInstance";
 import Notify from "../../../Utils/notify";
 import { Button, Input, Select, Checkbox, Textarea, PageHeader, Card } from "../../../Components/UI";
 
+// Regular expression to restrict input to safe alphanumeric characters and standard Persian/Latin punctuation
 const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/;
+
+/**
+ * Yup validation schema for creating an award record.
+ */
 const awardValidationSchema = Yup.object({
   title: Yup.string()
     .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
@@ -24,6 +34,9 @@ const awardValidationSchema = Yup.object({
     .required("انتخاب برنده الزامی است"),
 });
 
+/**
+ * CreateAward page component for adding student awards and linking winners.
+ */
 export default function CreateAward() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);

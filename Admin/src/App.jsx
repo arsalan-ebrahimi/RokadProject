@@ -1,8 +1,16 @@
+// ==========================================
+// Root Component: App
+// Top-level application component mounting RouterProvider and global Toast container
+// ==========================================
+
 import React from 'react';
 import { RouterProvider } from 'react-router-dom';
 import router from './Routes';
 import { Toaster } from 'react-hot-toast';
 
+/**
+ * Root React application component.
+ */
 export default function App() {
   return (
     <>

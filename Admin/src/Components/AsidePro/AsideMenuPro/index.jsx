@@ -1,8 +1,18 @@
+// ==========================================
+// Layout Component: AsideMenuPro
+// Collapsible sidebar accordion section containing dashboard navigation links
+// ==========================================
+
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AsideItemPro } from "./AsideItemPro";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
+/**
+ * Collapsible menu section with active route detection.
+ * @param {Object} props
+ * @param {string} props.titleMenu - Header title of the accordion section
+ */
 export function AsideMenuPro({ titleMenu }) {
   const [open, setOpen] = useState(true);
   const navigate = useNavigate();

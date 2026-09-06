@@ -1,5 +1,22 @@
+// ==========================================
+// UI Component: Input
+// Form text input field with floating/top label, icon slot, validation errors, and ref forwarding
+// ==========================================
+
 import React, { forwardRef } from "react";
 
+/**
+ * Reusable Form Input component.
+ * @param {Object} props
+ * @param {string} [props.label] - Field label text
+ * @param {string} [props.error] - Validation error message to display
+ * @param {string} [props.helperText] - Supplementary hint text beneath input
+ * @param {React.ReactNode} [props.icon=null] - Leading/trailing icon element
+ * @param {string} [props.dir] - Text direction ('rtl'|'ltr')
+ * @param {string} [props.className=''] - Additional CSS classes
+ * @param {string} [props.id] - DOM ID attribute
+ * @param {string} [props.name] - Formik field name attribute
+ */
 export const Input = forwardRef(
   (
     {
@@ -16,6 +33,7 @@ export const Input = forwardRef(
     ref
   ) => {
     const inputId = id || name;
+
 
     return (
       <div className="flex flex-col gap-1.5 w-full text-right">

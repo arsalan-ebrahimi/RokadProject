@@ -1,3 +1,8 @@
+// ==========================================
+// Page Component: CommentPage (Testimonials List)
+// Displays student, parent, and teacher testimonials with role filtering, live search, and deletion handling
+// ==========================================
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
@@ -10,6 +15,9 @@ import Search from "../../../Components/Search";
 import Loading from "../../../Components/Loading";
 import { Button, PageHeader, Card } from "../../../Components/UI";
 
+/**
+ * Comments/testimonials list page with role filters, search, and infinite scrolling.
+ */
 export default function CommentPage() {
   const navigate = useNavigate();
 

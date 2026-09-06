@@ -1,9 +1,21 @@
+// ==========================================
+// Component: CommentCard
+// Presentation card for testimonials displaying author avatar, role badge, and quote text
+// ==========================================
+
 import React from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { getImageUrl } from "../../../Utils/getImageUrl";
 import { Card, Badge, Button } from "../../../Components/UI";
 
+/**
+ * Card displaying individual user comment / testimonial with edit and delete triggers.
+ * @param {Object} props
+ * @param {Object} props.comment - Comment data entity
+ * @param {Function} props.onEdit - Edit trigger callback
+ * @param {Function} props.onDelete - Delete trigger callback
+ */
 export default function CommentCard({ comment, onEdit, onDelete }) {
   const getRoleBadgeVariant = (role) => {
     switch (role) {

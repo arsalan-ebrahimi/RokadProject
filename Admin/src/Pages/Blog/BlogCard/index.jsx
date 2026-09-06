@@ -1,3 +1,8 @@
+// ==========================================
+// Component: BlogCard
+// Presentation card for an individual blog entry displaying thumbnail, metadata, and action buttons
+// ==========================================
+
 import React from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -5,6 +10,13 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { getImageUrl } from "../../../Utils/getImageUrl";
 import { Card, Button } from "../../../Components/UI";
 
+/**
+ * Card displaying blog summary with edit and delete trigger handlers.
+ * @param {Object} props
+ * @param {Object} props.blog - Blog data entity
+ * @param {Function} props.onEdit - Callback when edit button is clicked
+ * @param {Function} props.onDelete - Callback when delete button is clicked
+ */
 export default function BlogCard({ blog, onEdit, onDelete }) {
   const imageUrl = getImageUrl(blog.img);
 

@@ -1,5 +1,21 @@
+// ==========================================
+// UI Component: Textarea
+// Multi-line form textarea input with label, error rendering, and focus states
+// ==========================================
+
 import React, { forwardRef } from "react";
 
+/**
+ * Reusable Textarea component.
+ * @param {Object} props
+ * @param {string} [props.label] - Field label text
+ * @param {string} [props.error] - Error message
+ * @param {string} [props.helperText] - Hint / helper text
+ * @param {number} [props.rows=4] - Initial row count
+ * @param {string} [props.className=''] - Additional CSS classes
+ * @param {string} [props.id] - DOM ID attribute
+ * @param {string} [props.name] - Formik field name attribute
+ */
 export const Textarea = forwardRef(
   (
     {
@@ -15,6 +31,7 @@ export const Textarea = forwardRef(
     ref
   ) => {
     const textareaId = id || name;
+
 
     return (
       <div className="flex flex-col gap-1.5 w-full text-right">

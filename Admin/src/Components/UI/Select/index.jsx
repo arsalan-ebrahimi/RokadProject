@@ -1,6 +1,24 @@
+// ==========================================
+// UI Component: Select
+// Form dropdown selector with support for primitive options, key-value objects, custom children, and custom arrow icon
+// ==========================================
+
 import React, { forwardRef } from "react";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
+/**
+ * Reusable Select Dropdown component.
+ * @param {Object} props
+ * @param {string} [props.label] - Field label text
+ * @param {string} [props.error] - Validation error message
+ * @param {string} [props.helperText] - Supplementary hint text
+ * @param {Array<string|number|{label: string, value: any}>} [props.options=[]] - Array of options
+ * @param {string} [props.placeholder="انتخاب کنید"] - Default placeholder option label
+ * @param {React.ReactNode} [props.children] - Custom option nodes (overrides options prop)
+ * @param {string} [props.className=''] - Additional CSS classes
+ * @param {string} [props.id] - DOM ID attribute
+ * @param {string} [props.name] - Formik field name attribute
+ */
 export const Select = forwardRef(
   (
     {
@@ -18,6 +36,7 @@ export const Select = forwardRef(
     ref
   ) => {
     const selectId = id || name;
+
 
     return (
       <div className="flex flex-col gap-1.5 w-full text-right">

@@ -1,5 +1,25 @@
+// ==========================================
+// UI Component: Checkbox
+// Accessible custom checkbox with card/inline variants, animated SVG checkmark, description text, and error handling
+// ==========================================
+
 import React, { forwardRef, useId } from "react";
 
+/**
+ * Reusable Checkbox component.
+ * @param {Object} props
+ * @param {string} [props.label] - Primary checkbox label
+ * @param {string} [props.description] - Supplementary description text
+ * @param {string} [props.error] - Error message
+ * @param {boolean} [props.checked=false] - Controlled checked state
+ * @param {Function} [props.onChange] - Change handler
+ * @param {boolean} [props.disabled=false] - Disabled state
+ * @param {'default'|'card'} [props.variant='default'] - Display layout variant
+ * @param {'sm'|'md'|'lg'} [props.size='md'] - Box and font size variant
+ * @param {string} [props.className=''] - Outer container class name
+ * @param {string} [props.boxClassName=''] - Custom box container class name
+ * @param {string} [props.labelClassName=''] - Custom label text class name
+ */
 export const Checkbox = forwardRef(
   (
     {
@@ -23,6 +43,7 @@ export const Checkbox = forwardRef(
     ref
   ) => {
     const generatedId = useId();
+
     const checkboxId = id || name || generatedId;
 
     // Size variants for the custom box

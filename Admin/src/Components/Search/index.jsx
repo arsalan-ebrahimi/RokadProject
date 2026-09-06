@@ -1,6 +1,19 @@
+// ==========================================
+// Component: Search
+// Debounced search input field with icon and customizable query delay
+// ==========================================
+
 import React, { useState, useEffect } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 
+/**
+ * Reusable debounced Search bar component.
+ * @param {Object} props
+ * @param {Function} props.onSearch - Callback receiving the debounced query string
+ * @param {string} [props.placeholder="جستجو..."] - Placeholder text
+ * @param {string} [props.className=""] - Custom CSS classes
+ * @param {string} [props.defaultValue=""] - Initial search term
+ */
 export default function Search({
   onSearch,
   placeholder = "جستجو...",
@@ -9,12 +22,14 @@ export default function Search({
 }) {
   const [searchTerm, setSearchTerm] = useState(defaultValue);
 
+  // Debounce user input by 400ms to reduce excessive search triggers/requests
   useEffect(() => {
     const timer = setTimeout(() => {
       if (onSearch) {
         onSearch(searchTerm);
       }
     }, 400);
+
 
     return () => clearTimeout(timer);
   }, [searchTerm, onSearch]);

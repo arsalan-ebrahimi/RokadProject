@@ -1,3 +1,8 @@
+// ==========================================
+// Page Component: StudentPage (Student List)
+// Displays student alumni directory with filters by generation, school branch, and major
+// ==========================================
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
@@ -10,6 +15,9 @@ import Search from "../../../Components/Search";
 import Loading from "../../../Components/Loading";
 import { Button, PageHeader, Card } from "../../../Components/UI";
 
+/**
+ * Student directory page with multi-field filters, search, and deletion handling.
+ */
 export default function StudentPage() {
   const navigate = useNavigate();
 

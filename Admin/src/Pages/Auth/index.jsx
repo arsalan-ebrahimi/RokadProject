@@ -1,3 +1,8 @@
+// ==========================================
+// Page Component: AdminLogin
+// Handles administrator authentication, phone number formatting, JWT storage, and role verification
+// ==========================================
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -10,6 +15,21 @@ import axiosInstance from "../../Utils/axiosInstance";
 import Notify from "../../Utils/notify";
 import { Button } from "../../Components/UI";
 
+/**
+ * Yup validation schema for admin login credentials.
+ */
+const loginValidationSchema = Yup.object({
+  phoneNumber: Yup.string()
+    .matches(/^09\d{9}$/, "شماره همراه معتبر نیست (مثال: 09123456789)")
+    .required("شماره همراه الزامی است"),
+  password: Yup.string()
+    .required("رمز عبور الزامی است")
+    .min(6, "رمز عبور باید حداقل ۶ کاراکتر باشد"),
+});
+
+/**
+ * AdminLogin authentication page component.
+ */
 export default function AdminLogin() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -17,18 +37,13 @@ export default function AdminLogin() {
 
   const formik = useFormik({
     initialValues: { phoneNumber: "", password: "" },
-    validationSchema: Yup.object({
-      phoneNumber: Yup.string()
-        .matches(/^09\d{9}$/, "شماره همراه معتبر نیست (مثال: 09123456789)")
-        .required("شماره همراه الزامی است"),
-      password: Yup.string()
-        .required("رمز عبور الزامی است")
-        .min(6, "رمز عبور باید حداقل ۶ کاراکتر باشد"),
-    }),
+    validationSchema: loginValidationSchema,
 
     onSubmit: async (values, { setSubmitting }) => {
       try {
+        // Convert Iranian local format 09... to international +989...
         const formattedPhone = values.phoneNumber.replace(/^0/, "+98");
+
 
         const response = await axiosInstance.post("auth/login-password", {
           phoneNumber: formattedPhone,

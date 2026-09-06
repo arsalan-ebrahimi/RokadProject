@@ -1,3 +1,8 @@
+// ==========================================
+// Page Component: EventPage (Event List)
+// Displays paginated list of events with branch filtering (Boys/Girls), search, and deletion handling
+// ==========================================
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
@@ -10,6 +15,9 @@ import Search from "../../../Components/Search";
 import Loading from "../../../Components/Loading";
 import { Button, PageHeader, Card } from "../../../Components/UI";
 
+/**
+ * Event list page with branch filter, search, infinite scrolling, and CRUD actions.
+ */
 export default function EventPage() {
   const navigate = useNavigate();
 
