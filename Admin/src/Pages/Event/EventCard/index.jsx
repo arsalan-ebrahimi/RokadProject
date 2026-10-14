@@ -4,9 +4,11 @@
 // ==========================================
 
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import { getImageUrl } from "../../../Utils/getImageUrl";
 import { Card, Badge, Button } from "../../../Components/UI";
 
@@ -18,6 +20,7 @@ import { Card, Badge, Button } from "../../../Components/UI";
  * @param {Function} props.onDelete - Callback when delete is triggered
  */
 export default function EventCard({ event, onEdit, onDelete }) {
+  const navigate = useNavigate();
   const imageUrl = getImageUrl(event.img);
 
   return (
@@ -29,12 +32,20 @@ export default function EventCard({ event, onEdit, onDelete }) {
             src={imageUrl}
             alt={event.title}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            onError={(e) => {
+              e.target.style.display = "none";
+              if (e.target.nextSibling) {
+                e.target.nextSibling.style.display = "flex";
+              }
+            }}
           />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-text-muted text-xs font-medium">
-            بدون تصویر
-          </div>
-        )}
+        ) : null}
+        <div
+          className="w-full h-full flex items-center justify-center text-text-muted text-xs font-medium"
+          style={{ display: event.img ? "none" : "flex" }}
+        >
+          بدون تصویر
+        </div>
       </div>
 
       {/* Content Section */}
@@ -74,7 +85,7 @@ export default function EventCard({ event, onEdit, onDelete }) {
         {/* Date */}
         <div className="flex items-center gap-1.5 text-xs text-text-muted mb-2.5 shrink-0">
           <CalendarTodayIcon fontSize="inherit" />
-          <span>{event.date}</span>
+          <span className="font-numeric">{event.date}</span>
         </div>
 
         {/* Description */}
@@ -83,24 +94,36 @@ export default function EventCard({ event, onEdit, onDelete }) {
         </p>
 
         {/* Action Toolbar */}
-        <div className="flex justify-end items-center gap-1 mt-auto shrink-0 pt-3 border-t border-border-light">
+        <div className="flex justify-between items-center gap-1 mt-auto shrink-0 pt-3 border-t border-border-light">
           <Button
-            variant="info-ghost"
-            size="icon-sm"
-            onClick={() => onEdit(event._id)}
-            title="ویرایش"
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(`/event/${event._id}`)}
+            icon={<VisibilityIcon fontSize="inherit" />}
+            className="text-xs text-primary hover:text-primary-active"
           >
-            <EditIcon fontSize="small" />
+            مشاهده رویداد
           </Button>
 
-          <Button
-            variant="danger-ghost"
-            size="icon-sm"
-            onClick={() => onDelete(event._id)}
-            title="حذف"
-          >
-            <DeleteOutlineIcon fontSize="small" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="info-ghost"
+              size="icon-sm"
+              onClick={() => onEdit(event._id)}
+              title="ویرایش"
+            >
+              <EditIcon fontSize="small" />
+            </Button>
+
+            <Button
+              variant="danger-ghost"
+              size="icon-sm"
+              onClick={() => onDelete(event._id)}
+              title="حذف"
+            >
+              <DeleteOutlineIcon fontSize="small" />
+            </Button>
+          </div>
         </div>
       </div>
     </Card>
