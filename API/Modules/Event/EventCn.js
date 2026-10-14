@@ -3,25 +3,97 @@ import path from "path";
 import { fileURLToPath } from "url";
 import ApiFeatures, { catchAsync, HandleERROR } from "vanta-api";
 import Event from "./EventMd.js";
+import { stripHtml } from "../../Utils/htmlSanitizer.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export const create = catchAsync(async (req, res, next) => {
-  const { title, type, date, description, branch, img } = req.body;
-
-  const existingEvent = await Event.findOne({ title });
-  if (existingEvent) {
-    return next(new HandleERROR("رویدادی با این عنوان قبلاً ثبت شده است", 400));
-  }
-
-  const newEvent = await Event.create({
+  const {
     title,
     type,
     date,
     description,
     branch,
     img,
+    eventDuration,
+    closingLocation,
+    holdingDate,
+    organizers,
+    teams,
+    howItWent,
+    memorableQuote,
+    deadlinesDescription,
+    deadlines,
+    tags,
+  } = req.body;
+
+  const cleanTitle = typeof title === "string" ? stripHtml(title) : "";
+  const existingEvent = await Event.findOne({ title: cleanTitle });
+  if (existingEvent) {
+    return next(new HandleERROR("رویدادی با این عنوان قبلاً ثبت شده است", 400));
+  }
+
+  const cleanOrganizers = Array.isArray(organizers)
+    ? organizers.map((org) => ({
+        name: typeof org?.name === "string" ? stripHtml(org.name) : "",
+        role: typeof org?.role === "string" ? stripHtml(org.role) : "",
+        category: org?.category,
+      }))
+    : [];
+
+  const cleanDeadlines = Array.isArray(deadlines)
+    ? deadlines.map((dl) => ({
+        title: typeof dl?.title === "string" ? stripHtml(dl.title) : "",
+        date: typeof dl?.date === "string" ? stripHtml(dl.date) : "",
+        description: typeof dl?.description === "string" ? stripHtml(dl.description) : "",
+      }))
+    : [];
+
+  const cleanTags = Array.isArray(tags)
+    ? tags.map((t) => (typeof t === "string" ? stripHtml(t) : "")).filter(Boolean)
+    : [];
+
+  const cleanTeams = {
+    firstTeam: {
+      name: typeof teams?.firstTeam?.name === "string" ? stripHtml(teams.firstTeam.name) : "",
+      isHonored: Boolean(teams?.firstTeam?.isHonored),
+    },
+    secondTeam: {
+      name: typeof teams?.secondTeam?.name === "string" ? stripHtml(teams.secondTeam.name) : "",
+      isHonored: Boolean(teams?.secondTeam?.isHonored),
+    },
+    thirdTeam: {
+      name: typeof teams?.thirdTeam?.name === "string" ? stripHtml(teams.thirdTeam.name) : "",
+      isHonored: Boolean(teams?.thirdTeam?.isHonored),
+    },
+    honoredTeams: Array.isArray(teams?.honoredTeams)
+      ? teams.honoredTeams
+          .map((ht) => ({ name: typeof ht?.name === "string" ? stripHtml(ht.name) : "" }))
+          .filter((ht) => ht.name)
+      : [],
+  };
+
+  const newEvent = await Event.create({
+    title: cleanTitle,
+    type: typeof type === "string" ? stripHtml(type) : "",
+    date: typeof date === "string" ? stripHtml(date) : "",
+    description: typeof description === "string" ? stripHtml(description) : "",
+    branch,
+    img,
+    eventDuration: typeof eventDuration === "string" ? stripHtml(eventDuration) : "",
+    closingLocation: typeof closingLocation === "string" ? stripHtml(closingLocation) : "",
+    holdingDate: typeof holdingDate === "string" ? stripHtml(holdingDate) : "",
+    organizers: cleanOrganizers,
+    teams: cleanTeams,
+    howItWent: typeof howItWent === "string" ? stripHtml(howItWent) : "",
+    memorableQuote: {
+      quote: typeof memorableQuote?.quote === "string" ? stripHtml(memorableQuote.quote) : "",
+      speaker: typeof memorableQuote?.speaker === "string" ? stripHtml(memorableQuote.speaker) : "",
+    },
+    deadlinesDescription: typeof deadlinesDescription === "string" ? stripHtml(deadlinesDescription) : "",
+    deadlines: cleanDeadlines,
+    tags: cleanTags,
   });
 
   return res.status(201).json({
@@ -34,7 +106,7 @@ export const create = catchAsync(async (req, res, next) => {
 export const getAll = catchAsync(async (req, res, next) => {
   const features = new ApiFeatures(Event, req.query, req.role)
     .filter()
-    .search(['title', 'type', 'description'])
+    .search(["title", "type", "description", "closingLocation", "tags"])
     .sort()
     .limitFields()
     .paginate()
@@ -70,30 +142,88 @@ export const getOne = catchAsync(async (req, res, next) => {
 });
 
 export const update = catchAsync(async (req, res, next) => {
-  const allowedUpdates = [
-    "title",
-    "type",
-    "date",
-    "description",
-    "branch",
-    "img",
-  ];
-  const updates = {};
-
-  Object.keys(req.body).forEach((el) => {
-    if (allowedUpdates.includes(el)) updates[el] = req.body[el];
-  });
-
   const oldEvent = await Event.findById(req.params.id);
   if (!oldEvent) {
     return next(new HandleERROR("رویداد یافت نشد", 404));
   }
 
-  // Delete old image from hard drive if a new one is uploaded
-  if (updates.img && updates.img !== oldEvent.img) {
-    const filePath = path.join(__dirname, "../../Public", oldEvent.img);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+  const updates = {};
+
+  if (req.body.title !== undefined) updates.title = typeof req.body.title === "string" ? stripHtml(req.body.title) : req.body.title;
+  if (req.body.type !== undefined) updates.type = typeof req.body.type === "string" ? stripHtml(req.body.type) : req.body.type;
+  if (req.body.date !== undefined) updates.date = typeof req.body.date === "string" ? stripHtml(req.body.date) : req.body.date;
+  if (req.body.description !== undefined) updates.description = typeof req.body.description === "string" ? stripHtml(req.body.description) : req.body.description;
+  if (req.body.branch !== undefined) updates.branch = req.body.branch;
+  if (req.body.eventDuration !== undefined) updates.eventDuration = typeof req.body.eventDuration === "string" ? stripHtml(req.body.eventDuration) : req.body.eventDuration;
+  if (req.body.closingLocation !== undefined) updates.closingLocation = typeof req.body.closingLocation === "string" ? stripHtml(req.body.closingLocation) : req.body.closingLocation;
+  if (req.body.holdingDate !== undefined) updates.holdingDate = typeof req.body.holdingDate === "string" ? stripHtml(req.body.holdingDate) : req.body.holdingDate;
+  if (req.body.howItWent !== undefined) updates.howItWent = typeof req.body.howItWent === "string" ? stripHtml(req.body.howItWent) : req.body.howItWent;
+  if (req.body.deadlinesDescription !== undefined) updates.deadlinesDescription = typeof req.body.deadlinesDescription === "string" ? stripHtml(req.body.deadlinesDescription) : req.body.deadlinesDescription;
+
+  if (req.body.organizers !== undefined) {
+    updates.organizers = Array.isArray(req.body.organizers)
+      ? req.body.organizers.map((org) => ({
+          name: typeof org?.name === "string" ? stripHtml(org.name) : "",
+          role: typeof org?.role === "string" ? stripHtml(org.role) : "",
+          category: org?.category,
+        }))
+      : [];
+  }
+
+  if (req.body.teams !== undefined) {
+    updates.teams = {
+      firstTeam: {
+        name: typeof req.body.teams?.firstTeam?.name === "string" ? stripHtml(req.body.teams.firstTeam.name) : "",
+        isHonored: Boolean(req.body.teams?.firstTeam?.isHonored),
+      },
+      secondTeam: {
+        name: typeof req.body.teams?.secondTeam?.name === "string" ? stripHtml(req.body.teams.secondTeam.name) : "",
+        isHonored: Boolean(req.body.teams?.secondTeam?.isHonored),
+      },
+      thirdTeam: {
+        name: typeof req.body.teams?.thirdTeam?.name === "string" ? stripHtml(req.body.teams.thirdTeam.name) : "",
+        isHonored: Boolean(req.body.teams?.thirdTeam?.isHonored),
+      },
+      honoredTeams: Array.isArray(req.body.teams?.honoredTeams)
+        ? req.body.teams.honoredTeams
+            .map((ht) => ({ name: typeof ht?.name === "string" ? stripHtml(ht.name) : "" }))
+            .filter((ht) => ht.name)
+        : [],
+    };
+  }
+
+  if (req.body.memorableQuote !== undefined) {
+    updates.memorableQuote = {
+      quote: typeof req.body.memorableQuote?.quote === "string" ? stripHtml(req.body.memorableQuote.quote) : "",
+      speaker: typeof req.body.memorableQuote?.speaker === "string" ? stripHtml(req.body.memorableQuote.speaker) : "",
+    };
+  }
+
+  if (req.body.deadlines !== undefined) {
+    updates.deadlines = Array.isArray(req.body.deadlines)
+      ? req.body.deadlines.map((dl) => ({
+          title: typeof dl?.title === "string" ? stripHtml(dl.title) : "",
+          date: typeof dl?.date === "string" ? stripHtml(dl.date) : "",
+          description: typeof dl?.description === "string" ? stripHtml(dl.description) : "",
+        }))
+      : [];
+  }
+
+  if (req.body.tags !== undefined) {
+    updates.tags = Array.isArray(req.body.tags)
+      ? req.body.tags.map((t) => (typeof t === "string" ? stripHtml(t) : "")).filter(Boolean)
+      : [];
+  }
+
+  if (req.body.img !== undefined && req.body.img !== oldEvent.img) {
+    updates.img = req.body.img;
+    const oldFilePath = path.join(__dirname, "../../Public", oldEvent.img);
+    if (fs.existsSync(oldFilePath)) {
+      try {
+        fs.unlinkSync(oldFilePath);
+      } catch (err) {
+        console.error("Failed to remove old event image:", err);
+      }
     }
   }
 
@@ -119,7 +249,11 @@ export const remove = catchAsync(async (req, res, next) => {
   if (deleteEvent.img) {
     const filePath = path.join(__dirname, "../../Public", deleteEvent.img);
     if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+      try {
+        fs.unlinkSync(filePath);
+      } catch (err) {
+        console.error("Failed to delete event image:", err);
+      }
     }
   }
 
