@@ -9,7 +9,6 @@
 import React from "react";
 import { createBrowserRouter } from "react-router-dom";
 
-
 // ==========================================
 // Layouts & Static Pages
 // ==========================================
@@ -25,6 +24,7 @@ import Blog from "../Pages/Blog";
 import BlogPage from "../Pages/Blog/BlogPage";
 import CreateBlog from "../Pages/Blog/CreateBlog";
 import UpdateBlog from "../Pages/Blog/UpdateBlog";
+import SingleBlog from "../Pages/Blog/SingleBlog";
 
 // ==========================================
 // Event Components
@@ -33,6 +33,7 @@ import EventLayout from "../Pages/Event";
 import EventPage from "../Pages/Event/EventPage";
 import CreateEvent from "../Pages/Event/CreateEvent";
 import UpdateEvent from "../Pages/Event/UpdateEvent";
+import SingleEvent from "../Pages/Event/SingleEvent";
 
 // ==========================================
 // Student Components
@@ -41,12 +42,13 @@ import StudentLayout from "../Pages/Student";
 import StudentPage from "../Pages/Student/StudentPage";
 import CreateStudent from "../Pages/Student/CreateStudent";
 import UpdateStudent from "../Pages/Student/UpdateStudent";
+import SingleStudent from "../Pages/Student/SingleStudent";
 
 // ==========================================
 // Award Components
 // ==========================================
 import Award from "../Pages/Award";
-import AwardPage from "../Pages/Award/AwardPage"; 
+import AwardPage from "../Pages/Award/AwardPage";
 import CreateAward from "../Pages/Award/CreateAward";
 import UpdateAward from "../Pages/Award/UpdateAward";
 
@@ -61,7 +63,7 @@ import UpdateComment from "../Pages/Comment/UpdateComment";
 // ==========================================
 // Seo Components
 // ==========================================
-import SeoSettings from "../Pages/SeoSettings"; 
+import SeoSettings from "../Pages/SeoSettings";
 
 // ==========================================
 // Application Router Configuration
@@ -89,6 +91,7 @@ const router = createBrowserRouter([
           { index: true, element: <BlogPage /> },
           { path: "create", element: <CreateBlog /> },
           { path: "update/:id", element: <UpdateBlog /> },
+          { path: ":id", element: <SingleBlog /> },
         ],
       },
       {
@@ -99,6 +102,7 @@ const router = createBrowserRouter([
           { index: true, element: <EventPage /> },
           { path: "create", element: <CreateEvent /> },
           { path: "update/:id", element: <UpdateEvent /> },
+          { path: ":id", element: <SingleEvent /> },
         ],
       },
       {
@@ -109,6 +113,7 @@ const router = createBrowserRouter([
           { index: true, element: <StudentPage /> },
           { path: "create", element: <CreateStudent /> },
           { path: "update/:id", element: <UpdateStudent /> },
+          { path: ":id", element: <SingleStudent /> },
         ],
       },
       {
