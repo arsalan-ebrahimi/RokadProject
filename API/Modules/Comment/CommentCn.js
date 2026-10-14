@@ -3,6 +3,7 @@ import { fileURLToPath } from "url";
 import path from "path";
 import ApiFeatures, { catchAsync, HandleERROR } from "vanta-api";
 import Comment from "./CommentMd.js";
+import { stripHtml } from "../../Utils/htmlSanitizer.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -10,7 +11,12 @@ const __dirname = path.dirname(__filename);
 export const create = catchAsync(async (req, res, next) => {
   const { author, content, role, img } = req.body;
 
-  const newComment = await Comment.create({ author, content, role, img });
+  const newComment = await Comment.create({
+    author: typeof author === "string" ? stripHtml(author) : "",
+    content: typeof content === "string" ? stripHtml(content) : "",
+    role: typeof role === "string" ? stripHtml(role) : "",
+    img,
+  });
 
   return res.status(201).json({
     success: true,
@@ -58,7 +64,9 @@ export const update = catchAsync(async (req, res, next) => {
   const updates = {};
 
   Object.keys(req.body).forEach((el) => {
-    if (allowedUpdates.includes(el)) updates[el] = req.body[el];
+    if (allowedUpdates.includes(el)) {
+      updates[el] = typeof req.body[el] === "string" ? stripHtml(req.body[el]) : req.body[el];
+    }
   });
 
   const oldComment = await Comment.findById(req.params.id);

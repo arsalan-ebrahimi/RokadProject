@@ -13,11 +13,12 @@ const signToken = (id, role) => {
   }
   return jwt.sign({ id, role }, process.env.JWT_SECRET, {
     expiresIn: "90d",
+    algorithm: "HS256",
   });
 };
 
 export const auth = catchAsync(async (req, res, next) => {
-  const { phoneNumber } = req.body;
+  const phoneNumber = String(req.body.phoneNumber || "").trim();
   const user = await User.findOne({ phoneNumber });
 
   if (!user || !user.password) {
@@ -51,16 +52,13 @@ export const auth = catchAsync(async (req, res, next) => {
 });
 
 export const loginWithPassword = catchAsync(async (req, res, next) => {
-  const { phoneNumber, password } = req.body;
+  const phoneNumber = String(req.body.phoneNumber || "").trim();
+  const password = String(req.body.password || "");
 
   const user = await User.findOne({ phoneNumber }).select("+password");
 
-  if (!user) {
+  if (!user || !user.password) {
     return next(new HandleERROR("شماره موبایل یا رمز عبور اشتباه است", 401));
-  }
-
-  if (!user.password) {
-    return next(new HandleERROR("برای این حساب کاربری رمز عبوری تنظیم نشده است", 400));
   }
 
   const isMatch = await bcryptjs.compare(password, user.password);
@@ -87,7 +85,9 @@ export const loginWithPassword = catchAsync(async (req, res, next) => {
 });
 
 export const loginWithOtp = catchAsync(async (req, res, next) => {
-  const { phoneNumber, code, password } = req.body;
+  const phoneNumber = String(req.body.phoneNumber || "").trim();
+  const code = String(req.body.code || "").trim();
+  const password = req.body.password ? String(req.body.password) : undefined;
 
   const verification = await verifySmsCode(phoneNumber, code);
 
@@ -128,7 +128,7 @@ export const loginWithOtp = catchAsync(async (req, res, next) => {
 });
 
 export const resendCode = catchAsync(async (req, res, next) => {
-  const { phoneNumber } = req.body;
+  const phoneNumber = String(req.body.phoneNumber || "").trim();
 
   const resultSms = await sendAuthCode(phoneNumber);
 
@@ -146,7 +146,9 @@ export const resendCode = catchAsync(async (req, res, next) => {
 });
 
 export const forgetPassword = catchAsync(async (req, res, next) => {
-  const { code, phoneNumber, newPassword } = req.body;
+  const phoneNumber = String(req.body.phoneNumber || "").trim();
+  const code = String(req.body.code || "").trim();
+  const newPassword = String(req.body.newPassword || "");
 
   const verification = await verifySmsCode(phoneNumber, code);
 

@@ -33,7 +33,8 @@ You can directly apply conditions to any field:
 - **Equality**: \`?role=admin\`
 - **Greater/Less than (\`gte\`, \`lte\`, \`gt\`, \`lt\`)**: \`?price[gte]=1000&price[lte]=5000\`
 - **In/Not in (\`in\`, \`nin\`)**: \`?category[in]=tech,news\`
-- **Regex**: \`?title[regex]=^Tutorial\` (Titles starting with "Tutorial")
+- **Field Existence (\`exists\`)**: \`?img[exists]=true\`
+- **Safe Text Search**: Use \`?q=...\` for safe regex-escaped text search
 `;
 
 const options = {

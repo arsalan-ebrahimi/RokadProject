@@ -1,32 +1,41 @@
 import ApiFeatures, { catchAsync, HandleERROR } from "vanta-api";
 import Award from "./AwardMd.js";
+import { stripHtml } from "../../Utils/htmlSanitizer.js";
 
 export const create = catchAsync(async (req, res, next) => {
   const { title, rank, description, winners } = req.body;
 
-  const existingAward = await Award.findOne({ title });
+  const cleanTitle = typeof title === "string" ? stripHtml(title) : "";
+  const cleanDescription = typeof description === "string" ? stripHtml(description) : "";
+
+  const existingAward = await Award.findOne({ title: cleanTitle });
   if (existingAward) {
     return next(new HandleERROR("جایزه‌ای با این عنوان قبلاً ثبت شده است", 400));
   }
 
-  const newAward = await Award.create({ title, rank, description, winners });
+  const newAward = await Award.create({
+    title: cleanTitle,
+    rank: Number(rank),
+    description: cleanDescription,
+    winners,
+  });
 
   return res.status(201).json({
     success: true,
     message: "جایزه با موفقیت ایجاد شد",
-    data: newAward
+    data: newAward,
   });
 });
 
 export const getAll = catchAsync(async (req, res, next) => {
   const features = new ApiFeatures(Award, req.query, req.role)
     .filter()
-    .search(['title', 'description'])
+    .search(["title", "description"])
     .sort()
     .limitFields()
     .paginate()
     .populate();
-    
+
   const result = await features.execute();
   return res.status(200).json(result);
 });
@@ -34,7 +43,7 @@ export const getAll = catchAsync(async (req, res, next) => {
 export const getOne = catchAsync(async (req, res, next) => {
   const features = new ApiFeatures(Award, req.query, req.role)
     .addManualFilters({ _id: req.params.id })
-    .filter() 
+    .filter()
     .limitFields()
     .populate();
 
@@ -48,7 +57,7 @@ export const getOne = catchAsync(async (req, res, next) => {
 
   return res.status(200).json({
     success: true,
-    data: doc
+    data: doc,
   });
 });
 
@@ -57,8 +66,14 @@ export const update = catchAsync(async (req, res, next) => {
   const updates = {};
 
   Object.keys(req.body).forEach((el) => {
-    if (allowedUpdates.includes(el)) updates[el] = req.body[el];
+    if (allowedUpdates.includes(el)) {
+      updates[el] = typeof req.body[el] === "string" ? stripHtml(req.body[el]) : req.body[el];
+    }
   });
+
+  if (updates.rank !== undefined) {
+    updates.rank = Number(updates.rank);
+  }
 
   const updatedAward = await Award.findByIdAndUpdate(req.params.id, updates, {
     new: true,
@@ -72,7 +87,7 @@ export const update = catchAsync(async (req, res, next) => {
   return res.status(200).json({
     success: true,
     message: "جایزه با موفقیت بروزرسانی شد",
-    data: updatedAward
+    data: updatedAward,
   });
 });
 
@@ -85,6 +100,6 @@ export const remove = catchAsync(async (req, res, next) => {
 
   return res.status(200).json({
     success: true,
-    message: "جایزه با موفقیت حذف شد"
+    message: "جایزه با موفقیت حذف شد",
   });
 });

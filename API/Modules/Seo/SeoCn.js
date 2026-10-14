@@ -1,16 +1,17 @@
 import ApiFeatures, { catchAsync, HandleERROR } from "vanta-api";
 import Seo from "./SeoMd.js";
+import { stripHtml } from "../../Utils/htmlSanitizer.js";
 
 export const getOne = catchAsync(async (req, res, next) => {
   const features = new ApiFeatures(Seo, req.query, req.role)
     .limitFields()
-    .paginate()
+    .paginate();
 
   const result = await features.execute();
   
   let doc = Array.isArray(result) ? result[0] : result?.data ? result.data[0] : result;
 
-if (!doc) {
+  if (!doc) {
     doc = {
       title: "رکاد - پلتفرم آموزشی",
       description: "پلتفرم جامع آموزشی و مدیریت دانش‌آموزان رکاد",
@@ -43,6 +44,16 @@ export const update = catchAsync(async (req, res, next) => {
 
   Object.keys(req.body).forEach((el) => {
     if (allowedUpdates.includes(el)) updates[el] = req.body[el];
+  });
+
+  const stringFieldsToStrip = [
+    "title", "description", "keywords", "canonicalUrl",
+    "ogTitle", "ogDescription", "twitterTitle", "twitterDescription"
+  ];
+  stringFieldsToStrip.forEach((field) => {
+    if (typeof updates[field] === "string") {
+      updates[field] = stripHtml(updates[field]);
+    }
   });
 
   const updatedSeo = await Seo.findOneAndUpdate({}, updates, {

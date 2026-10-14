@@ -1,6 +1,7 @@
 import ApiFeatures, { catchAsync, HandleERROR } from "vanta-api";
 import User from "./UserMd.js";
 import bcryptjs from "bcryptjs";
+import { stripHtml } from "../../Utils/htmlSanitizer.js";
 
 export const getAll = catchAsync(async (req, res, next) => {
   const features = new ApiFeatures(User, req.query, req.role)
@@ -60,8 +61,8 @@ export const update = catchAsync(async (req, res, next) => {
     return next(new HandleERROR("کاربر یافت نشد", 404));
   }
 
-  if (fullName !== undefined) user.fullName = fullName;
-  if (birthDate !== undefined) user.birthDate = birthDate;
+  if (fullName !== undefined) user.fullName = stripHtml(fullName);
+  if (birthDate !== undefined) user.birthDate = stripHtml(birthDate);
   if (password) user.password = await bcryptjs.hash(password, 12);
   if (req.role === "superAdmin" && role) user.role = role;
 
@@ -70,6 +71,10 @@ export const update = catchAsync(async (req, res, next) => {
   return res.status(200).json({
     success: true,
     message: "اطلاعات کاربر با موفقیت بروزرسانی شد",
-    data: updatedUser,
+    data: (() => {
+      const u = updatedUser.toObject();
+      delete u.password;
+      return u;
+    })(),
   });
 });
