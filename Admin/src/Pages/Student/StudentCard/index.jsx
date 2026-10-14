@@ -4,9 +4,11 @@
 // ==========================================
 
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import LinkIcon from "@mui/icons-material/Link";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import { getImageUrl } from "../../../Utils/getImageUrl";
 import { Card, Badge, Button } from "../../../Components/UI";
@@ -19,6 +21,7 @@ import { Card, Badge, Button } from "../../../Components/UI";
  * @param {Function} props.onDelete - Delete trigger callback
  */
 export default function StudentCard({ student, onEdit, onDelete }) {
+  const navigate = useNavigate();
   const imageUrl = getImageUrl(student.img);
 
   return (
@@ -54,6 +57,11 @@ export default function StudentCard({ student, onEdit, onDelete }) {
           <Badge variant="indigo" size="sm">
             نسل {student.generation}
           </Badge>
+          {student.currentCity && (
+            <span className="text-[11px] text-text-muted">
+              {student.currentCity}
+            </span>
+          )}
         </div>
 
         <h2 className="text-base md:text-lg font-bold text-secondary line-clamp-1 leading-[1.4] min-h-[1.4em] mb-1 break-words">
@@ -82,24 +90,36 @@ export default function StudentCard({ student, onEdit, onDelete }) {
         </div>
 
         {/* Card Actions */}
-        <div className="flex justify-end items-center gap-1 mt-auto shrink-0 pt-3 border-t border-border-light">
+        <div className="flex justify-between items-center gap-1 mt-auto shrink-0 pt-3 border-t border-border-light">
           <Button
-            variant="info-ghost"
-            size="icon-sm"
-            onClick={() => onEdit(student._id)}
-            title="ویرایش"
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(`/student/${student._id}`)}
+            icon={<VisibilityIcon fontSize="inherit" />}
+            className="text-xs text-primary hover:text-primary-active"
           >
-            <EditIcon fontSize="small" />
+            مشاهده پرونده
           </Button>
 
-          <Button
-            variant="danger-ghost"
-            size="icon-sm"
-            onClick={() => onDelete(student._id)}
-            title="حذف"
-          >
-            <DeleteOutlineIcon fontSize="small" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="info-ghost"
+              size="icon-sm"
+              onClick={() => onEdit(student._id)}
+              title="ویرایش"
+            >
+              <EditIcon fontSize="small" />
+            </Button>
+
+            <Button
+              variant="danger-ghost"
+              size="icon-sm"
+              onClick={() => onDelete(student._id)}
+              title="حذف"
+            >
+              <DeleteOutlineIcon fontSize="small" />
+            </Button>
+          </div>
         </div>
       </div>
     </Card>
