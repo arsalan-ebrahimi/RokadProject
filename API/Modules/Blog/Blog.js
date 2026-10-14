@@ -22,6 +22,18 @@ export default blogRouter;
  * @swagger
  * components:
  *   schemas:
+ *     TableOfContentItem:
+ *       type: object
+ *       required:
+ *         - title
+ *       properties:
+ *         _id:
+ *           type: string
+ *           example: "64a2b3c4d5e6f7a8b9c0d1e3"
+ *         title:
+ *           type: string
+ *           description: Section heading title
+ *           example: "مقدمه‌ای بر استک MERN"
  *     Blog:
  *       type: object
  *       required:
@@ -37,23 +49,38 @@ export default blogRouter;
  *         title:
  *           type: string
  *           description: Blog post title
- *           example: "Web Development with MERN Stack"
+ *           example: "توسعه وب با استک MERN"
  *         description:
  *           type: string
- *           description: Blog post content/description
- *           example: "In this article, we examine the structure of full-stack projects..."
+ *           description: Blog post excerpt/summary
+ *           example: "در این مقاله ساختار پروژه‌های فول‌استک را بررسی می‌کنیم..."
  *         img:
  *           type: string
- *           description: Image URL or icon name for the blog post
+ *           description: Image filename
  *           example: "mern-banner.jpg"
  *         date:
  *           type: string
  *           description: Publication date
- *           example: "2026-08-15"
- *         __v:
- *           type: integer
- *           description: Version key
- *           example: 0
+ *           example: "1404/06/15"
+ *         tags:
+ *           type: array
+ *           items:
+ *             type: string
+ *           example: ["برنامه‌نویسی", "آموزش", "ری‌اکت"]
+ *         tableOfContents:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/TableOfContentItem'
+ *         htmlContent:
+ *           type: string
+ *           description: Sanitized HTML body of the article
+ *           example: "<p>متن کامل مقاله به همراه <strong>کدهای نمونه</strong>...</p>"
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
  *     BlogInput:
  *       type: object
  *       required:
@@ -64,16 +91,32 @@ export default blogRouter;
  *       properties:
  *         title:
  *           type: string
- *           example: "Web Development with MERN Stack"
+ *           example: "توسعه وب با استک MERN"
  *         description:
  *           type: string
- *           example: "In this article, we examine the structure of full-stack projects..."
+ *           example: "در این مقاله ساختار پروژه‌های فول‌استک را بررسی می‌کنیم..."
  *         img:
  *           type: string
  *           example: "mern-banner.jpg"
  *         date:
  *           type: string
- *           example: "2026-08-15"
+ *           example: "1404/06/15"
+ *         tags:
+ *           type: array
+ *           items:
+ *             type: string
+ *           example: ["برنامه‌نویسی", "آموزش"]
+ *         tableOfContents:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: "مقدمه و تعاریف اولیه"
+ *         htmlContent:
+ *           type: string
+ *           example: "<h2>بخش اول</h2><p>متن مقاله...</p>"
  *     BlogResponse:
  *       type: object
  *       properties:
@@ -82,7 +125,7 @@ export default blogRouter;
  *           example: true
  *         message:
  *           type: string
- *           example: "Article created successfully"
+ *           example: "مقاله با موفقیت ایجاد شد"
  *         data:
  *           $ref: '#/components/schemas/Blog'
  *     BlogListResponse:
@@ -121,90 +164,56 @@ export default blogRouter;
  *           example: false
  *         message:
  *           type: string
- *           example: "Error message will be displayed here"
+ *           example: "پیام خطای مربوطه"
  *         statusCode:
  *           type: integer
  *           example: 400
- *   securitySchemes:
- *     bearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
  */
 
 /**
  * @swagger
  * tags:
  *   - name: Blog
- *     description: Blog Management Endpoints 
+ *     description: مدیریت مقالات و وبلاگ
  */
 
 /**
  * @swagger
  * /api/blog:
  *   get:
- *     summary: Retrieve all blog posts with advanced features
+ *     summary: دریافت لیست مقالات با قابلیت فیلتر، صفحه‌بندی و جستجو
  *     tags: [Blog]
- *     description: "Retrieve the list of records with filtering, pagination, and advanced search ."
  *     parameters:
  *       - in: query
  *         name: q
  *         schema:
  *           type: string
- *         description: "Search text"
- *         example: "React"
+ *         description: جستجو در عنوان، توضیحات و تگ‌ها
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
  *           default: 1
- *         description: "Page number"
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
  *           default: 10
- *         description: "Items per page"
  *       - in: query
  *         name: sort
  *         schema:
  *           type: string
- *         description: "Sorting"
- *         example: "-date"
- *       - in: query
- *         name: fields
- *         schema:
- *           type: string
- *         description: "Select fields"
- *         example: "title,date"
- *       - in: query
- *         name: populate
- *         schema:
- *           type: string
- *         description: "Populate relations"
- *         example: "author,comments"
+ *           example: "-createdAt"
  *     responses:
  *       200:
- *         description: Successfully retrieved the list of blog posts
+ *         description: لیست مقالات با موفقیت دریافت شد
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/BlogListResponse'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               message: "Server error occurred"
- *               statusCode: 500
- * 
  *   post:
- *     summary: Create a new blog post
+ *     summary: ایجاد مقاله جدید (نیاز به دسترسی ادمین)
  *     tags: [Blog]
- *     description: Create a new blog post. Requires admin privileges and Bearer token.
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -215,122 +224,47 @@ export default blogRouter;
  *             $ref: '#/components/schemas/BlogInput'
  *     responses:
  *       201:
- *         description: Blog post created successfully
+ *         description: مقاله با موفقیت ایجاد شد
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/BlogResponse'
  *       400:
- *         description: Bad Request (Validation Error or Duplicate Title)
+ *         description: خطای اعتبارسنجی داده‌ها
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
- *             examples:
- *               DuplicateTitle:
- *                 summary: Duplicate Title Error
- *                 value:
- *                   success: false
- *                   message: "An article with this title is already registered"
- *                   statusCode: 400
- *               ValidationError:
- *                 summary: Validation Error
- *                 value:
- *                   success: false
- *                   message: "Title field is required"
- *                   statusCode: 400
  *       401:
- *         description: Unauthorized (User not logged in)
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               message: "Please log in to your account first"
- *               statusCode: 401
+ *         description: عدم احراز هویت
  *       403:
- *         description: Forbidden (User does not have admin role)
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               message: "You are not authorized to perform this operation"
- *               statusCode: 403
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ *         description: عدم دسترسی مدیریت
  */
 
 /**
  * @swagger
  * /api/blog/{id}:
  *   get:
- *     summary: Get a specific blog post by ID
+ *     summary: دریافت یک مقاله با شناسه
  *     tags: [Blog]
- *     description: "Get the details of a specific record."
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
- *         description: MongoDB ObjectId of the blog post
- *         example: "64a2b3c4d5e6f7a8b9c0d1e2"
- *       - in: query
- *         name: fields
- *         schema:
- *           type: string
- *         description: "Select fields"
- *         example: "title,date"
- *       - in: query
- *         name: populate
- *         schema:
- *           type: string
- *         description: "Populate relations"
- *         example: "author,comments"
  *     responses:
  *       200:
- *         description: Blog post fetched successfully
+ *         description: جزئیات مقاله
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/BlogResponse'
- *             example:
- *               success: true
- *               data:
- *                 _id: "64a2b3c4d5e6f7a8b9c0d1e2"
- *                 title: "Web Development with MERN Stack"
- *                 description: "In this article, we examine the structure of full-stack projects..."
- *                 img: "mern-banner.jpg"
- *                 date: "2026-08-15"
- *                 __v: 0
  *       404:
- *         description: Blog post not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               message: "Article not found"
- *               statusCode: 404
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- * 
+ *         description: مقاله یافت نشد
  *   patch:
- *     summary: Update an existing blog post
+ *     summary: ویرایش مقاله (نیاز به دسترسی ادمین)
  *     tags: [Blog]
- *     description: Update specific fields of a blog post. Requires admin privileges and Bearer token.
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -339,7 +273,6 @@ export default blogRouter;
  *         required: true
  *         schema:
  *           type: string
- *         description: MongoDB ObjectId of the blog post to update
  *     requestBody:
  *       required: true
  *       content:
@@ -349,84 +282,35 @@ export default blogRouter;
  *             properties:
  *               title:
  *                 type: string
- *                 example: "Web Development with MERN Stack ((New Version))"
  *               description:
  *                 type: string
- *                 example: "Updated description..."
  *               img:
  *                 type: string
- *                 example: "new-banner.jpg"
  *               date:
  *                 type: string
- *                 example: "2026-08-20"
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               tableOfContents:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     title:
+ *                       type: string
+ *               htmlContent:
+ *                 type: string
  *     responses:
  *       200:
- *         description: Blog post updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/BlogResponse'
- *             example:
- *               success: true
- *               message: "Article updated successfully"
- *               data:
- *                 _id: "64a2b3c4d5e6f7a8b9c0d1e2"
- *                 title: "Web Development with MERN Stack ((New Version))"
- *                 description: "Updated description..."
- *                 img: "new-banner.jpg"
- *                 date: "2026-08-20"
- *                 __v: 0
+ *         description: مقاله با موفقیت بروزرسانی شد
  *       400:
- *         description: Validation Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               message: "Title cannot be empty"
- *               statusCode: 400
- *       401:
- *         description: Unauthorized (User not logged in)
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               message: "Please log in to your account first"
- *               statusCode: 401
- *       403:
- *         description: Forbidden (User does not have admin role)
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               message: "You are not authorized to perform this operation"
- *               statusCode: 403
+ *         description: خطای اعتبارسنجی
  *       404:
- *         description: Blog post not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               message: "Article not found"
- *               statusCode: 404
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- * 
+ *         description: مقاله یافت نشد
  *   delete:
- *     summary: Delete a blog post
+ *     summary: حذف مقاله (نیاز به دسترسی ادمین)
  *     tags: [Blog]
- *     description: Permanently remove a blog post from the database. Requires admin privileges and Bearer token.
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -435,58 +319,9 @@ export default blogRouter;
  *         required: true
  *         schema:
  *           type: string
- *         description: MongoDB ObjectId of the blog post to delete
  *     responses:
  *       200:
- *         description: Blog post deleted successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: "Article deleted successfully"
- *                 data:
- *                   nullable: true
- *                   example: null
- *       401:
- *         description: Unauthorized
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               message: "Please log in to your account first"
- *               statusCode: 401
- *       403:
- *         description: Forbidden
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               message: "You are not authorized to perform this operation"
- *               statusCode: 403
+ *         description: مقاله با موفقیت حذف شد
  *       404:
- *         description: Blog post not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               message: "Article not found"
- *               statusCode: 404
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ *         description: مقاله یافت نشد
  */
