@@ -28,79 +28,148 @@ export default studentRouter;
  *         - type
  *         - link
  *       properties:
+ *         _id:
+ *           type: string
  *         type:
  *           type: string
- *           description: Type of social media (e.g., github, linkedin)
  *           example: "github"
  *         link:
  *           type: string
- *           description: URL of the social profile
  *           example: "https://github.com/example"
+ *     KeyActivity:
+ *       type: object
+ *       required:
+ *         - title
+ *       properties:
+ *         _id:
+ *           type: string
+ *         title:
+ *           type: string
+ *           example: "عضو تیم طراحی هویت بصری رویدادها"
+ *         description:
+ *           type: string
+ *           example: "مدیریت و پیاده‌سازی متریال‌های تبلیغاتی در دوره تحصیلی"
  *     Student:
  *       type: object
  *       required:
  *         - fullName
  *         - job
  *         - generation
+ *         - schoolType
+ *         - major
+ *         - img
  *       properties:
  *         _id:
  *           type: string
- *           description: Auto-generated MongoDB ID
  *           example: "64a2b3c4d5e6f7a8b9c0d1e2"
  *         fullName:
  *           type: string
- *           description: Student full name
- *           example: "Mohammad Rezaei"
+ *           example: "محمد رضایی"
  *         job:
  *           type: string
- *           description: Student current job position
- *           example: "Frontend Developer"
+ *           description: Current job status
+ *           example: "توسعه‌دهنده فرانت‌اند در اسنپ"
  *         generation:
  *           type: integer
- *           description: Student generation number
  *           example: 3
  *         major:
  *           type: string
- *           description: Major
+ *           example: "تولید و توسعه پایگاه‌های اینترنتی"
  *         schoolType:
  *           type: string
- *           enum: [Boys, Girls]
- *           description: School type
+ *           example: "هنرستان پسرانه رکاد"
+ *         img:
+ *           type: string
+ *           example: "avatar-rezaei.jpg"
  *         socialLinks:
  *           type: array
  *           items:
  *             $ref: '#/components/schemas/SocialLink'
- *           description: Array of social media links
- *         __v:
+ *         about:
+ *           type: string
+ *           description: Long bio / about student
+ *           example: "محمد رضایی از فارغ‌التحصیلان برتر نسل ۳ رشته نرم‌افزار..."
+ *         rokadStory:
+ *           type: string
+ *           description: Story and journey with Rokad
+ *           example: "ورود به رکاد نقطه عطفی در یادگیری عملی و کار تیمی من بود..."
+ *         achievements:
+ *           type: string
+ *           description: Honors and achievements
+ *           example: "کسب رتبه نخست در المپیاد مهارت و منتور پروژه‌های کلاسی"
+ *         keyActivities:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/KeyActivity'
+ *         currentCity:
+ *           type: string
+ *           description: City of current activity
+ *           example: "تهران"
+ *         graduationYear:
+ *           type: string
+ *           description: Year of graduation
+ *           example: "1402"
+ *         portfolioCount:
  *           type: integer
- *           description: Version key
- *           example: 0
+ *           description: Number of portfolio projects
+ *           example: 12
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
  *     StudentInput:
  *       type: object
  *       required:
  *         - fullName
  *         - job
  *         - generation
+ *         - schoolType
+ *         - major
+ *         - img
  *       properties:
  *         fullName:
  *           type: string
- *           example: "Mohammad Rezaei"
+ *           example: "محمد رضایی"
  *         job:
  *           type: string
- *           example: "Frontend Developer"
+ *           example: "توسعه‌دهنده فرانت‌اند در اسنپ"
  *         generation:
  *           type: integer
  *           example: 3
  *         major:
  *           type: string
- *           example: "Mathematics and Physics"
+ *           example: "تولید و توسعه پایگاه‌های اینترنتی"
  *         schoolType:
  *           type: string
- *           example: "Boys"
+ *           example: "هنرستان پسرانه رکاد"
+ *         img:
+ *           type: string
+ *           example: "avatar-rezaei.jpg"
  *         socialLinks:
  *           type: array
  *           items:
  *             $ref: '#/components/schemas/SocialLink'
+ *         about:
+ *           type: string
+ *         rokadStory:
+ *           type: string
+ *         achievements:
+ *           type: string
+ *         keyActivities:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/KeyActivity'
+ *         currentCity:
+ *           type: string
+ *           example: "تهران"
+ *         graduationYear:
+ *           type: string
+ *           example: "1402"
+ *         portfolioCount:
+ *           type: integer
+ *           example: 12
  *     StudentResponse:
  *       type: object
  *       properties:
@@ -109,7 +178,7 @@ export default studentRouter;
  *           example: true
  *         message:
  *           type: string
- *           example: "Student registered successfully"
+ *           example: "دانش‌آموز با موفقیت ثبت شد"
  *         data:
  *           $ref: '#/components/schemas/Student'
  *     StudentListResponse:
@@ -125,21 +194,6 @@ export default studentRouter;
  *           type: array
  *           items:
  *             $ref: '#/components/schemas/Student'
- *         pagination:
- *           type: object
- *           properties:
- *             page:
- *               type: integer
- *               example: 1
- *             limit:
- *               type: integer
- *               example: 10
- *             total:
- *               type: integer
- *               example: 25
- *             totalPages:
- *               type: integer
- *               example: 3
  *     ErrorResponse:
  *       type: object
  *       properties:
@@ -148,90 +202,45 @@ export default studentRouter;
  *           example: false
  *         message:
  *           type: string
- *           example: "Error message will be displayed here"
- *         statusCode:
- *           type: integer
- *           example: 400
- *   securitySchemes:
- *     bearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
+ *           example: "پیام خطای مربوطه"
  */
 
 /**
  * @swagger
  * tags:
- *   - name: Students
- *     description: Student Management Endpoints 
+ *   - name: Student
+ *     description: مدیریت پرونده دانش‌آموزان و فارغ‌التحصیلان برجسته
  */
 
 /**
  * @swagger
  * /api/student:
  *   get:
- *     summary: Retrieve all students with advanced features
- *     tags: [Students]
- *     description: "Retrieve the list of records with filtering, pagination, and advanced search ."
+ *     summary: دریافت لیست کلیه دانش‌آموزان با جستجو و صفحه‌بندی
+ *     tags: [Student]
  *     parameters:
  *       - in: query
  *         name: q
  *         schema:
  *           type: string
- *         description: "Search text"
- *         example: "Rezaei"
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
- *           default: 1
- *         description: "Page number"
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
- *           default: 10
- *         description: "Items per page"
- *       - in: query
- *         name: sort
- *         schema:
- *           type: string
- *         description: "Sorting"
- *         example: "-generation"
- *       - in: query
- *         name: fields
- *         schema:
- *           type: string
- *         description: "Select fields"
- *         example: "fullName,job"
- *       - in: query
- *         name: populate
- *         schema:
- *           type: string
- *         description: "Populate relations"
- *         example: "awards"
  *     responses:
  *       200:
- *         description: Successfully retrieved the list of students
+ *         description: لیست دانش‌آموزان
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/StudentListResponse'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               message: "Server error occurred"
- *               statusCode: 500
- * 
  *   post:
- *     summary: Create a new student
- *     tags: [Students]
- *     description: Create a new student. Requires admin privileges and Bearer token.
+ *     summary: ثبت پرونده دانش‌آموز جدید (نیاز به دسترسی ادمین)
+ *     tags: [Student]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -242,114 +251,37 @@ export default studentRouter;
  *             $ref: '#/components/schemas/StudentInput'
  *     responses:
  *       201:
- *         description: Student created successfully
+ *         description: دانش‌آموز با موفقیت ثبت شد
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/StudentResponse'
- *       400:
- *         description: Bad Request (Validation Error)
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               message: "Full name field is required"
- *               statusCode: 400
- *       401:
- *         description: Unauthorized (User not logged in)
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               message: "Please log in to your account first"
- *               statusCode: 401
- *       403:
- *         description: Forbidden (User does not have admin role)
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               message: "You are not authorized to perform this operation"
- *               statusCode: 403
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
  */
 
 /**
  * @swagger
  * /api/student/{id}:
  *   get:
- *     summary: Get a specific student by ID
- *     tags: [Students]
- *     description: "Get the details of a specific record."
+ *     summary: دریافت اطلاعات کامل پرونده یک دانش‌آموز
+ *     tags: [Student]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
- *         description: MongoDB ObjectId of the student
- *         example: "64a2b3c4d5e6f7a8b9c0d1e2"
- *       - in: query
- *         name: fields
- *         schema:
- *           type: string
- *         description: "Select fields"
- *         example: "fullName,job"
- *       - in: query
- *         name: populate
- *         schema:
- *           type: string
- *         description: "Populate relations"
  *     responses:
  *       200:
- *         description: Student fetched successfully
+ *         description: جزئیات پرونده دانش‌آموز
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/StudentResponse'
- *             example:
- *               success: true
- *               data:
- *                 _id: "64a2b3c4d5e6f7a8b9c0d1e2"
- *                 fullName: "Mohammad Rezaei"
- *                 job: "Frontend Developer"
- *                 generation: 3
- *                 socialLinks:
- *                   - type: "github"
- *                     link: "https://github.com/example"
- *                 __v: 0
  *       404:
- *         description: Student not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               message: "Student not found"
- *               statusCode: 404
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- * 
+ *         description: دانش‌آموز یافت نشد
  *   patch:
- *     summary: Update an existing student
- *     tags: [Students]
- *     description: Update specific fields of a student. Requires admin privileges and Bearer token.
+ *     summary: ویرایش پرونده دانش‌آموز (نیاز به دسترسی ادمین)
+ *     tags: [Student]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -358,97 +290,20 @@ export default studentRouter;
  *         required: true
  *         schema:
  *           type: string
- *         description: MongoDB ObjectId of the student to update
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             properties:
- *               fullName:
- *                 type: string
- *                 example: "Mohammad Rezaei ((Updated))"
- *               job:
- *                 type: string
- *                 example: "Full-stack Developer"
- *               generation:
- *                 type: integer
- *                 example: 3
- *               socialLinks:
- *                 type: array
- *                 items:
- *                   $ref: '#/components/schemas/SocialLink'
  *     responses:
  *       200:
- *         description: Student updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/StudentResponse'
- *             example:
- *               success: true
- *               message: "Student information updated successfully"
- *               data:
- *                 _id: "64a2b3c4d5e6f7a8b9c0d1e2"
- *                 fullName: "Mohammad Rezaei ((Updated))"
- *                 job: "Full-stack Developer"
- *                 generation: 3
- *                 socialLinks:
- *                   - type: "github"
- *                     link: "https://github.com/example"
- *                 __v: 0
- *       400:
- *         description: Validation Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               message: "Full name must be a string"
- *               statusCode: 400
- *       401:
- *         description: Unauthorized (User not logged in)
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               message: "Please log in to your account first"
- *               statusCode: 401
- *       403:
- *         description: Forbidden (User does not have admin role)
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               message: "You are not authorized to perform this operation"
- *               statusCode: 403
+ *         description: اطلاعات دانش‌آموز با موفقیت بروزرسانی شد
  *       404:
- *         description: Student not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               message: "Student not found"
- *               statusCode: 404
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- * 
+ *         description: دانش‌آموز یافت نشد
  *   delete:
- *     summary: Delete a student
- *     tags: [Students]
- *     description: Permanently remove a student from the database. Requires admin privileges and Bearer token.
+ *     summary: حذف پرونده دانش‌آموز (نیاز به دسترسی ادمین)
+ *     tags: [Student]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -457,58 +312,9 @@ export default studentRouter;
  *         required: true
  *         schema:
  *           type: string
- *         description: MongoDB ObjectId of the student to delete
  *     responses:
  *       200:
- *         description: Student deleted successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: "Student deleted successfully"
- *                 data:
- *                   nullable: true
- *                   example: null
- *       401:
- *         description: Unauthorized
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               message: "Please log in to your account first"
- *               statusCode: 401
- *       403:
- *         description: Forbidden
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               message: "You are not authorized to perform this operation"
- *               statusCode: 403
+ *         description: دانش‌آموز با موفقیت حذف شد
  *       404:
- *         description: Student not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               message: "Student not found"
- *               statusCode: 404
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ *         description: دانش‌آموز یافت نشد
  */
