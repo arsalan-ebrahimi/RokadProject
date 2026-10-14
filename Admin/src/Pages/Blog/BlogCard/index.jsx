@@ -4,20 +4,23 @@
 // ==========================================
 
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import { getImageUrl } from "../../../Utils/getImageUrl";
-import { Card, Button } from "../../../Components/UI";
+import { Card, Button, Badge } from "../../../Components/UI";
 
 /**
- * Card displaying blog summary with edit and delete trigger handlers.
+ * Card displaying blog summary with edit, delete, and preview trigger handlers.
  * @param {Object} props
  * @param {Object} props.blog - Blog data entity
  * @param {Function} props.onEdit - Callback when edit button is clicked
  * @param {Function} props.onDelete - Callback when delete button is clicked
  */
 export default function BlogCard({ blog, onEdit, onDelete }) {
+  const navigate = useNavigate();
   const imageUrl = getImageUrl(blog.img);
 
   return (
@@ -29,12 +32,20 @@ export default function BlogCard({ blog, onEdit, onDelete }) {
             src={imageUrl}
             alt={blog.title}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            onError={(e) => {
+              e.target.style.display = "none";
+              if (e.target.nextSibling) {
+                e.target.nextSibling.style.display = "flex";
+              }
+            }}
           />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-text-muted text-xs font-medium">
-            بدون تصویر
-          </div>
-        )}
+        ) : null}
+        <div
+          className="w-full h-full flex items-center justify-center text-text-muted text-xs font-medium"
+          style={{ display: blog.img ? "none" : "flex" }}
+        >
+          بدون تصویر
+        </div>
       </div>
 
       {/* Content Section */}
@@ -43,34 +54,63 @@ export default function BlogCard({ blog, onEdit, onDelete }) {
           {blog.title}
         </h2>
 
+        {/* Date & Meta */}
         <div className="flex items-center gap-1.5 text-xs text-text-muted mb-2.5 shrink-0">
           <CalendarTodayIcon fontSize="inherit" />
-          <span>{blog.date}</span>
+          <span className="font-numeric">{blog.date}</span>
         </div>
+
+        {/* Tags */}
+        {Array.isArray(blog.tags) && blog.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-2.5 min-h-[1.75rem] max-h-[3.5rem] overflow-hidden">
+            {blog.tags.slice(0, 3).map((tag, idx) => (
+              <Badge key={idx} variant="primary" size="sm">
+                {tag}
+              </Badge>
+            ))}
+            {blog.tags.length > 3 && (
+              <span className="text-[10px] text-text-muted self-center">
+                +{blog.tags.length - 3}
+              </span>
+            )}
+          </div>
+        )}
 
         <p className="text-xs md:text-sm text-text-secondary line-clamp-2 md:line-clamp-3 leading-relaxed mb-4 min-h-[2.8em] break-words overflow-hidden">
           {blog.description}
         </p>
 
         {/* Action Buttons Toolbar */}
-        <div className="flex justify-end items-center gap-1 mt-auto shrink-0 pt-3 border-t border-border-light">
+        <div className="flex justify-between items-center gap-1 mt-auto shrink-0 pt-3 border-t border-border-light">
           <Button
-            variant="info-ghost"
-            size="icon-sm"
-            onClick={() => onEdit(blog)}
-            title="ویرایش"
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(`/blog/${blog._id}`)}
+            icon={<VisibilityIcon fontSize="inherit" />}
+            className="text-xs text-primary hover:text-primary-active"
           >
-            <EditIcon fontSize="small" />
+            پیش‌نمایش
           </Button>
 
-          <Button
-            variant="danger-ghost"
-            size="icon-sm"
-            onClick={() => onDelete(blog._id)}
-            title="حذف"
-          >
-            <DeleteOutlineIcon fontSize="small" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="info-ghost"
+              size="icon-sm"
+              onClick={() => onEdit(blog)}
+              title="ویرایش"
+            >
+              <EditIcon fontSize="small" />
+            </Button>
+
+            <Button
+              variant="danger-ghost"
+              size="icon-sm"
+              onClick={() => onDelete(blog._id)}
+              title="حذف"
+            >
+              <DeleteOutlineIcon fontSize="small" />
+            </Button>
+          </div>
         </div>
       </div>
     </Card>
