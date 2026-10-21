@@ -1,4 +1,4 @@
-// ==========================================
+﻿// ==========================================
 // Page Component: CreateEvent
 // Form for publishing events using unified EventForm
 // ==========================================
@@ -31,6 +31,7 @@ export default function CreateEvent() {
 
       const payload = {
         title: values.title,
+        slug: values.slug ? values.slug.trim() : undefined,
         type: values.type,
         date: (values.date || "").replace(/\//g, "-"),
         description: values.description,

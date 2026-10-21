@@ -1,4 +1,5 @@
-import mongoose from "mongoose";
+﻿import mongoose from "mongoose";
+import { slugify } from "../../Utils/slugify.js";
 
 const organizerSchema = new mongoose.Schema(
   {
@@ -63,6 +64,13 @@ const eventSchema = new mongoose.Schema(
       required: [true, "وارد کردن عنوان رویداد الزامی است"],
       unique: true,
       trim: true,
+    },
+    slug: {
+      type: String,
+      unique: true,
+      trim: true,
+      lowercase: true,
+      index: true,
     },
     type: {
       type: String,
@@ -175,6 +183,18 @@ const eventSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+eventSchema.pre("validate", function (next) {
+  if (!this.slug && this.title) {
+    this.slug = slugify(this.title);
+  } else if (this.slug) {
+    this.slug = slugify(this.slug);
+  }
+  next();
+});
+
+eventSchema.index({ slug: 1 }, { unique: true, sparse: true });
+eventSchema.index({ createdAt: -1 });
 
 const Event = mongoose.model("Event", eventSchema);
 export default Event;

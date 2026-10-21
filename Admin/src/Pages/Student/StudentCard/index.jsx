@@ -1,6 +1,7 @@
 // ==========================================
 // Component: StudentCard
 // Presentation card displaying student profile, generation badge, current job, and external portfolio links
+// Fully responsive with aspect-ratio thumbnail and >=40px touch targets
 // ==========================================
 
 import React from "react";
@@ -27,11 +28,12 @@ export default function StudentCard({ student, onEdit, onDelete }) {
   return (
     <Card hoverable className="overflow-hidden flex flex-col group h-full">
       {/* Student Thumbnail */}
-      <div className="h-48 w-full bg-bg-light relative overflow-hidden flex items-center justify-center border-b border-border/60">
+      <div className="h-48 w-full bg-bg-light relative overflow-hidden flex items-center justify-center border-b border-border/60 aspect-video">
         {student.img ? (
           <img
             src={imageUrl}
             alt={student.fullName}
+            loading="lazy"
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             onError={(e) => {
               e.target.style.display = "none";
@@ -89,14 +91,14 @@ export default function StudentCard({ student, onEdit, onDelete }) {
             ))}
         </div>
 
-        {/* Card Actions */}
+        {/* Card Actions with >=40px touch targets */}
         <div className="flex justify-between items-center gap-1 mt-auto shrink-0 pt-3 border-t border-border-light">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => navigate(`/student/${student._id}`)}
             icon={<VisibilityIcon fontSize="inherit" />}
-            className="text-xs text-primary hover:text-primary-active"
+            className="text-xs text-primary hover:text-primary-active min-h-[40px]"
           >
             مشاهده پرونده
           </Button>
@@ -107,6 +109,8 @@ export default function StudentCard({ student, onEdit, onDelete }) {
               size="icon-sm"
               onClick={() => onEdit(student._id)}
               title="ویرایش"
+              aria-label="ویرایش دانش‌آموز"
+              className="min-h-[40px] min-w-[40px]"
             >
               <EditIcon fontSize="small" />
             </Button>
@@ -116,6 +120,8 @@ export default function StudentCard({ student, onEdit, onDelete }) {
               size="icon-sm"
               onClick={() => onDelete(student._id)}
               title="حذف"
+              aria-label="حذف دانش‌آموز"
+              className="min-h-[40px] min-w-[40px]"
             >
               <DeleteOutlineIcon fontSize="small" />
             </Button>

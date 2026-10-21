@@ -9,10 +9,10 @@ import * as Yup from "yup";
 import axiosInstance from "../../Utils/axiosInstance";
 import Notify from "../../Utils/notify";
 import Loading from "../../Components/Loading";
-import { Button, Input, Textarea, PageHeader, Card } from "../../Components/UI";
+import { Button, Input, Textarea, PageHeader, Card, FormActionBar } from "../../Components/UI";
 
 // Regular expression to restrict input to safe alphanumeric characters and standard Persian/Latin punctuation
-const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/;
+const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-_،؛؟!.:«»",;?()\u200c\u200d]+$/;
 
 /**
  * Yup validation schema for site-wide SEO metadata fields.
@@ -132,7 +132,7 @@ export default function SeoSettings() {
   }
 
   return (
-    <div dir="rtl" className="p-6 md:p-8 w-full bg-background min-h-screen">
+    <div dir="rtl" className="p-4 sm:p-6 md:p-8 pb-28 md:pb-8 w-full bg-background min-h-screen">
       <PageHeader
         title="مدیریت سئو سایت (SEO)"
         subtitle="تنظیم متاتگ‌ها، اپن گراف و کارت‌های توییتر"
@@ -140,7 +140,7 @@ export default function SeoSettings() {
         backLabel="بازگشت به داشبورد"
       />
 
-      <Card className="p-6 md:p-8 max-w-4xl mx-auto shadow-sm">
+      <Card className="p-4 sm:p-6 md:p-8 max-w-4xl mx-auto shadow-sm">
         <form onSubmit={formik.handleSubmit} className="flex flex-col gap-8">
           {/* Basic SEO Section */}
           <div className="flex flex-col gap-4">
@@ -277,17 +277,11 @@ export default function SeoSettings() {
             </div>
           </div>
 
-          {/* Submit Button */}
-          <div className="flex justify-end pt-4 border-t border-border/80">
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              isLoading={isSubmitting}
-            >
-              ذخیره تغییرات سئو
-            </Button>
-          </div>
+          <FormActionBar
+            isSubmitting={isSubmitting}
+            submitText="ذخیره تغییرات سئو"
+            showCancel={false}
+          />
         </form>
       </Card>
     </div>

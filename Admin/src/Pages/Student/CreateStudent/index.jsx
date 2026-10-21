@@ -7,7 +7,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../../Utils/axiosInstance";
 import Notify from "../../../Utils/notify";
-import StudentForm, { toEnglishDigits } from "../components/StudentForm";
+import StudentForm from "../components/StudentForm";
+import { toEnglishDigits } from "../../../Utils/toEnglishDigits";
 
 export default function CreateStudent() {
   const navigate = useNavigate();

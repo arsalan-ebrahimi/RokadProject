@@ -1,4 +1,4 @@
-// ==========================================
+﻿// ==========================================
 // Page Component: UpdateBlog
 // Form for editing existing blog posts using unified BlogForm
 // ==========================================
@@ -21,6 +21,7 @@ export default function UpdateBlog() {
 
   const [initialValues, setInitialValues] = useState({
     title: "",
+    slug: "",
     date: "",
     description: "",
     img: null,
@@ -33,13 +34,15 @@ export default function UpdateBlog() {
     const fetchBlog = async () => {
       setLoading(true);
       try {
-        const response = await axiosInstance.get(`blog/${id}`);
+        const targetId = id ? decodeURIComponent(id) : "";
+        const response = await axiosInstance.get(`blog/${targetId}`);
         const data = response?.data?.data || response?.data || response;
         const blog = Array.isArray(data) ? data[0] : data;
 
         if (blog) {
           setInitialValues({
             title: blog.title || "",
+            slug: blog.slug || "",
             date: blog.date || "",
             description: blog.description || "",
             img: blog.img || null,
@@ -80,13 +83,14 @@ export default function UpdateBlog() {
 
         const uploadData = await axiosInstance.post("upload", formData);
         if (!uploadData || !uploadData.success) {
-          throw new Error(uploadData?.message || "آپلود تصویر با خطا مواجه شد");
+          throw new Error(uploadData?.message || "خطایی در آپلود تصویر رخ داد");
         }
         finalImageName = uploadData.data;
       }
 
       const blogPayload = {
         title: values.title,
+        slug: values.slug ? values.slug.trim() : undefined,
         date: (values.date || "").replace(/\//g, "-"),
         description: values.description,
         img: finalImageName,
@@ -97,7 +101,8 @@ export default function UpdateBlog() {
         htmlContent: values.htmlContent || "",
       };
 
-      const response = await axiosInstance.patch(`blog/${id}`, blogPayload);
+      const targetId = id ? decodeURIComponent(id) : "";
+      const response = await axiosInstance.patch(`blog/${targetId}`, blogPayload);
 
       if (response && (response.success || response.status === "success")) {
         Notify("success", "مقاله با موفقیت ویرایش شد.");
@@ -128,7 +133,7 @@ export default function UpdateBlog() {
       isEdit={true}
       existingImageUrl={existingImageUrl}
       pageTitle="ویرایش مقاله"
-      pageSubtitle="ویرایش محتوا، سرفصل‌ها، تگ‌ها و کدهای HTML"
+      pageSubtitle="ویرایش محتوا، مشخصات مقاله و کدهای HTML"
     />
   );
 }

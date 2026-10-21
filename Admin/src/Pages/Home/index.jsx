@@ -80,13 +80,14 @@ export default function Home() {
   return (
     <div
       dir="rtl"
-      className="flex flex-col items-center justify-center min-h-[88vh] p-6 md:p-8 bg-background relative"
+      className="flex flex-col items-center justify-center min-h-[88vh] p-4 sm:p-6 md:p-8 bg-background relative"
     >
       {/* Top Action Buttons */}
-      <div className="w-full flex justify-between md:justify-end items-center gap-3 mb-6 md:mb-0 md:absolute md:top-8 md:left-8">
+      <div className="w-full flex justify-between md:justify-end items-center gap-2 sm:gap-3 mb-6 md:mb-0 md:absolute md:top-8 md:left-8">
         <Button
           variant="primary-subtle"
           size="sm"
+          className="min-h-[40px]"
           onClick={() => navigate("/seo")}
           icon={<SettingsIcon fontSize="small" />}
         >
@@ -96,6 +97,7 @@ export default function Home() {
         <Button
           variant="danger-outline"
           size="sm"
+          className="min-h-[40px]"
           onClick={handleLogout}
           icon={<LogoutIcon fontSize="small" className="rotate-180" />}
         >
@@ -104,17 +106,17 @@ export default function Home() {
       </div>
 
       {/* Header Section */}
-      <div className="text-center mb-10 md:mb-12 space-y-2 mt-4">
-        <h1 className="text-3xl md:text-4xl font-black text-secondary tracking-tight">
+      <div className="text-center mb-8 sm:mb-10 md:mb-12 space-y-2 mt-4 px-2">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-secondary tracking-tight break-words">
           به داشبورد مدیریت خوش آمدید
         </h1>
-        <p className="text-text-secondary text-sm md:text-base max-w-lg">
+        <p className="text-text-secondary text-xs sm:text-sm md:text-base max-w-lg mx-auto">
           جهت مدیریت بخش‌های مختلف سایت، گزینه مورد نظر را انتخاب نمایید
         </p>
       </div>
 
       {/* Navigation Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full max-w-5xl">
         {menuItems.map((item) => (
           <button
             key={item.id}
@@ -124,24 +126,25 @@ export default function Home() {
               ${item.bgClass}
               text-white
               rounded-2xl
-              p-7
-              flex items-center gap-5
+              p-5 sm:p-6 md:p-7
+              flex items-center gap-4 sm:gap-5
               transition-all duration-300 ease-out
               transform hover:-translate-y-1.5 hover:scale-[1.01]
               shadow-md hover:shadow-xl
               ${item.shadowClass}
               group cursor-pointer select-none text-right
+              min-h-[72px]
             `}
           >
             {/* Icon Container with backdrop blur */}
-            <div className="bg-white/20 p-3.5 rounded-xl backdrop-blur-sm group-hover:bg-white/30 transition-colors shrink-0 flex items-center justify-center">
+            <div className="bg-white/20 p-3 sm:p-3.5 rounded-xl backdrop-blur-sm group-hover:bg-white/30 transition-colors shrink-0 flex items-center justify-center">
               {item.icon}
             </div>
 
             {/* Text details */}
-            <div className="flex flex-col items-start flex-grow">
-              <span className="text-lg md:text-xl font-bold">{item.title}</span>
-              <span className="text-white/80 text-xs font-medium mt-0.5">
+            <div className="flex flex-col items-start flex-grow min-w-0">
+              <span className="text-base sm:text-lg md:text-xl font-bold truncate w-full">{item.title}</span>
+              <span className="text-white/80 text-[11px] sm:text-xs font-medium mt-0.5 truncate w-full">
                 {item.subtitle}
               </span>
             </div>

@@ -1,6 +1,7 @@
 // ==========================================
 // UI Component: Input
 // Form text input field with floating/top label, icon slot, validation errors, and ref forwarding
+// Styled mobile-first with >=16px font on mobile to prevent iOS auto-zoom, and >=44px tap target
 // ==========================================
 
 import React, { forwardRef } from "react";
@@ -34,7 +35,6 @@ export const Input = forwardRef(
   ) => {
     const inputId = id || name;
 
-
     return (
       <div className="flex flex-col gap-1.5 w-full text-right">
         {label && (
@@ -59,7 +59,7 @@ export const Input = forwardRef(
             name={name}
             dir={dir}
             className={`
-              w-full py-2.5 px-4 rounded-xl text-sm bg-surface text-text-primary placeholder:text-text-muted
+              w-full min-h-[44px] py-2.5 px-4 rounded-xl text-base md:text-sm bg-surface text-text-primary placeholder:text-text-muted
               border transition-all duration-200 outline-none
               disabled:bg-bg-subtle disabled:text-text-muted disabled:cursor-not-allowed
               ${icon ? "pr-10" : "pr-4"}
@@ -81,7 +81,7 @@ export const Input = forwardRef(
         )}
 
         {!error && helperText && (
-          <span className="text-xs text-text-muted font-normal">
+          <span className="text-xs text-text-muted font-normal break-all break-words max-w-full leading-relaxed block overflow-hidden">
             {helperText}
           </span>
         )}

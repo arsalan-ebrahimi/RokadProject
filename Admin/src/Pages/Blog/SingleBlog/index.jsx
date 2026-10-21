@@ -1,4 +1,4 @@
-// ==========================================
+﻿// ==========================================
 // Page Component: SingleBlog
 // Live preview page for an existing published blog post
 // ==========================================
@@ -22,7 +22,8 @@ export default function SingleBlog() {
     const fetchBlog = async () => {
       setLoading(true);
       try {
-        const response = await axiosInstance.get(`blog/${id}`);
+        const targetId = id ? decodeURIComponent(id) : "";
+        const response = await axiosInstance.get(`blog/${targetId}`);
         const data = response?.data?.data || response?.data || response;
         const result = Array.isArray(data) ? data[0] : data;
         if (result) {
@@ -52,17 +53,21 @@ export default function SingleBlog() {
   }
 
   return (
-    <div dir="rtl" className="p-6 md:p-8 w-full bg-background min-h-screen">
+    <div dir="rtl" className="p-4 sm:p-6 md:p-8 w-full bg-background min-h-dvh">
       <div className="max-w-4xl mx-auto">
         <PageHeader
           title={blog.title}
-          subtitle="پیش‌نمایش زنده صفحه مقاله (همانند دید کاربر کلاینت)"
+          subtitle={
+            blog.slug
+              ? `آدرس صفحه: /blog/${blog.slug}`
+              : "پیش‌نمایش زنده صفحه مقاله (همانند دید کاربر کلاینت)"
+          }
           backTo="/blog"
           action={
             <Button
               variant="primary"
               size="md"
-              onClick={() => navigate(`/blog/update/${blog._id}`)}
+              onClick={() => navigate(`/blog/update/${blog.slug || blog._id}`)}
               icon={<EditIcon fontSize="small" />}
             >
               ویرایش مقاله

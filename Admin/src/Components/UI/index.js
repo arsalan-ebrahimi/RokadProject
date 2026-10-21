@@ -12,4 +12,7 @@ export { Badge } from "./Badge";
 export { Card } from "./Card";
 export { PageHeader } from "./PageHeader";
 export { ImageUpload } from "./ImageUpload";
+export { FormActionBar } from "./FormActionBar";
+export { Tabs } from "./Tabs";
+export { Modal } from "./Modal";
 

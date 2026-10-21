@@ -1,4 +1,4 @@
-// ==========================================
+﻿// ==========================================
 // Page Component: UpdateEvent
 // Form for modifying event details using unified EventForm
 // ==========================================
@@ -21,6 +21,7 @@ export default function UpdateEvent() {
 
   const [initialValues, setInitialValues] = useState({
     title: "",
+    slug: "",
     type: "",
     date: "",
     description: "",
@@ -47,13 +48,15 @@ export default function UpdateEvent() {
     const fetchEvent = async () => {
       setLoading(true);
       try {
-        const response = await axiosInstance.get(`event/${id}`);
+        const targetId = id ? decodeURIComponent(id) : "";
+        const response = await axiosInstance.get(`event/${targetId}`);
         const data = response?.data?.data || response?.data || response;
         const event = Array.isArray(data) ? data[0] : data;
 
         if (event) {
           setInitialValues({
             title: event.title || "",
+            slug: event.slug || "",
             type: event.type || "",
             date: event.date || "",
             description: event.description || "",
@@ -138,6 +141,7 @@ export default function UpdateEvent() {
 
       const payload = {
         title: values.title,
+        slug: values.slug ? values.slug.trim() : undefined,
         type: values.type,
         date: (values.date || "").replace(/\//g, "-"),
         description: values.description,
@@ -178,7 +182,8 @@ export default function UpdateEvent() {
         tags: values.tags || [],
       };
 
-      const response = await axiosInstance.patch(`event/${id}`, payload);
+      const targetId = id ? decodeURIComponent(id) : "";
+      const response = await axiosInstance.patch(`event/${targetId}`, payload);
 
       if (response && (response.success || response.status === "success")) {
         Notify("success", "رویداد با موفقیت بروزرسانی شد.");

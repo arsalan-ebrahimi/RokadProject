@@ -10,10 +10,10 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import axiosInstance from "../../../Utils/axiosInstance";
 import Notify from "../../../Utils/notify";
 import { DEFAULT_AVATARS } from "../../../Constants/defaultAvatars";
-import { Button, Input, Textarea, PageHeader, Card } from "../../../Components/UI";
+import { Button, Input, Textarea, PageHeader, Card, FormActionBar } from "../../../Components/UI";
 
 // Regular expression to restrict input to safe alphanumeric characters and standard Persian/Latin punctuation
-const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/;
+const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-_،؛؟!.:«»",;?()\u200c\u200d]+$/;
 
 /**
  * Yup validation schema for creating a testimonial comment.
@@ -117,15 +117,15 @@ export default function CreateComment() {
   };
 
   return (
-    <div dir="rtl" className="p-6 md:p-8 w-full bg-background min-h-screen">
+    <div dir="rtl" className="p-4 sm:p-6 md:p-8 w-full bg-background min-h-dvh">
       <PageHeader
         title="افزودن نظر جدید"
         subtitle="ثبت نظر دانش‌آموزان، والدین و همکاران گرامی"
         backTo="/comment"
       />
 
-      <Card className="p-6 md:p-8 max-w-4xl mx-auto shadow-sm">
-        <form onSubmit={formik.handleSubmit} className="flex flex-col gap-6">
+      <Card className="p-4 sm:p-6 md:p-8 max-w-4xl mx-auto shadow-sm">
+        <form onSubmit={formik.handleSubmit} className="flex flex-col gap-6 pb-20 md:pb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <Input
               label="نام نویسنده"
@@ -172,6 +172,7 @@ export default function CreateComment() {
                     <img
                       src={`/default-avatars/${avatar.filename}`}
                       alt={avatar.alt}
+                      loading="lazy"
                       className="w-full h-full object-cover rounded-full"
                     />
                   </div>
@@ -217,15 +218,11 @@ export default function CreateComment() {
             )}
           </div>
 
-          <div className="flex justify-end pt-4 border-t border-border/80">
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              isLoading={isSubmitting}
-            >
-              ثبت نظر
-            </Button>
+          <div className="pt-4 border-t border-border/80">
+            <FormActionBar
+              submitLabel="ثبت نظر"
+              isSubmitting={isSubmitting}
+            />
           </div>
         </form>
       </Card>

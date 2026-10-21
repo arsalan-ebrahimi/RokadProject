@@ -73,38 +73,40 @@ export default function AdminLogin() {
   });
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bg-light p-4" dir="rtl">
-      <div className="max-w-md w-full bg-surface rounded-2xl shadow-lg border border-border/80 p-8 md:p-10 transition-all">
+    <div className="min-h-[100dvh] flex items-center justify-center bg-bg-light p-4 sm:p-6" dir="rtl">
+      <div className="max-w-md w-full bg-surface rounded-2xl shadow-lg border border-border/80 p-6 sm:p-8 md:p-10 transition-all">
         {/* Brand Logo */}
-        <div className="flex justify-center mb-8">
+        <div className="flex justify-center mb-6 sm:mb-8">
           <img
             src="/Logo-Type-green.png"
             alt="Rokad Admin Panel"
-            className="h-14 w-auto object-contain"
+            className="h-12 sm:h-14 w-auto object-contain"
           />
         </div>
 
         {/* Header Texts */}
-        <h2 className="text-2xl font-extrabold text-center text-secondary mb-2">
+        <h2 className="text-xl sm:text-2xl font-extrabold text-center text-secondary mb-2">
           ورود به پنل مدیریت
         </h2>
-        <p className="text-center text-text-secondary mb-8 text-sm">
+        <p className="text-center text-text-secondary mb-6 sm:mb-8 text-xs sm:text-sm">
           لطفاً شماره همراه و رمز عبور خود را وارد کنید
         </p>
 
         {/* Login Form */}
-        <form onSubmit={formik.handleSubmit} className="space-y-5">
+        <form onSubmit={formik.handleSubmit} className="space-y-4 sm:space-y-5">
           {/* Phone Number Input */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold text-text-primary select-none">
               شماره همراه
             </label>
             <input
-              type="text"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
               name="phoneNumber"
               placeholder="09123456789"
               dir="ltr"
-              className={`w-full px-4 py-3 rounded-xl bg-bg-light/60 outline-none transition-all duration-200 text-left font-sans border text-sm focus:bg-white ${
+              className={`w-full px-4 py-3 min-h-[44px] rounded-xl bg-bg-light/60 outline-none transition-all duration-200 text-left font-sans border text-base md:text-sm focus:bg-white ${
                 formik.touched.phoneNumber && formik.errors.phoneNumber
                   ? "border-error focus:border-error focus:ring-4 focus:ring-error/10"
                   : "border-border hover:border-border-hover focus:border-primary focus:ring-4 focus:ring-primary/10"
@@ -126,10 +128,11 @@ export default function AdminLogin() {
             <div className="relative flex items-center">
               <input
                 type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
                 name="password"
                 placeholder="••••••••"
                 dir="ltr"
-                className={`w-full pl-4 pr-11 py-3 rounded-xl bg-bg-light/60 outline-none transition-all duration-200 text-left font-sans tracking-widest border text-sm focus:bg-white ${
+                className={`w-full pl-4 pr-12 py-3 min-h-[44px] rounded-xl bg-bg-light/60 outline-none transition-all duration-200 text-left font-sans tracking-widest border text-base md:text-sm focus:bg-white ${
                   formik.touched.password && formik.errors.password
                     ? "border-error focus:border-error focus:ring-4 focus:ring-error/10"
                     : "border-border hover:border-border-hover focus:border-primary focus:ring-4 focus:ring-primary/10"
@@ -140,7 +143,8 @@ export default function AdminLogin() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 text-text-muted hover:text-primary transition-colors focus:outline-none cursor-pointer"
+                className="absolute right-1 w-10 h-10 flex items-center justify-center text-text-muted hover:text-primary transition-colors focus:outline-none cursor-pointer"
+                aria-label={showPassword ? "مخفی کردن رمز عبور" : "نمایش رمز عبور"}
                 tabIndex={-1}
               >
                 {showPassword ? (
@@ -165,7 +169,7 @@ export default function AdminLogin() {
               variant="primary"
               size="tall"
               isLoading={formik.isSubmitting}
-              className="w-full text-base font-bold shadow-md hover:shadow-lg shadow-primary/20 hover:-translate-y-0.5"
+              className="w-full text-base font-bold shadow-md hover:shadow-lg shadow-primary/20 hover:-translate-y-0.5 min-h-[48px]"
             >
               ورود به داشبورد
             </Button>
@@ -173,7 +177,7 @@ export default function AdminLogin() {
         </form>
 
         {/* Footer Support Text */}
-        <div className="mt-8 text-center pt-6 border-t border-border-light">
+        <div className="mt-6 sm:mt-8 text-center pt-5 sm:pt-6 border-t border-border-light">
           <p className="text-xs text-text-muted">
             در صورت فراموشی رمز عبور با پشتیبانی فنی تماس بگیرید.
           </p>

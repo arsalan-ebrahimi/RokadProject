@@ -1,4 +1,4 @@
-// ==========================================
+﻿// ==========================================
 // Page Component: CreateBlog
 // Form for creating and publishing a new blog post using unified BlogForm
 // ==========================================
@@ -24,13 +24,14 @@ export default function CreateBlog() {
 
         const uploadData = await axiosInstance.post("upload", formData);
         if (!uploadData || !uploadData.success) {
-          throw new Error(uploadData?.message || "آپلود عکس با خطا مواجه شد");
+          throw new Error(uploadData?.message || "خطایی در آپلود تصویر رخ داد");
         }
         uploadedFilename = uploadData.data;
       }
 
       const blogPayload = {
         title: values.title,
+        slug: values.slug ? values.slug.trim() : undefined,
         date: (values.date || "").replace(/\//g, "-"),
         description: values.description,
         img: uploadedFilename,
@@ -62,7 +63,7 @@ export default function CreateBlog() {
       isSubmitting={isSubmitting}
       isEdit={false}
       pageTitle="افزودن بلاگ جدید"
-      pageSubtitle="نگارش مقاله، فهرست مطالب، محتوای HTML و تگ‌ها"
+      pageSubtitle="نگارش مقاله و انتشار در بخش مقالات و وبلاگ"
     />
   );
 }

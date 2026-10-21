@@ -1,8 +1,9 @@
 // ==========================================
 // Utility: Notification & Toast System
-// Custom RTL wrapper around react-hot-toast with project design tokens
+// Custom RTL wrapper around react-hot-toast with project design tokens & Undo flow
 // ==========================================
 
+import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
 // ==========================================
@@ -21,7 +22,7 @@ const BASE_TOAST_STYLE = {
   border: "1px solid var(--color-border, #e2e8f0)",
   boxShadow: "0 10px 25px -5px rgba(27, 35, 77, 0.08), 0 8px 10px -6px rgba(27, 35, 77, 0.04)",
   padding: "12px 18px",
-  maxWidth: "440px",
+  maxWidth: "460px",
 };
 
 const TOAST_VARIANTS = {
@@ -54,6 +55,83 @@ const TOAST_VARIANTS = {
 };
 
 // ==========================================
+// Component: UndoToastContent
+// Live ticking countdown toast with accessible Undo action button
+// ==========================================
+
+export function UndoToastContent({ t, message, onUndo, expiresAt, entityLabel = "مورد" }) {
+  const [remaining, setRemaining] = useState(() =>
+    Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000))
+  );
+
+  useEffect(() => {
+    let intervalId = null;
+    const updateCountdown = () => {
+      const left = Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
+      setRemaining(left);
+      if (left <= 0 && intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+
+    updateCountdown();
+    intervalId = setInterval(updateCountdown, 250);
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [expiresAt]);
+
+  const handleUndo = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      // Execute restore callback first to update state synchronously
+      onUndo?.();
+    } finally {
+      // Remove toast immediately
+      toast.remove(t.id);
+    }
+  };
+
+  return (
+    <div
+      role="status"
+      dir="rtl"
+      className={`${
+        t.visible ? "animate-enter" : "animate-leave"
+      } max-w-md w-full bg-surface border border-border shadow-lg rounded-2xl p-3.5 flex items-center justify-between gap-3 pointer-events-auto select-none`}
+      style={{
+        direction: "rtl",
+        fontFamily: "var(--font-sans, 'IRANSansX', 'Vazirmatn', sans-serif)",
+        borderRight: "4px solid var(--color-warning, #f59e0b)",
+      }}
+    >
+      <div className="flex items-center gap-2.5 min-w-0">
+        <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
+        <p className="text-xs md:text-sm font-medium text-text-primary truncate">
+          {message}
+        </p>
+        <span
+          className="text-[11px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full shrink-0 font-numeric"
+          aria-live="polite"
+        >
+          {remaining} ثانیه
+        </span>
+      </div>
+
+      <button
+        type="button"
+        aria-label={`بازگردانی ${entityLabel}`}
+        onClick={handleUndo}
+        className="px-3.5 py-1.5 text-xs md:text-sm font-bold text-white bg-primary hover:bg-primary-hover active:bg-primary-active rounded-xl transition-all shadow-xs shrink-0 cursor-pointer"
+      >
+        بازگردانی
+      </button>
+    </div>
+  );
+}
+
+// ==========================================
 // Main Notify Function & Helper Shortcuts
 // ==========================================
 
@@ -81,17 +159,49 @@ const Notify = (type = "success", message = "", options = {}) => {
   return (variant.handler ?? toast)(message, toastOptions);
 };
 
+/**
+ * Triggers a custom undo toast with a deterministic ID and live countdown.
+ * @param {Object} params
+ * @param {string} params.id - Entity/Item ID or deterministic key
+ * @param {string} params.message - Message to display
+ * @param {string} [params.entityLabel="مورد"] - Entity label in Persian
+ * @param {Function} params.onUndo - Callback invoked only when Undo button is clicked
+ * @param {number} params.expiresAt - Epoch timestamp when the undo window closes
+ * @returns {string} Toast ID
+ */
+export const NotifyUndo = ({ id, message, entityLabel = "مورد", onUndo, expiresAt }) => {
+  const toastId = id ? String(id) : `undo-${Date.now()}`;
+
+  toast.custom(
+    (t) => (
+      <UndoToastContent
+        t={t}
+        message={message}
+        entityLabel={entityLabel}
+        onUndo={onUndo}
+        expiresAt={expiresAt}
+      />
+    ),
+    {
+      id: toastId,
+      duration: Infinity,
+      position: "top-center",
+    }
+  );
+
+  return toastId;
+};
+
 // Convenient helper method shortcuts
 Notify.success = (message, options) => Notify("success", message, options);
 Notify.error = (message, options) => Notify("error", message, options);
 Notify.warning = (message, options) => Notify("warning", message, options);
 Notify.info = (message, options) => Notify("info", message, options);
 Notify.loading = (message, options) => Notify("loading", message, options);
+Notify.undo = NotifyUndo;
 Notify.dismiss = (id) => toast.dismiss(id);
 Notify.remove = (id) => toast.remove(id);
 Notify.promise = (promise, msgs, options = {}) =>
   toast.promise(promise, msgs, { position: "top-center", ...options });
 
 export default Notify;
-
-

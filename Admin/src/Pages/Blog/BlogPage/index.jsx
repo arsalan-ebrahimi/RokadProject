@@ -1,9 +1,9 @@
 // ==========================================
 // Page Component: BlogPage (Blog List)
-// Displays paginated/infinite-scrolling list of blog articles with live search and delete confirmation
+// Displays paginated/infinite-scrolling list of blog articles with live search and undoable delete
 // ==========================================
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import axiosInstance from "../../../Utils/axiosInstance";
@@ -13,9 +13,10 @@ import confirm from "../../../Utils/confirm";
 import Search from "../../../Components/Search";
 import Loading from "../../../Components/Loading";
 import { Button, PageHeader, Card } from "../../../Components/UI";
+import { useUndoableDelete } from "../../../Hooks";
 
 /**
- * Blog list page with search, infinite scrolling, and CRUD actions.
+ * Blog list page with search, infinite scrolling, and undoable delete workflow.
  */
 export default function BlogPage() {
   const navigate = useNavigate();
@@ -26,12 +27,31 @@ export default function BlogPage() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const isFetchingRef = useRef(false);
 
   const LIMIT = 12;
+
+  // Undoable Delete Hook: manages 5s countdown window and optimistic UI filtering
+  const {
+    visibleItems: visibleBlogs,
+    requestDelete,
+  } = useUndoableDelete({
+    entity: "article",
+    entityLabel: "مقاله",
+    items: blogs,
+    getId: (item) => item?._id,
+    getLabel: (blog) => blog?.title || "",
+    deleteFn: (id) => axiosInstance.delete(`blog/${id}`),
+    onDeleted: (id) => {
+      setBlogs((prev) => prev.filter((blog) => blog._id !== id));
+    },
+    duration: 5000,
+  });
 
   const fetchBlogs = async (pageNumber, query) => {
     if (pageNumber === 1) setLoading(true);
     else setLoadingMore(true);
+    isFetchingRef.current = true;
 
     try {
       const data = await axiosInstance.get(
@@ -59,13 +79,16 @@ export default function BlogPage() {
           });
         }
       } else {
+        setHasMore(false);
         Notify("error", data?.message || "خطا در دریافت اطلاعات");
       }
     } catch (error) {
+      setHasMore(false);
       Notify("error", error.message || "خطا در دریافت اطلاعات");
     } finally {
       setLoading(false);
       setLoadingMore(false);
+      isFetchingRef.current = false;
     }
   };
 
@@ -75,18 +98,22 @@ export default function BlogPage() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollHeight = document.documentElement.scrollHeight;
-      const scrollTop = document.documentElement.scrollTop;
-      const clientHeight = window.innerHeight;
+      if (!hasMore || loading || loadingMore || isFetchingRef.current) return;
 
-      if (scrollTop + clientHeight >= scrollHeight - 100) {
-        if (hasMore && !loading && !loadingMore) {
+      const scrollTop =
+        window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+      const clientHeight = window.innerHeight || document.documentElement.clientHeight;
+      const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+
+      if (scrollHeight > clientHeight + 100 && scrollTop > 60) {
+        if (scrollTop + clientHeight >= scrollHeight - 160) {
+          isFetchingRef.current = true;
           setPage((prevPage) => prevPage + 1);
         }
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [hasMore, loading, loadingMore]);
 
@@ -94,6 +121,7 @@ export default function BlogPage() {
     setSearchQuery(query);
     setPage(1);
     setHasMore(true);
+    isFetchingRef.current = false;
   };
 
   const handleEditBlog = (data) => {
@@ -103,31 +131,27 @@ export default function BlogPage() {
 
   const handleAddBlog = () => navigate("create");
 
-  const handleDeleteBlog = async (id) => {
+  const handleDeleteBlog = async (itemOrId) => {
+    const article =
+      typeof itemOrId === "object" && itemOrId !== null
+        ? itemOrId
+        : blogs.find((b) => b._id === itemOrId);
+
+    if (!article) return;
+
     const isConfirmed = await confirm(
-      "آیا از حذف این بلاگ اطمینان دارید؟",
-      "این عمل غیرقابل بازگشت است و تصویر آن نیز حذف خواهد شد.",
+      "آیا از حذف این مقاله اطمینان دارید؟",
+      "این عمل غیرقابل بازگشت است و تصویر آن نیز پاک خواهد شد.",
       "بله، حذف کن"
     );
 
     if (!isConfirmed) return;
 
-    try {
-      const deleteData = await axiosInstance.delete(`blog/${id}`);
-
-      if (deleteData && deleteData.success !== false) {
-        setBlogs((prev) => prev.filter((blog) => blog._id !== id));
-        Notify("success", "بلاگ با موفقیت حذف شد.");
-      } else {
-        Notify("error", deleteData?.message || "حذف بلاگ ناموفق بود");
-      }
-    } catch (error) {
-      Notify("error", error.message || "حذف بلاگ ناموفق بود");
-    }
+    requestDelete(article);
   };
 
   return (
-    <div dir="rtl" className="p-6 md:p-8 w-full bg-background min-h-screen">
+    <div dir="rtl" className="p-4 sm:p-6 md:p-8 w-full bg-background min-h-dvh">
       <PageHeader
         title="مدیریت بلاگ‌ها"
         action={
@@ -136,13 +160,14 @@ export default function BlogPage() {
             size="md"
             icon={<AddIcon fontSize="small" />}
             onClick={handleAddBlog}
+            className="w-full sm:w-auto"
           >
             افزودن بلاگ
           </Button>
         }
       >
-        <Card className="flex justify-end p-3 shadow-xs">
-          <Search onSearch={handleSearch} placeholder="جستجوی بلاگ..." />
+        <Card className="flex flex-col sm:flex-row justify-end p-3 shadow-xs">
+          <Search onSearch={handleSearch} placeholder="جستجوی بلاگ..." className="w-full sm:w-80" />
         </Card>
       </PageHeader>
 
@@ -153,8 +178,8 @@ export default function BlogPage() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
-            {blogs.map((blog) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 items-stretch">
+            {visibleBlogs.map((blog) => (
               <BlogCard
                 key={blog._id}
                 blog={blog}
@@ -164,7 +189,7 @@ export default function BlogPage() {
             ))}
           </div>
 
-          {blogs.length === 0 && !loading && (
+          {visibleBlogs.length === 0 && !loading && (
             <div className="col-span-full text-center text-text-secondary py-14">
               هیچ بلاگی یافت نشد.
             </div>

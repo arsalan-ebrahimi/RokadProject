@@ -32,7 +32,8 @@ export default function SingleEvent() {
     const fetchEvent = async () => {
       setLoading(true);
       try {
-        const response = await axiosInstance.get(`event/${id}`);
+        const targetId = id ? decodeURIComponent(id) : "";
+        const response = await axiosInstance.get(`event/${targetId}`);
         const data = response?.data?.data || response?.data || response;
         const result = Array.isArray(data) ? data[0] : data;
         if (result) {
@@ -67,24 +68,26 @@ export default function SingleEvent() {
   const staff = (event.organizers || []).filter((o) => o.category === "عوامل اجرایی");
 
   return (
-    <div dir="rtl" className="p-6 md:p-8 w-full bg-background min-h-screen">
+    <div dir="rtl" className="p-4 sm:p-6 md:p-8 w-full bg-background min-h-dvh">
       <div className="max-w-5xl mx-auto">
         <PageHeader
           title={event.title}
-          subtitle={`مشخصات کامل و جزئیات برگزاری ${event.type}`}
+          subtitle={event.slug ? `آدرس صفحه: /event/${event.slug}` : `مشخصات کامل و جزئیات برگزاری ${event.type}`}
           backTo="/event"
           action={
             <Button
               variant="primary"
               size="md"
-              onClick={() => navigate(`/event/update/${event._id}`)}
+              onClick={() => navigate(`/event/update/${event.slug || event._id}`)}
               icon={<EditIcon fontSize="small" />}
+              className="w-full sm:w-auto"
             >
               ویرایش اطلاعات رویداد
             </Button>
           }
         />
       </div>
+
 
       <div className="max-w-5xl mx-auto flex flex-col gap-8">
         {/* Hero Banner Card */}

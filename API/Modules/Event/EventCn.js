@@ -1,9 +1,11 @@
-import fs from "fs";
+﻿import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import mongoose from "mongoose";
 import ApiFeatures, { catchAsync, HandleERROR } from "vanta-api";
 import Event from "./EventMd.js";
 import { stripHtml } from "../../Utils/htmlSanitizer.js";
+import { slugify, generateUniqueSlug } from "../../Utils/slugify.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,6 +13,7 @@ const __dirname = path.dirname(__filename);
 export const create = catchAsync(async (req, res, next) => {
   const {
     title,
+    slug,
     type,
     date,
     description,
@@ -33,6 +36,8 @@ export const create = catchAsync(async (req, res, next) => {
   if (existingEvent) {
     return next(new HandleERROR("رویدادی با این عنوان قبلاً ثبت شده است", 400));
   }
+
+  const finalSlug = await generateUniqueSlug(Event, slug || cleanTitle);
 
   const cleanOrganizers = Array.isArray(organizers)
     ? organizers.map((org) => ({
@@ -76,6 +81,7 @@ export const create = catchAsync(async (req, res, next) => {
 
   const newEvent = await Event.create({
     title: cleanTitle,
+    slug: finalSlug,
     type: typeof type === "string" ? stripHtml(type) : "",
     date: typeof date === "string" ? stripHtml(date) : "",
     description: typeof description === "string" ? stripHtml(description) : "",
@@ -106,7 +112,7 @@ export const create = catchAsync(async (req, res, next) => {
 export const getAll = catchAsync(async (req, res, next) => {
   const features = new ApiFeatures(Event, req.query, req.role)
     .filter()
-    .search(["title", "type", "description", "closingLocation", "tags"])
+    .search(["title", "slug", "type", "description", "closingLocation", "tags"])
     .sort()
     .limitFields()
     .paginate()
@@ -117,8 +123,14 @@ export const getAll = catchAsync(async (req, res, next) => {
 });
 
 export const getOne = catchAsync(async (req, res, next) => {
+  const identifier = req.params.id ? decodeURIComponent(req.params.id).trim() : "";
+  const isObjectId = mongoose.Types.ObjectId.isValid(identifier) && /^[0-9a-fA-F]{24}$/.test(identifier);
+  const filter = isObjectId
+    ? { $or: [{ _id: identifier }, { slug: identifier.toLowerCase() }] }
+    : { slug: identifier.toLowerCase() };
+
   const features = new ApiFeatures(Event, req.query, req.role)
-    .addManualFilters({ _id: req.params.id })
+    .addManualFilters(filter)
     .filter()
     .limitFields()
     .populate();
@@ -135,6 +147,17 @@ export const getOne = catchAsync(async (req, res, next) => {
     return next(new HandleERROR("رویداد یافت نشد", 404));
   }
 
+  // Ensure slug exists on legacy documents if missing
+  if (!doc.slug && doc._id && doc.title) {
+    try {
+      const generatedSlug = await generateUniqueSlug(Event, doc.title, doc._id);
+      await Event.findByIdAndUpdate(doc._id, { slug: generatedSlug });
+      doc.slug = generatedSlug;
+    } catch (e) {
+      // Ignore background slug fix error
+    }
+  }
+
   return res.status(200).json({
     success: true,
     data: doc,
@@ -142,7 +165,13 @@ export const getOne = catchAsync(async (req, res, next) => {
 });
 
 export const update = catchAsync(async (req, res, next) => {
-  const oldEvent = await Event.findById(req.params.id);
+  const identifier = req.params.id ? decodeURIComponent(req.params.id).trim() : "";
+  const isObjectId = mongoose.Types.ObjectId.isValid(identifier) && /^[0-9a-fA-F]{24}$/.test(identifier);
+  const filter = isObjectId
+    ? { $or: [{ _id: identifier }, { slug: identifier.toLowerCase() }] }
+    : { slug: identifier.toLowerCase() };
+
+  const oldEvent = await Event.findOne(filter);
   if (!oldEvent) {
     return next(new HandleERROR("رویداد یافت نشد", 404));
   }
@@ -150,6 +179,13 @@ export const update = catchAsync(async (req, res, next) => {
   const updates = {};
 
   if (req.body.title !== undefined) updates.title = typeof req.body.title === "string" ? stripHtml(req.body.title) : req.body.title;
+
+  if (req.body.slug !== undefined && req.body.slug.trim() !== "") {
+    updates.slug = await generateUniqueSlug(Event, req.body.slug, oldEvent._id);
+  } else if (updates.title && (!oldEvent.slug || req.body.slug === "")) {
+    updates.slug = await generateUniqueSlug(Event, updates.title, oldEvent._id);
+  }
+
   if (req.body.type !== undefined) updates.type = typeof req.body.type === "string" ? stripHtml(req.body.type) : req.body.type;
   if (req.body.date !== undefined) updates.date = typeof req.body.date === "string" ? stripHtml(req.body.date) : req.body.date;
   if (req.body.description !== undefined) updates.description = typeof req.body.description === "string" ? stripHtml(req.body.description) : req.body.description;
@@ -227,7 +263,7 @@ export const update = catchAsync(async (req, res, next) => {
     }
   }
 
-  const updatedEvent = await Event.findByIdAndUpdate(req.params.id, updates, {
+  const updatedEvent = await Event.findByIdAndUpdate(oldEvent._id, updates, {
     new: true,
     runValidators: true,
   });
@@ -240,7 +276,13 @@ export const update = catchAsync(async (req, res, next) => {
 });
 
 export const remove = catchAsync(async (req, res, next) => {
-  const deleteEvent = await Event.findByIdAndDelete(req.params.id);
+  const identifier = req.params.id ? decodeURIComponent(req.params.id).trim() : "";
+  const isObjectId = mongoose.Types.ObjectId.isValid(identifier) && /^[0-9a-fA-F]{24}$/.test(identifier);
+  const filter = isObjectId
+    ? { $or: [{ _id: identifier }, { slug: identifier.toLowerCase() }] }
+    : { slug: identifier.toLowerCase() };
+
+  const deleteEvent = await Event.findOneAndDelete(filter);
 
   if (!deleteEvent) {
     return next(new HandleERROR("رویداد یافت نشد", 404));

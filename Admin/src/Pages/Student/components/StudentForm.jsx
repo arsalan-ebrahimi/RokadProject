@@ -24,19 +24,13 @@ import {
   PageHeader,
   Card,
   ImageUpload,
+  FormActionBar,
 } from "../../../Components/UI";
+import { toEnglishDigits } from "../../../Utils/toEnglishDigits";
 
-const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d\/]+$/;
+const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-_،؛؟!.:«»",;?()/\u200c\u200d]+$/u;
 
-// Converts Persian/Arabic digits to English digits
-export const toEnglishDigits = (str) => {
-  if (typeof str !== "string") return str;
-  return str
-    .replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d))
-    .replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
-};
-
-export const studentValidationSchema = Yup.object({
+const studentValidationSchema = Yup.object({
   fullName: Yup.string()
     .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
     .max(100, "نام کامل حداکثر ۱۰۰ کاراکتر است")
@@ -204,17 +198,18 @@ export default function StudentForm({
   };
 
   return (
-    <div dir="rtl" className="p-6 md:p-8 w-full bg-background min-h-screen">
+    <div dir="rtl" className="p-4 sm:p-6 md:p-8 w-full bg-background min-h-dvh">
       <PageHeader
         title={pageTitle}
         subtitle={pageSubtitle}
         backTo="/student"
       />
 
-      <Card className="p-6 md:p-8 max-w-4xl mx-auto shadow-sm">
+      <Card className="p-4 sm:p-6 md:p-8 max-w-4xl mx-auto shadow-sm">
         <FormikProvider value={formik}>
-          <form onSubmit={handleFormSubmit} className="flex flex-col gap-8">
+          <form onSubmit={handleFormSubmit} className="flex flex-col gap-8 pb-20 md:pb-6">
             {/* 1. Basic Identity Information */}
+
             <div className="flex flex-col gap-5">
               <h3 className="text-base font-bold text-secondary border-b border-border/80 pb-2 flex items-center gap-2">
                 <SchoolIcon fontSize="small" className="text-primary" />
@@ -517,16 +512,12 @@ export default function StudentForm({
               />
             </div>
 
-            {/* Submit Button */}
-            <div className="flex justify-end pt-4 border-t border-border/80">
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                isLoading={isSubmitting}
-              >
-                {isEdit ? "ذخیره تغییرات پرونده" : "ثبت پرونده دانش‌آموز"}
-              </Button>
+            {/* Submit Action Bar */}
+            <div className="pt-4 border-t border-border/80">
+              <FormActionBar
+                submitLabel={isEdit ? "ذخیره تغییرات پرونده" : "ثبت پرونده دانش‌آموز"}
+                isSubmitting={isSubmitting}
+              />
             </div>
           </form>
         </FormikProvider>
@@ -534,3 +525,4 @@ export default function StudentForm({
     </div>
   );
 }
+

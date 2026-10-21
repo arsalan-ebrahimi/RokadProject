@@ -1,4 +1,4 @@
-// ==========================================
+﻿// ==========================================
 // Component: BlogForm
 // Shared form for creating and updating blog articles with live preview tabs,
 // dynamic tags, table of contents builder, and rich HTML editor
@@ -21,17 +21,28 @@ import {
   PageHeader,
   Card,
   ImageUpload,
+  Tabs,
+  FormActionBar,
 } from "../../../Components/UI";
 import HtmlEditor from "./HtmlEditor";
 import BlogPreview from "./BlogPreview";
+import { slugify } from "../../../Utils/slugify";
 
-const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d\/]+$/;
+const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-_،؛؟!.:«»",;?()/\u200c\u200d]+$/u;
 
-export const blogValidationSchema = Yup.object({
+const blogValidationSchema = Yup.object({
   title: Yup.string()
     .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
     .max(200, "عنوان حداکثر ۲۰۰ کاراکتر است")
     .required("وارد کردن عنوان مقاله الزامی است"),
+  slug: Yup.string()
+    .max(150, "اسلاگ حداکثر می‌تواند ۱۵۰ کاراکتر باشد")
+    .test(
+      "slug-format",
+      "اسلاگ فقط می‌تواند شامل حروف، اعداد و خط تیره (-) باشد و نباید با خط تیره شروع یا پایان یابد",
+      (val) => !val || !val.trim() || /^[a-z0-9\u0600-\u06FF]+(?:-[a-z0-9\u0600-\u06FF]+)*$/.test(val)
+    )
+    .optional(),
   date: Yup.string()
     .matches(safeTextRegex, "مقدار غیرمجاز")
     .required("انتخاب تاریخ انتشار الزامی است"),
@@ -56,7 +67,7 @@ export const blogValidationSchema = Yup.object({
       title: Yup.string()
         .max(200, "عنوان سرفصل حداکثر ۲۰۰ کاراکتر است")
         .test("safe-text", "عنوان سرفصل شامل کاراکتر غیرمجاز است", (val) => {
-          if (!val || !val.trim()) return true; // empty row while drafting is allowed, will be pruned on submit
+          if (!val || !val.trim()) return true;
           return safeTextRegex.test(val);
         }),
     })
@@ -66,6 +77,7 @@ export const blogValidationSchema = Yup.object({
 
 const defaultInitialValues = {
   title: "",
+  slug: "",
   date: "",
   description: "",
   img: null,
@@ -83,17 +95,18 @@ export default function BlogForm({
   pageTitle = "افزودن بلاگ جدید",
   pageSubtitle = "نگارش مقاله و انتشار در بخش مقالات و وبلاگ",
 }) {
-  const [activeTab, setActiveTab] = useState("edit"); // "edit" | "preview"
+  const [activeTab, setActiveTab] = useState("edit");
   const [imagePreview, setImagePreview] = useState(existingImageUrl || null);
   const [newTagInput, setNewTagInput] = useState("");
+  const [userModifiedSlug, setUserModifiedSlug] = useState(Boolean(initialValues?.slug));
   const tagInputRef = useRef(null);
 
-  // Normalize initialValues so tableOfContents is always an array of objects
   const normalizedInitialValues = useMemo(() => {
     const raw = initialValues || defaultInitialValues;
     return {
       ...defaultInitialValues,
       ...raw,
+      slug: raw.slug || "",
       tags: Array.isArray(raw.tags) ? raw.tags : [],
       tableOfContents: Array.isArray(raw.tableOfContents)
         ? raw.tableOfContents.map((item) =>
@@ -110,7 +123,6 @@ export default function BlogForm({
     initialValues: normalizedInitialValues,
     validationSchema: blogValidationSchema,
     onSubmit: async (values) => {
-      // Auto-commit pending tag if typed
       let currentTags = Array.isArray(values.tags) ? [...values.tags] : [];
       if (newTagInput.trim()) {
         const extraTags = newTagInput
@@ -121,7 +133,6 @@ export default function BlogForm({
         currentTags = [...currentTags, ...extraTags];
       }
 
-      // Drop blank rows in table of contents
       const cleanedToc = (values.tableOfContents || [])
         .map((item) =>
           typeof item === "string"
@@ -130,8 +141,11 @@ export default function BlogForm({
         )
         .filter((item) => item.title.length > 0);
 
+      const finalSlug = values.slug?.trim() ? slugify(values.slug) : slugify(values.title);
+
       await onSubmit({
         ...values,
+        slug: finalSlug,
         tags: currentTags,
         tableOfContents: cleanedToc,
       });
@@ -139,12 +153,42 @@ export default function BlogForm({
     },
   });
 
-  // Synchronize image preview when existingImageUrl updates
+  useEffect(() => {
+    if (initialValues?.slug) {
+      setUserModifiedSlug(true);
+    }
+  }, [initialValues?.slug]);
+
   useEffect(() => {
     if (!(formik.values.img instanceof File)) {
       setImagePreview(existingImageUrl || null);
     }
   }, [existingImageUrl]);
+
+  const handleTitleChange = (e) => {
+    const newTitle = e.target.value;
+    formik.setFieldValue("title", newTitle);
+    if (!userModifiedSlug) {
+      formik.setFieldValue("slug", slugify(newTitle));
+    }
+  };
+
+  const handleSlugChange = (e) => {
+    setUserModifiedSlug(true);
+    const sanitized = e.target.value
+      .toLowerCase()
+      .replace(/[\s_]+/g, "-")
+      .replace(/[^\u0600-\u06FFa-z0-9-]/g, "")
+      .replace(/-+/g, "-");
+    formik.setFieldValue("slug", sanitized);
+  };
+
+  const handleSlugBlur = (e) => {
+    formik.handleBlur(e);
+    if (formik.values.slug) {
+      formik.setFieldValue("slug", slugify(formik.values.slug));
+    }
+  };
 
   const handleImageSelect = (file) => {
     formik.setFieldValue("img", file);
@@ -155,7 +199,6 @@ export default function BlogForm({
     }
   };
 
-  // Add tag handler supporting comma-separated values & hashtag trimming
   const handleAddTag = () => {
     const raw = newTagInput.trim();
     if (!raw) {
@@ -192,7 +235,6 @@ export default function BlogForm({
     );
   };
 
-  // Direct Table of Contents helpers
   const handleAddTableOfContent = () => {
     const current = Array.isArray(formik.values.tableOfContents)
       ? [...formik.values.tableOfContents]
@@ -226,7 +268,6 @@ export default function BlogForm({
   const handleFormSubmit = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
 
-    // Commit any pending tag text before running validation
     if (newTagInput.trim()) {
       const extraTags = newTagInput
         .trim()
@@ -248,15 +289,14 @@ export default function BlogForm({
       setNewTagInput("");
     }
 
-    // Check for validation errors
     const errors = await formik.validateForm();
     if (Object.keys(errors).length > 0) {
-      // Switch back to edit tab if errors are present so user sees them
       if (activeTab === "preview") {
         setActiveTab("edit");
       }
       formik.setTouched({
         title: true,
+        slug: true,
         date: true,
         description: true,
         img: true,
@@ -269,55 +309,37 @@ export default function BlogForm({
     formik.handleSubmit(e);
   };
 
+  const blogTabs = [
+    {
+      id: "edit",
+      label: "ویرایش و نگارش مقاله",
+      icon: <EditNoteIcon fontSize="small" />,
+    },
+    {
+      id: "preview",
+      label: "پیش‌نمایش زنده مقاله",
+      icon: <VisibilityIcon fontSize="small" />,
+    },
+  ];
+
   return (
-    <div dir="rtl" className="p-6 md:p-8 w-full bg-background min-h-screen">
+    <div dir="rtl" className="p-4 sm:p-6 md:p-8 w-full bg-background min-h-screen">
       <PageHeader
         title={pageTitle}
         subtitle={pageSubtitle}
         backTo="/blog"
       />
 
-      {/* Top Tab Bar Switcher (Edit vs Live Preview) */}
-      <div className="max-w-4xl mx-auto mb-6 flex items-center justify-between bg-surface p-1.5 rounded-2xl border border-border shadow-2xs">
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setActiveTab("edit")}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer ${
-              activeTab === "edit"
-                ? "bg-primary text-white shadow-xs"
-                : "text-text-secondary hover:text-text-primary hover:bg-bg-light"
-            }`}
-          >
-            <EditNoteIcon fontSize="small" />
-            <span>ویرایش و نگارش مقاله</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("preview")}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer ${
-              activeTab === "preview"
-                ? "bg-primary text-white shadow-xs"
-                : "text-text-secondary hover:text-text-primary hover:bg-bg-light"
-            }`}
-          >
-            <VisibilityIcon fontSize="small" />
-            <span>پیش‌نمایش زنده مقاله</span>
-          </button>
-        </div>
-
-        <span className="text-xs text-text-muted hidden sm:inline-block pl-3">
-          {activeTab === "edit"
-            ? "فرم اطلاعات و کد HTML"
-            : "پیش‌نمایش خروجی در صفحه کاربر"}
-        </span>
+      <div className="max-w-4xl mx-auto mb-6">
+        <Tabs
+          tabs={blogTabs}
+          activeTab={activeTab}
+          onChange={setActiveTab}
+        />
       </div>
 
-      {/* Persistent Formik Form Wrapping Both Tabs */}
       <FormikProvider value={formik}>
-        <form onSubmit={handleFormSubmit} className="max-w-4xl mx-auto flex flex-col gap-6">
-          {/* Live Preview Tab Viewport (kept mounted) */}
+        <form onSubmit={handleFormSubmit} className="max-w-4xl mx-auto flex flex-col gap-6 pb-20 md:pb-6">
           <div className={activeTab === "preview" ? "block" : "hidden"}>
             <BlogPreview
               title={formik.values.title}
@@ -330,42 +352,67 @@ export default function BlogForm({
               htmlContent={formik.values.htmlContent}
             />
 
-            {/* Preview View Bottom Action Bar */}
-            <div className="flex justify-between items-center mt-6 bg-surface p-4 rounded-2xl border border-border shadow-xs">
-              <Button
-                type="button"
-                variant="outline"
-                size="md"
-                onClick={() => setActiveTab("edit")}
-                icon={<EditNoteIcon fontSize="small" />}
-              >
-                بازگشت به ویرایش مقاله
-              </Button>
-
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                isLoading={isSubmitting}
-              >
-                {isEdit ? "ذخیره تغییرات مقاله" : "ثبت و انتشار مقاله"}
-              </Button>
+            <div className="mt-6">
+              <FormActionBar
+                submitLabel={isEdit ? "ذخیره تغییرات مقاله" : "ثبت و انتشار مقاله"}
+                isSubmitting={isSubmitting}
+                secondaryAction={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="md"
+                    onClick={() => setActiveTab("edit")}
+                    icon={<EditNoteIcon fontSize="small" />}
+                    className="w-full md:w-auto text-xs md:text-sm font-semibold min-h-[44px]"
+                  >
+                    بازگشت به ویرایش
+                  </Button>
+                }
+              />
             </div>
           </div>
 
-          {/* Edit Form Tab Viewport (kept mounted) */}
           <div className={activeTab === "edit" ? "block" : "hidden"}>
             <Card className="p-6 md:p-8 shadow-sm">
               <div className="flex flex-col gap-6">
-                {/* Basic Fields */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <Input
                     label="عنوان مقاله"
                     placeholder="مثال: معرفی جامع معماری فرانت‌اند و فریمورک‌ها"
                     error={formik.touched.title && formik.errors.title}
-                    {...formik.getFieldProps("title")}
+                    name="title"
+                    value={formik.values.title}
+                    onChange={handleTitleChange}
+                    onBlur={formik.handleBlur}
                   />
 
+                  <Input
+                    label="اسلاگ / شناسه یکتای مقاله در URL (Slug)"
+                    placeholder="rokad-frontend-architecture-guide"
+                    helperText={
+                      formik.values.slug ? (
+                        <span className="flex items-center gap-1.5 flex-wrap break-all text-xs text-text-muted">
+                          <span>آدرس URL صفحه:</span>
+                          <span
+                            dir="ltr"
+                            className="font-mono text-primary font-medium bg-primary/10 px-1.5 py-0.5 rounded text-[11px] break-all max-w-full"
+                          >
+                            /blog/{formik.values.slug.length > 55 ? `${formik.values.slug.slice(0, 55)}...` : formik.values.slug}
+                          </span>
+                        </span>
+                      ) : (
+                        "در صورت خالی گذاشتن، اسلاگ به صورت خودکار از عنوان مقاله تولید می‌شود."
+                      )
+                    }
+                    error={formik.touched.slug && formik.errors.slug}
+                    name="slug"
+                    value={formik.values.slug}
+                    onChange={handleSlugChange}
+                    onBlur={handleSlugBlur}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <Input
                     label="تاریخ انتشار"
                     placeholder="مثال: 1404-06-15"
@@ -374,7 +421,6 @@ export default function BlogForm({
                   />
                 </div>
 
-                {/* Excerpt / Summary */}
                 <Textarea
                   label="چکیده و توضیحات مقاله"
                   rows={4}
@@ -383,7 +429,6 @@ export default function BlogForm({
                   {...formik.getFieldProps("description")}
                 />
 
-                {/* Dynamic Tags Section */}
                 <div className="flex flex-col gap-3 border-t border-border/80 pt-5">
                   <div className="flex justify-between items-center">
                     <label className="text-xs md:text-sm font-semibold text-text-primary select-none flex items-center gap-1.5">
@@ -455,7 +500,6 @@ export default function BlogForm({
                   )}
                 </div>
 
-                {/* Table of Contents (فهرست مطالب) */}
                 <div className="flex flex-col gap-3 border-t border-border/80 pt-5">
                   <div className="flex justify-between items-center">
                     <label className="text-xs md:text-sm font-semibold text-text-primary select-none flex items-center gap-1.5">
@@ -525,7 +569,6 @@ export default function BlogForm({
                   </div>
                 </div>
 
-                {/* Rich HTML Content Input */}
                 <div className="border-t border-border/80 pt-5">
                   <HtmlEditor
                     name="htmlContent"
@@ -539,7 +582,6 @@ export default function BlogForm({
                   />
                 </div>
 
-                {/* Featured Image */}
                 <div className="border-t border-border/80 pt-5">
                   <ImageUpload
                     label="تصویر شاخص مقاله"
@@ -550,26 +592,23 @@ export default function BlogForm({
                   />
                 </div>
 
-                {/* Submit Button */}
-                <div className="flex justify-between items-center pt-4 border-t border-border/80">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="md"
-                    onClick={() => setActiveTab("preview")}
-                    icon={<VisibilityIcon fontSize="small" />}
-                  >
-                    مشاهده پیش‌نمایش قبل از انتشار
-                  </Button>
-
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    size="lg"
-                    isLoading={isSubmitting}
-                  >
-                    {isEdit ? "ذخیره تغییرات مقاله" : "ثبت و انتشار مقاله"}
-                  </Button>
+                <div className="pt-4 border-t border-border/80">
+                  <FormActionBar
+                    submitLabel={isEdit ? "ذخیره تغییرات مقاله" : "ثبت و انتشار مقاله"}
+                    isSubmitting={isSubmitting}
+                    secondaryAction={
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="md"
+                        onClick={() => setActiveTab("preview")}
+                        icon={<VisibilityIcon fontSize="small" />}
+                        className="w-full md:w-auto text-xs md:text-sm font-semibold min-h-[44px]"
+                      >
+                        پیش‌نمایش قبل از انتشار
+                      </Button>
+                    }
+                  />
                 </div>
               </div>
             </Card>

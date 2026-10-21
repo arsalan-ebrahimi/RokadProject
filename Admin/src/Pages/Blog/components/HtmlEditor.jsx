@@ -1,9 +1,10 @@
 // ==========================================
 // Component: HtmlEditor
-// Rich HTML Code Editor with toolbar, line numbers, and quick tag insertion
+// Rich HTML Code Editor with responsive toolbar, line numbers, quick tag insertion,
+// and dvh-aware viewport height with mobile line-wrap support
 // ==========================================
 
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import CodeIcon from "@mui/icons-material/Code";
 import FormatBoldIcon from "@mui/icons-material/FormatBold";
 import FormatItalicIcon from "@mui/icons-material/FormatItalic";
@@ -12,6 +13,7 @@ import FormatQuoteIcon from "@mui/icons-material/FormatQuote";
 import LinkIcon from "@mui/icons-material/Link";
 import ImageIcon from "@mui/icons-material/Image";
 import TitleIcon from "@mui/icons-material/Title";
+import WrapTextIcon from "@mui/icons-material/WrapText";
 
 export default function HtmlEditor({
   value = "",
@@ -23,6 +25,8 @@ export default function HtmlEditor({
   placeholder = "کد HTML مقاله را اینجا بنویسید یا با دکمه‌های بالا درج کنید...",
 }) {
   const textareaRef = useRef(null);
+  const gutterRef = useRef(null);
+  const [isWrapEnabled, setIsWrapEnabled] = useState(true);
 
   // Quick tag insertion helper
   const insertTag = (openTag, closeTag = "") => {
@@ -67,10 +71,8 @@ export default function HtmlEditor({
   };
 
   // Generate line numbers
-  const linesCount = Math.max((value || "").split("\n").length, 12);
+  const linesCount = Math.max((value || "").split("\n").length, 10);
   const lineNumbers = Array.from({ length: linesCount }, (_, i) => i + 1);
-
-  const gutterRef = useRef(null);
 
   const handleScroll = (e) => {
     if (gutterRef.current) {
@@ -86,9 +88,24 @@ export default function HtmlEditor({
             <CodeIcon fontSize="small" className="text-primary" />
             <span>{label}</span>
           </label>
-          <span className="text-[11px] text-text-muted font-numeric">
-            {value.length} کاراکتر
-          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsWrapEnabled((prev) => !prev)}
+              title={isWrapEnabled ? "غیرفعال‌سازی شکستن خطوط" : "فعال‌سازی شکستن خطوط"}
+              className={`text-xs px-2 py-0.5 rounded flex items-center gap-1 border transition-colors cursor-pointer ${
+                isWrapEnabled
+                  ? "bg-primary-light border-primary-border text-text-accent"
+                  : "bg-surface border-border text-text-muted"
+              }`}
+            >
+              <WrapTextIcon fontSize="inherit" />
+              <span className="hidden sm:inline">شکست خطوط</span>
+            </button>
+            <span className="text-[11px] text-text-muted font-numeric">
+              {value.length} کاراکتر
+            </span>
+          </div>
         </div>
       )}
 
@@ -100,15 +117,15 @@ export default function HtmlEditor({
             : "border-border focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20"
         }`}
       >
-        {/* Formatting Toolbar */}
+        {/* Formatting Toolbar (horizontally scrollable on mobile) */}
         <div
           dir="ltr"
-          className="flex flex-wrap items-center gap-1 p-2 bg-bg-light/80 border-b border-border/70 select-none text-xs"
+          className="flex items-center gap-1 p-2 bg-bg-light/80 border-b border-border/70 select-none text-xs overflow-x-auto hide-scrollbar scroll-smooth"
         >
           <button
             type="button"
             onClick={() => insertTag("<h2>", "</h2>")}
-            className="px-2.5 py-1 rounded hover:bg-surface border border-transparent hover:border-border text-secondary font-bold flex items-center gap-1 transition-colors"
+            className="px-2.5 py-1.5 rounded hover:bg-surface border border-transparent hover:border-border text-secondary font-bold flex items-center gap-1 transition-colors shrink-0 min-h-[32px]"
             title="Heading 2 (<h2>)"
           >
             <TitleIcon fontSize="small" /> H2
@@ -116,16 +133,16 @@ export default function HtmlEditor({
           <button
             type="button"
             onClick={() => insertTag("<h3>", "</h3>")}
-            className="px-2 py-1 rounded hover:bg-surface border border-transparent hover:border-border text-secondary font-semibold transition-colors"
+            className="px-2 py-1.5 rounded hover:bg-surface border border-transparent hover:border-border text-secondary font-semibold transition-colors shrink-0 min-h-[32px]"
             title="Heading 3 (<h3>)"
           >
             H3
           </button>
-          <div className="w-[1px] h-4 bg-border mx-1" />
+          <div className="w-[1px] h-4 bg-border mx-1 shrink-0" />
           <button
             type="button"
             onClick={() => insertTag("<p>", "</p>")}
-            className="px-2 py-1 rounded hover:bg-surface border border-transparent hover:border-border text-secondary transition-colors"
+            className="px-2 py-1.5 rounded hover:bg-surface border border-transparent hover:border-border text-secondary transition-colors shrink-0 min-h-[32px]"
             title="Paragraph (<p>)"
           >
             P
@@ -133,7 +150,7 @@ export default function HtmlEditor({
           <button
             type="button"
             onClick={() => insertTag("<strong>", "</strong>")}
-            className="p-1 rounded hover:bg-surface border border-transparent hover:border-border text-secondary transition-colors"
+            className="p-1.5 rounded hover:bg-surface border border-transparent hover:border-border text-secondary transition-colors shrink-0 min-h-[32px]"
             title="Bold (<strong>)"
           >
             <FormatBoldIcon fontSize="small" />
@@ -141,16 +158,16 @@ export default function HtmlEditor({
           <button
             type="button"
             onClick={() => insertTag("<em>", "</em>")}
-            className="p-1 rounded hover:bg-surface border border-transparent hover:border-border text-secondary transition-colors"
+            className="p-1.5 rounded hover:bg-surface border border-transparent hover:border-border text-secondary transition-colors shrink-0 min-h-[32px]"
             title="Italic (<em>)"
           >
             <FormatItalicIcon fontSize="small" />
           </button>
-          <div className="w-[1px] h-4 bg-border mx-1" />
+          <div className="w-[1px] h-4 bg-border mx-1 shrink-0" />
           <button
             type="button"
             onClick={() => insertTag("<ul>\n  <li>", "</li>\n</ul>")}
-            className="p-1 rounded hover:bg-surface border border-transparent hover:border-border text-secondary transition-colors"
+            className="p-1.5 rounded hover:bg-surface border border-transparent hover:border-border text-secondary transition-colors shrink-0 min-h-[32px]"
             title="Unordered List (<ul>)"
           >
             <FormatListBulletedIcon fontSize="small" />
@@ -158,7 +175,7 @@ export default function HtmlEditor({
           <button
             type="button"
             onClick={() => insertTag("<blockquote>\n  ", "\n</blockquote>")}
-            className="p-1 rounded hover:bg-surface border border-transparent hover:border-border text-secondary transition-colors"
+            className="p-1.5 rounded hover:bg-surface border border-transparent hover:border-border text-secondary transition-colors shrink-0 min-h-[32px]"
             title="Quote (<blockquote>)"
           >
             <FormatQuoteIcon fontSize="small" />
@@ -166,26 +183,24 @@ export default function HtmlEditor({
           <button
             type="button"
             onClick={() => insertTag("<code>", "</code>")}
-            className="px-2 py-1 rounded hover:bg-surface border border-transparent hover:border-border font-mono text-secondary transition-colors"
+            className="px-2 py-1.5 rounded hover:bg-surface border border-transparent hover:border-border font-mono text-secondary transition-colors shrink-0 min-h-[32px]"
             title="Inline Code (<code>)"
           >
             &lt;/&gt;
           </button>
           <button
             type="button"
-            onClick={() =>
-              insertTag("<pre><code>\n", "\n</code></pre>")
-            }
-            className="px-2 py-1 rounded hover:bg-surface border border-transparent hover:border-border font-mono text-xs text-secondary transition-colors"
+            onClick={() => insertTag("<pre><code>\n", "\n</code></pre>")}
+            className="px-2 py-1.5 rounded hover:bg-surface border border-transparent hover:border-border font-mono text-xs text-secondary transition-colors shrink-0 min-h-[32px]"
             title="Code Block (<pre><code>)"
           >
             pre
           </button>
-          <div className="w-[1px] h-4 bg-border mx-1" />
+          <div className="w-[1px] h-4 bg-border mx-1 shrink-0" />
           <button
             type="button"
             onClick={() => insertTag('<a href="https://..." target="_blank">', "</a>")}
-            className="p-1 rounded hover:bg-surface border border-transparent hover:border-border text-secondary transition-colors"
+            className="p-1.5 rounded hover:bg-surface border border-transparent hover:border-border text-secondary transition-colors shrink-0 min-h-[32px]"
             title="Link (<a>)"
           >
             <LinkIcon fontSize="small" />
@@ -193,7 +208,7 @@ export default function HtmlEditor({
           <button
             type="button"
             onClick={() => insertTag('<img src="https://..." alt="', '" class="rounded-xl w-full my-4" />')}
-            className="p-1 rounded hover:bg-surface border border-transparent hover:border-border text-secondary transition-colors"
+            className="p-1.5 rounded hover:bg-surface border border-transparent hover:border-border text-secondary transition-colors shrink-0 min-h-[32px]"
             title="Image (<img>)"
           >
             <ImageIcon fontSize="small" />
@@ -201,19 +216,19 @@ export default function HtmlEditor({
           <button
             type="button"
             onClick={() => insertTag("<hr />\n")}
-            className="px-2 py-1 rounded hover:bg-surface border border-transparent hover:border-border text-secondary transition-colors"
+            className="px-2 py-1.5 rounded hover:bg-surface border border-transparent hover:border-border text-secondary transition-colors shrink-0 min-h-[32px]"
             title="Divider (<hr />)"
           >
             HR
           </button>
         </div>
 
-        {/* Code Area with Line Numbers */}
-        <div className="flex bg-[#1e2433] text-gray-200 min-h-[320px] max-h-[550px] overflow-hidden" dir="ltr">
+        {/* Code Area with Line Numbers and responsive height */}
+        <div className="flex bg-[#1e2433] text-gray-200 min-h-[260px] md:min-h-[350px] max-h-[50dvh] md:max-h-[550px] overflow-hidden" dir="ltr">
           {/* Gutter / Line Numbers */}
           <div
             ref={gutterRef}
-            className="w-12 py-3 px-2 text-right select-none font-mono text-xs text-gray-500 bg-[#161a25] border-r border-gray-700/60 overflow-hidden leading-6"
+            className="w-10 md:w-12 py-3 px-1.5 md:px-2 text-right select-none font-mono text-xs text-gray-500 bg-[#161a25] border-r border-gray-700/60 overflow-hidden leading-6 shrink-0"
           >
             {lineNumbers.map((num) => (
               <div key={num}>{num}</div>
@@ -229,11 +244,14 @@ export default function HtmlEditor({
             onBlur={onBlur}
             onKeyDown={handleKeyDown}
             onScroll={handleScroll}
-            wrap="off"
+            wrap={isWrapEnabled ? "soft" : "off"}
             placeholder={placeholder}
-            rows={14}
+            rows={12}
             spellCheck={false}
-            className="flex-1 p-3 bg-transparent text-gray-100 font-mono text-sm leading-6 resize-y focus:outline-none placeholder-gray-500 overflow-x-auto"
+            className={`
+              flex-1 p-3 bg-transparent text-gray-100 font-mono text-xs md:text-sm leading-6 resize-y focus:outline-none placeholder-gray-500 overflow-x-auto
+              ${isWrapEnabled ? "break-words whitespace-pre-wrap" : "whitespace-pre"}
+            `}
           />
         </div>
       </div>

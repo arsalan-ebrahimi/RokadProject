@@ -1,6 +1,7 @@
-// ==========================================
+﻿// ==========================================
 // Component: EventCard
 // Presentation card for events displaying thumbnail, category/branch badges, date, and actions
+// Fully responsive with aspect-video thumbnail and >=40px touch targets
 // ==========================================
 
 import React from "react";
@@ -26,11 +27,12 @@ export default function EventCard({ event, onEdit, onDelete }) {
   return (
     <Card hoverable className="overflow-hidden flex flex-col group h-full">
       {/* Event Thumbnail */}
-      <div className="h-48 w-full bg-bg-light relative overflow-hidden border-b border-border/60">
+      <div className="h-48 w-full bg-bg-light relative overflow-hidden border-b border-border/60 aspect-video">
         {event.img ? (
           <img
             src={imageUrl}
             alt={event.title}
+            loading="lazy"
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             onError={(e) => {
               e.target.style.display = "none";
@@ -93,14 +95,14 @@ export default function EventCard({ event, onEdit, onDelete }) {
           {event.description}
         </p>
 
-        {/* Action Toolbar */}
+        {/* Action Toolbar with >=40px touch targets */}
         <div className="flex justify-between items-center gap-1 mt-auto shrink-0 pt-3 border-t border-border-light">
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(`/event/${event._id}`)}
+            onClick={() => navigate(`/event/${event.slug || event._id}`)}
             icon={<VisibilityIcon fontSize="inherit" />}
-            className="text-xs text-primary hover:text-primary-active"
+            className="text-xs text-primary hover:text-primary-active min-h-[40px]"
           >
             مشاهده رویداد
           </Button>
@@ -111,6 +113,8 @@ export default function EventCard({ event, onEdit, onDelete }) {
               size="icon-sm"
               onClick={() => onEdit(event._id)}
               title="ویرایش"
+              aria-label="ویرایش رویداد"
+              className="min-h-[40px] min-w-[40px]"
             >
               <EditIcon fontSize="small" />
             </Button>
@@ -120,6 +124,8 @@ export default function EventCard({ event, onEdit, onDelete }) {
               size="icon-sm"
               onClick={() => onDelete(event._id)}
               title="حذف"
+              aria-label="حذف رویداد"
+              className="min-h-[40px] min-w-[40px]"
             >
               <DeleteOutlineIcon fontSize="small" />
             </Button>

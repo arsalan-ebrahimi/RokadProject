@@ -53,12 +53,12 @@ export default function AwardCard({ award, onEdit, onDelete }) {
   const rankDetails = getRankDetails(award.rank);
 
   return (
-    <Card hoverable className="p-4 flex items-center justify-between gap-4">
+    <Card hoverable className="p-3.5 sm:p-4 flex items-center justify-between gap-3 sm:gap-4">
       {/* Award Information */}
-      <div className="flex items-center gap-4 flex-grow min-w-0">
+      <div className="flex items-center gap-3 sm:gap-4 flex-grow min-w-0">
         {/* Dynamic Rank Circle */}
         <div
-          className={`w-12 h-12 flex items-center justify-center rounded-2xl text-lg font-black border shrink-0 shadow-xs ${rankDetails.bg}`}
+          className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl sm:rounded-2xl text-base sm:text-lg font-black border shrink-0 shadow-xs ${rankDetails.bg}`}
           title={rankDetails.label}
         >
           {rankDetails.badge}
@@ -71,7 +71,7 @@ export default function AwardCard({ award, onEdit, onDelete }) {
               {rankDetails.label}
             </span>
           </div>
-          <h2 className="text-base md:text-lg font-bold text-secondary line-clamp-1 leading-[1.4] min-h-[1.4em] break-words">
+          <h2 className="text-sm sm:text-base md:text-lg font-bold text-secondary line-clamp-1 leading-[1.4] min-h-[1.4em] break-words">
             {award.title}
           </h2>
           {award.description && (
@@ -87,8 +87,10 @@ export default function AwardCard({ award, onEdit, onDelete }) {
         <Button
           variant="info-ghost"
           size="icon-sm"
+          className="min-w-[40px] min-h-[40px]"
           onClick={() => onEdit(award._id)}
           title="ویرایش"
+          aria-label="ویرایش جایزه"
         >
           <EditIcon fontSize="small" />
         </Button>
@@ -96,8 +98,10 @@ export default function AwardCard({ award, onEdit, onDelete }) {
         <Button
           variant="danger-ghost"
           size="icon-sm"
+          className="min-w-[40px] min-h-[40px]"
           onClick={() => onDelete(award._id)}
           title="حذف"
+          aria-label="حذف جایزه"
         >
           <DeleteOutlineIcon fontSize="small" />
         </Button>

@@ -1,6 +1,7 @@
 // ==========================================
 // UI Component: Textarea
 // Multi-line form textarea input with label, error rendering, and focus states
+// Styled mobile-first with >=16px font on mobile to prevent iOS auto-zoom, and >=44px tap target
 // ==========================================
 
 import React, { forwardRef } from "react";
@@ -32,7 +33,6 @@ export const Textarea = forwardRef(
   ) => {
     const textareaId = id || name;
 
-
     return (
       <div className="flex flex-col gap-1.5 w-full text-right">
         {label && (
@@ -50,7 +50,7 @@ export const Textarea = forwardRef(
           name={name}
           rows={rows}
           className={`
-            w-full py-2.5 px-4 rounded-xl text-sm bg-surface text-text-primary placeholder:text-text-muted
+            w-full min-h-[44px] py-2.5 px-4 rounded-xl text-base md:text-sm bg-surface text-text-primary placeholder:text-text-muted
             border transition-all duration-200 outline-none resize-y
             disabled:bg-bg-subtle disabled:text-text-muted disabled:cursor-not-allowed
             ${

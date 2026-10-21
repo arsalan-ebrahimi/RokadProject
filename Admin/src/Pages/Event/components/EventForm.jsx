@@ -25,15 +25,25 @@ import {
   Card,
   PageHeader,
   ImageUpload,
+  FormActionBar,
 } from "../../../Components/UI";
+import { slugify } from "../../../Utils/slugify";
 
-const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d\/]+$/;
+const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-_،؛؟!.:«»",;?()/\u200c\u200d]+$/u;
 
-export const eventValidationSchema = Yup.object({
+const eventValidationSchema = Yup.object({
   title: Yup.string()
     .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
     .max(200, "عنوان حداکثر ۲۰۰ کاراکتر است")
     .required("عنوان رویداد الزامی است"),
+  slug: Yup.string()
+    .max(150, "اسلاگ حداکثر می‌تواند ۱۵۰ کاراکتر باشد")
+    .test(
+      "slug-format",
+      "اسلاگ فقط می‌تواند شامل حروف، اعداد و خط تیره (-) باشد و نباید با خط تیره شروع یا پایان یابد",
+      (val) => !val || !val.trim() || /^[a-z0-9\u0600-\u06FF]+(?:-[a-z0-9\u0600-\u06FF]+)*$/.test(val)
+    )
+    .optional(),
   type: Yup.string()
     .matches(safeTextRegex, "استفاده از کاراکترهای خاص مجاز نیست")
     .required("نوع رویداد الزامی است"),
@@ -139,6 +149,7 @@ export const eventValidationSchema = Yup.object({
 
 const defaultEventInitialValues = {
   title: "",
+  slug: "",
   type: "",
   date: "",
   description: "",
@@ -176,11 +187,16 @@ export default function EventForm({
 }) {
   const [imagePreview, setImagePreview] = useState(existingImageUrl || null);
   const [newTagInput, setNewTagInput] = useState("");
+  const [userModifiedSlug, setUserModifiedSlug] = useState(Boolean(initialValues?.slug));
   const tagInputRef = useRef(null);
 
   const formik = useFormik({
     enableReinitialize: true,
-    initialValues,
+    initialValues: {
+      ...defaultEventInitialValues,
+      ...initialValues,
+      slug: initialValues?.slug || "",
+    },
     validationSchema: eventValidationSchema,
     onSubmit: async (values) => {
       let finalTags = Array.isArray(values.tags) ? [...values.tags] : [];
@@ -205,8 +221,11 @@ export default function EventForm({
         (dl) => dl?.title && dl.title.trim()
       );
 
+      const finalSlug = values.slug?.trim() ? slugify(values.slug) : slugify(values.title);
+
       await onSubmit({
         ...values,
+        slug: finalSlug,
         tags: finalTags,
         organizers: cleanedOrganizers,
         teams: {
@@ -231,12 +250,42 @@ export default function EventForm({
     },
   });
 
-  // Synchronize image preview with existingImageUrl on updates
+  useEffect(() => {
+    if (initialValues?.slug) {
+      setUserModifiedSlug(true);
+    }
+  }, [initialValues?.slug]);
+
   useEffect(() => {
     if (!(formik.values.img instanceof File)) {
       setImagePreview(existingImageUrl || null);
     }
   }, [existingImageUrl]);
+
+  const handleTitleChange = (e) => {
+    const val = e.target.value;
+    formik.setFieldValue("title", val);
+    if (!userModifiedSlug) {
+      formik.setFieldValue("slug", slugify(val));
+    }
+  };
+
+  const handleSlugChange = (e) => {
+    setUserModifiedSlug(true);
+    const sanitized = e.target.value
+      .toLowerCase()
+      .replace(/[\s_]+/g, "-")
+      .replace(/[^\u0600-\u06FFa-z0-9-]/g, "")
+      .replace(/-+/g, "-");
+    formik.setFieldValue("slug", sanitized);
+  };
+
+  const handleSlugBlur = (e) => {
+    formik.handleBlur(e);
+    if (formik.values.slug) {
+      formik.setFieldValue("slug", slugify(formik.values.slug));
+    }
+  };
 
   const handleImageSelect = (file) => {
     formik.setFieldValue("img", file);
@@ -304,6 +353,7 @@ export default function EventForm({
     if (Object.keys(errors).length > 0) {
       formik.setTouched({
         title: true,
+        slug: true,
         type: true,
         date: true,
         description: true,
@@ -318,16 +368,17 @@ export default function EventForm({
   };
 
   return (
-    <div dir="rtl" className="p-6 md:p-8 w-full bg-background min-h-screen">
+    <div dir="rtl" className="p-4 sm:p-6 md:p-8 w-full bg-background min-h-dvh">
       <PageHeader
         title={pageTitle}
         subtitle={pageSubtitle}
         backTo="/event"
       />
 
-      <Card className="p-6 md:p-8 max-w-4xl mx-auto shadow-sm">
+      <Card className="p-4 sm:p-6 md:p-8 max-w-4xl mx-auto shadow-sm">
         <FormikProvider value={formik}>
-          <form onSubmit={handleFormSubmit} className="flex flex-col gap-8">
+          <form onSubmit={handleFormSubmit} className="flex flex-col gap-8 pb-20 md:pb-6">
+
             {/* 1. Basic Information */}
             <div className="flex flex-col gap-5">
               <h3 className="text-base font-bold text-secondary border-b border-border/80 pb-2 flex items-center gap-2">
@@ -340,7 +391,35 @@ export default function EventForm({
                   label="عنوان رویداد"
                   placeholder="مثال: رویداد بازی‌سازی و کارآفرینی رکاد"
                   error={formik.touched.title && formik.errors.title}
-                  {...formik.getFieldProps("title")}
+                  name="title"
+                  value={formik.values.title}
+                  onChange={handleTitleChange}
+                  onBlur={formik.handleBlur}
+                />
+
+                <Input
+                  label="اسلاگ / شناسه یکتای رویداد در URL (Slug)"
+                  placeholder="rokad-gamedev-hackathon-2025"
+                  helperText={
+                    formik.values.slug ? (
+                      <span className="flex items-center gap-1.5 flex-wrap break-all text-xs text-text-muted">
+                        <span>آدرس URL صفحه:</span>
+                        <span
+                          dir="ltr"
+                          className="font-mono text-primary font-medium bg-primary/10 px-1.5 py-0.5 rounded text-[11px] break-all max-w-full"
+                        >
+                          /event/{formik.values.slug.length > 55 ? `${formik.values.slug.slice(0, 55)}...` : formik.values.slug}
+                        </span>
+                      </span>
+                    ) : (
+                      "در صورت خالی بودن، اسلاگ خودکار از عنوان رویداد ایجاد می‌شود."
+                    )
+                  }
+                  error={formik.touched.slug && formik.errors.slug}
+                  name="slug"
+                  value={formik.values.slug}
+                  onChange={handleSlugChange}
+                  onBlur={handleSlugBlur}
                 />
 
                 <Input
@@ -356,84 +435,84 @@ export default function EventForm({
                   error={formik.touched.date && formik.errors.date}
                   {...formik.getFieldProps("date")}
                 />
-
-                <Input
-                  label="تاریخ برگزاری رویداد"
-                  placeholder="مثال: ۲۵ تا ۲۸ مهر ۱۴۰۴"
-                  error={formik.touched.holdingDate && formik.errors.holdingDate}
-                  {...formik.getFieldProps("holdingDate")}
-                />
-
-                <Input
-                  label="مدت رویداد"
-                  placeholder="مثال: ۳ روز (۵۴ ساعت)"
-                  error={formik.touched.eventDuration && formik.errors.eventDuration}
-                  {...formik.getFieldProps("eventDuration")}
-                />
-
-                <Input
-                  label="محل اختتامیه"
-                  placeholder="مثال: سالن همایش‌های بین‌المللی رکاد"
-                  error={formik.touched.closingLocation && formik.errors.closingLocation}
-                  {...formik.getFieldProps("closingLocation")}
-                />
               </div>
 
               {/* Branch Selection */}
-              <div className="flex flex-col gap-1.5 w-full text-right mt-1">
-                <label className="text-xs md:text-sm font-semibold text-text-primary select-none">
-                  شعبه برگزارکننده
+              <div className="flex flex-col gap-2">
+                <label className="text-xs md:text-sm font-semibold text-text-primary">
+                  شعبه مدرسه (حداقل یک مورد):
                 </label>
-                <div className="grid grid-cols-2 gap-3 max-w-md">
-                  {["دخترانه", "پسرانه"].map((branchOption) => {
-                    const isSelected = formik.values.branch?.includes(branchOption);
-                    return (
-                      <Checkbox
-                        key={branchOption}
-                        variant="card"
-                        checked={Boolean(isSelected)}
-                        onChange={(e) => {
-                          const isChecked = e.target.checked;
-                          const current = Array.isArray(formik.values.branch)
-                            ? formik.values.branch
-                            : [];
-                          const updated = isChecked
-                            ? [...current, branchOption]
-                            : current.filter((b) => b !== branchOption);
-                          formik.setFieldValue("branch", updated);
-                          formik.setFieldTouched("branch", true, false);
-                        }}
-                        label={`شعبه ${branchOption}`}
-                      />
-                    );
-                  })}
+                <div className="flex items-center gap-6">
+                  {["دخترانه", "پسرانه"].map((b) => (
+                    <Checkbox
+                      key={b}
+                      label={`شعبه ${b}`}
+                      checked={formik.values.branch?.includes(b)}
+                      onChange={(e) => {
+                        const current = formik.values.branch || [];
+                        if (e.target.checked) {
+                          formik.setFieldValue("branch", [...current, b]);
+                        } else {
+                          formik.setFieldValue(
+                            "branch",
+                            current.filter((item) => item !== b)
+                          );
+                        }
+                      }}
+                    />
+                  ))}
                 </div>
                 {formik.touched.branch && formik.errors.branch && (
-                  <span className="text-xs text-error font-medium animate-fadeIn">
-                    {typeof formik.errors.branch === "string"
-                      ? formik.errors.branch
-                      : formik.errors.branch[0]}
+                  <span className="text-xs text-error font-medium">
+                    {formik.errors.branch}
                   </span>
                 )}
               </div>
 
+              {/* Description */}
               <Textarea
-                label="توضیحات و معرفی رویداد"
+                label="توضیحات کلی رویداد"
                 rows={4}
-                placeholder="توضیحات جامع درباره اهداف و محورهای رویداد..."
+                placeholder="توضیحات و اهداف برگزاری رویداد..."
                 error={formik.touched.description && formik.errors.description}
                 {...formik.getFieldProps("description")}
               />
             </div>
 
-            {/* 2. Organizers (Mentors, Judges, Staff) - Min 3 required */}
+            {/* 2. Extended Event Details */}
+            <div className="flex flex-col gap-5 border-t border-border/80 pt-6">
+              <h3 className="text-base font-bold text-secondary flex items-center gap-2">
+                <AccessTimeIcon fontSize="small" className="text-primary" />
+                <span>مشخصات زمانی و مکانی تکمیلی</span>
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <Input
+                  label="مدت زمان برگزاری"
+                  placeholder="مثال: ۳ روز (۳۶ ساعت)"
+                  {...formik.getFieldProps("eventDuration")}
+                />
+                <Input
+                  label="مکان اختتامیه"
+                  placeholder="مثال: سالن همایش‌های رکاد"
+                  {...formik.getFieldProps("closingLocation")}
+                />
+                <Input
+                  label="بازه زمانی برگزاری"
+                  placeholder="مثال: ۱۲ الی ۱۴ مهرماه ۱۴۰۴"
+                  {...formik.getFieldProps("holdingDate")}
+                />
+              </div>
+            </div>
+
+            {/* 3. Organizers (Mentors, Judges, Staff) */}
             <div className="flex flex-col gap-4 border-t border-border/80 pt-6">
               <div className="flex justify-between items-center">
                 <h3 className="text-base font-bold text-secondary flex items-center gap-2">
                   <GroupIcon fontSize="small" className="text-primary" />
-                  <span>کادر رویداد (منتور، داور، عوامل اجرایی)</span>
+                  <span>کادر رویداد (منتورها، داوران و عوامل اجرایی)</span>
                 </h3>
-                <span className="text-xs font-semibold text-error bg-error/10 px-2.5 py-1 rounded-md">
+                <span className="text-xs text-text-muted font-medium">
                   حداقل ۳ نفر الزامی است
                 </span>
               </div>
@@ -441,47 +520,51 @@ export default function EventForm({
               <FieldArray name="organizers">
                 {({ push, remove }) => (
                   <div className="flex flex-col gap-3">
-                    {formik.values.organizers?.map((org, index) => {
-                      const nameErr = formik.errors.organizers?.[index]?.name;
-                      const roleErr = formik.errors.organizers?.[index]?.role;
-                      const catErr = formik.errors.organizers?.[index]?.category;
-                      const touched = formik.touched.organizers?.[index];
+                    {formik.values.organizers?.map((org, idx) => {
+                      const nameErr = formik.errors.organizers?.[idx]?.name;
+                      const roleErr = formik.errors.organizers?.[idx]?.role;
+                      const touchedName = formik.touched.organizers?.[idx]?.name;
+                      const touchedRole = formik.touched.organizers?.[idx]?.role;
 
                       return (
                         <div
-                          key={index}
+                          key={idx}
                           className="flex flex-col md:flex-row gap-3 items-start md:items-center bg-bg-light/60 p-4 rounded-xl border border-border"
                         >
+                          <div className="w-full md:w-1/3">
+                            <Input
+                              placeholder="نام و نام خانوادگی..."
+                              error={touchedName && nameErr}
+                              {...formik.getFieldProps(
+                                `organizers[${idx}].name`
+                              )}
+                            />
+                          </div>
+
+                          <div className="w-full md:w-1/3">
+                            <Input
+                              placeholder="نقش (مثال: منتور UI/UX)..."
+                              error={touchedRole && roleErr}
+                              {...formik.getFieldProps(
+                                `organizers[${idx}].role`
+                              )}
+                            />
+                          </div>
+
                           <div className="w-full md:w-1/4">
                             <Select
-                              label={index === 0 ? "دسته‌بندی" : ""}
-                              options={["منتور", "عوامل اجرایی", "داور"]}
-                              error={touched?.category && catErr}
-                              {...formik.getFieldProps(
-                                `organizers[${index}].category`
-                              )}
-                            />
-                          </div>
-
-                          <div className="w-full md:w-1/3">
-                            <Input
-                              label={index === 0 ? "نام و نام خانوادگی" : ""}
-                              placeholder="مثال: مهندس حسینی"
-                              error={touched?.name && nameErr}
-                              {...formik.getFieldProps(
-                                `organizers[${index}].name`
-                              )}
-                            />
-                          </div>
-
-                          <div className="w-full md:w-1/3">
-                            <Input
-                              label={index === 0 ? "نقش / سمت زیر نام" : ""}
-                              placeholder="مثال: تسهیلگر ارشد یا داور فنی"
-                              error={touched?.role && roleErr}
-                              {...formik.getFieldProps(
-                                `organizers[${index}].role`
-                              )}
+                              value={org.category}
+                              onChange={(e) =>
+                                formik.setFieldValue(
+                                  `organizers[${idx}].category`,
+                                  e.target.value
+                                )
+                              }
+                              options={[
+                                { value: "منتور", label: "منتور" },
+                                { value: "داور", label: "داور" },
+                                { value: "عوامل اجرایی", label: "عوامل اجرایی" },
+                              ]}
                             />
                           </div>
 
@@ -489,27 +572,15 @@ export default function EventForm({
                             type="button"
                             variant="danger-ghost"
                             size="icon-sm"
-                            onClick={() => remove(index)}
-                            disabled={formik.values.organizers.length <= 3}
-                            title={
-                              formik.values.organizers.length <= 3
-                                ? "حداقل ۳ عضو باید در کادر باقی بماند"
-                                : "حذف این عضو"
-                            }
-                            className={`shrink-0 ${index === 0 ? "md:mt-5" : ""}`}
+                            onClick={() => remove(idx)}
+                            title="حذف این عضو"
+                            className="shrink-0"
                           >
                             <DeleteOutlineIcon fontSize="small" />
                           </Button>
                         </div>
                       );
                     })}
-
-                    {formik.errors.organizers &&
-                      typeof formik.errors.organizers === "string" && (
-                        <span className="text-xs text-error font-semibold">
-                          {formik.errors.organizers}
-                        </span>
-                      )}
 
                     <Button
                       type="button"
@@ -521,31 +592,37 @@ export default function EventForm({
                       icon={<AddIcon fontSize="small" />}
                       className="self-start mt-1"
                     >
-                      افزودن عضو جدید به کادر رویداد
+                      افزودن عضو جدید به کادر
                     </Button>
+
+                    {formik.errors.organizers &&
+                      typeof formik.errors.organizers === "string" && (
+                        <span className="text-xs text-error font-medium">
+                          {formik.errors.organizers}
+                        </span>
+                      )}
                   </div>
                 )}
               </FieldArray>
             </div>
 
-            {/* 3. Competition Teams (First, Second, Third with Honored Toggle + Unlimited Honored Teams) */}
-            <div className="flex flex-col gap-4 border-t border-border/80 pt-6">
+            {/* 4. Competition Teams Podium */}
+            <div className="flex flex-col gap-5 border-t border-border/80 pt-6">
               <h3 className="text-base font-bold text-secondary flex items-center gap-2">
                 <EmojiEventsIcon fontSize="small" className="text-primary" />
-                <span>تیم‌های برتر و شایسته تقدیر</span>
+                <span>تیم‌های برتر و سکوهای مسابقه</span>
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Team 1 */}
-                <div className="bg-bg-light/60 p-4 rounded-xl border border-border flex flex-col gap-3">
-                  <span className="text-xs font-bold text-amber-700 bg-amber-100 px-2.5 py-0.5 rounded-full self-start">
-                    🥇 تیم اول (ثابت)
-                  </span>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                {/* 1st Place */}
+                <div className="flex flex-col gap-2 p-4 rounded-xl border border-amber-300 bg-amber-50/40">
+                  <span className="text-xs font-bold text-amber-800">🥇 تیم اول مسابقه:</span>
                   <Input
                     placeholder="نام تیم اول..."
                     {...formik.getFieldProps("teams.firstTeam.name")}
                   />
                   <Checkbox
+                    label="تیم شایسته تقدیر ویژه"
                     checked={Boolean(formik.values.teams?.firstTeam?.isHonored)}
                     onChange={(e) =>
                       formik.setFieldValue(
@@ -553,20 +630,18 @@ export default function EventForm({
                         e.target.checked
                       )
                     }
-                    label="این تیم شایسته تقدیر نیز باشد"
                   />
                 </div>
 
-                {/* Team 2 */}
-                <div className="bg-bg-light/60 p-4 rounded-xl border border-border flex flex-col gap-3">
-                  <span className="text-xs font-bold text-slate-700 bg-slate-200 px-2.5 py-0.5 rounded-full self-start">
-                    🥈 تیم دوم (ثابت)
-                  </span>
+                {/* 2nd Place */}
+                <div className="flex flex-col gap-2 p-4 rounded-xl border border-slate-300 bg-slate-50/50">
+                  <span className="text-xs font-bold text-slate-700">🥈 تیم دوم مسابقه:</span>
                   <Input
                     placeholder="نام تیم دوم..."
                     {...formik.getFieldProps("teams.secondTeam.name")}
                   />
                   <Checkbox
+                    label="تیم شایسته تقدیر ویژه"
                     checked={Boolean(formik.values.teams?.secondTeam?.isHonored)}
                     onChange={(e) =>
                       formik.setFieldValue(
@@ -574,20 +649,18 @@ export default function EventForm({
                         e.target.checked
                       )
                     }
-                    label="این تیم شایسته تقدیر نیز باشد"
                   />
                 </div>
 
-                {/* Team 3 */}
-                <div className="bg-bg-light/60 p-4 rounded-xl border border-border flex flex-col gap-3">
-                  <span className="text-xs font-bold text-amber-900 bg-amber-200/60 px-2.5 py-0.5 rounded-full self-start">
-                    🥉 تیم سوم (ثابت)
-                  </span>
+                {/* 3rd Place */}
+                <div className="flex flex-col gap-2 p-4 rounded-xl border border-amber-700/30 bg-amber-100/20">
+                  <span className="text-xs font-bold text-amber-900">🥉 تیم سوم مسابقه:</span>
                   <Input
                     placeholder="نام تیم سوم..."
                     {...formik.getFieldProps("teams.thirdTeam.name")}
                   />
                   <Checkbox
+                    label="تیم شایسته تقدیر ویژه"
                     checked={Boolean(formik.values.teams?.thirdTeam?.isHonored)}
                     onChange={(e) =>
                       formik.setFieldValue(
@@ -595,85 +668,72 @@ export default function EventForm({
                         e.target.checked
                       )
                     }
-                    label="این تیم شایسته تقدیر نیز باشد"
                   />
                 </div>
               </div>
 
               {/* Dynamic Honored Teams */}
-              <div className="mt-2 flex flex-col gap-3">
-                <label className="text-xs md:text-sm font-semibold text-text-primary">
-                  تیم‌های شایسته تقدیر دیگر (هر تعداد دلخواه):
-                </label>
+              <FieldArray name="teams.honoredTeams">
+                {({ push, remove }) => (
+                  <div className="flex flex-col gap-3 mt-2">
+                    <label className="text-xs md:text-sm font-semibold text-text-primary">
+                      سایر تیم‌های شایسته تقدیر:
+                    </label>
 
-                <FieldArray name="teams.honoredTeams">
-                  {({ push, remove }) => (
-                    <div className="flex flex-col gap-2">
-                      {formik.values.teams?.honoredTeams?.map((t, idx) => (
-                        <div
-                          key={idx}
-                          className="flex items-center gap-3 bg-bg-light/40 p-2.5 rounded-lg border border-border max-w-lg"
+                    {formik.values.teams?.honoredTeams?.map((ht, idx) => (
+                      <div key={idx} className="flex items-center gap-3 max-w-md">
+                        <Input
+                          placeholder="نام تیم شایسته تقدیر..."
+                          {...formik.getFieldProps(
+                            `teams.honoredTeams[${idx}].name`
+                          )}
+                        />
+                        <Button
+                          type="button"
+                          variant="danger-ghost"
+                          size="icon-sm"
+                          onClick={() => remove(idx)}
+                          title="حذف تیم"
+                          className="shrink-0"
                         >
-                          <span className="text-xs font-bold text-text-muted font-numeric">
-                            #{idx + 1}
-                          </span>
-                          <Input
-                            placeholder="نام تیم شایسته تقدیر..."
-                            {...formik.getFieldProps(
-                              `teams.honoredTeams[${idx}].name`
-                            )}
-                          />
-                          <Button
-                            type="button"
-                            variant="danger-ghost"
-                            size="icon-sm"
-                            onClick={() => remove(idx)}
-                            title="حذف"
-                          >
-                            <DeleteOutlineIcon fontSize="small" />
-                          </Button>
-                        </div>
-                      ))}
+                          <DeleteOutlineIcon fontSize="small" />
+                        </Button>
+                      </div>
+                    ))}
 
-                      <Button
-                        type="button"
-                        variant="primary-subtle"
-                        size="sm"
-                        onClick={() => push({ name: "" })}
-                        icon={<AddIcon fontSize="small" />}
-                        className="self-start mt-1"
-                      >
-                        افزودن تیم شایسته تقدیر
-                      </Button>
-                    </div>
-                  )}
-                </FieldArray>
-              </div>
+                    <Button
+                      type="button"
+                      variant="primary-subtle"
+                      size="sm"
+                      onClick={() => push({ name: "" })}
+                      icon={<AddIcon fontSize="small" />}
+                      className="self-start mt-1"
+                    >
+                      افزودن تیم شایسته تقدیر
+                    </Button>
+                  </div>
+                )}
+              </FieldArray>
             </div>
 
-            {/* 4. How the Event Went (رویداد چطور گذشت) */}
-            <div className="flex flex-col gap-3 border-t border-border/80 pt-6">
+            {/* 5. How It Went & Memorable Quote */}
+            <div className="flex flex-col gap-5 border-t border-border/80 pt-6">
               <h3 className="text-base font-bold text-secondary flex items-center gap-2">
                 <AutoStoriesIcon fontSize="small" className="text-primary" />
-                <span>رویداد چطور گذشت (اختیاری)</span>
+                <span>گزارش برگزاری رویداد و نقل‌قول به‌یادماندنی</span>
               </h3>
+
               <Textarea
+                label="چگونگی برگزاری رویداد (داستان رویداد)"
                 rows={4}
-                placeholder="روایت و گزارش کلی از نحوه برگزاری، شور و اشتیاق شرکت‌کنندگان، چالش‌ها و دستاوردها..."
+                placeholder="شرح کامل روند برگزاری رویداد، هیجان رقابت‌ها و دستاوردها..."
                 {...formik.getFieldProps("howItWent")}
               />
-            </div>
 
-            {/* 5. Memorable Quotes (سخنان به‌یاد‌ماندنی) */}
-            <div className="flex flex-col gap-3 border-t border-border/80 pt-6">
-              <h3 className="text-base font-bold text-secondary flex items-center gap-2">
-                <FormatQuoteIcon fontSize="small" className="text-primary" />
-                <span>سخنان به‌یاد‌ماندنی رویداد (اختیاری)</span>
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div className="col-span-1 md:col-span-2">
                   <Input
-                    label="متن نقل‌قول / سخن به‌یاد‌ماندنی"
+                    label="نقل‌قول ماندگار رویداد"
                     placeholder="مثال: بزرگترین یادگیری در این رویداد، پیاده‌سازی سریع ایده‌ها بود..."
                     {...formik.getFieldProps("memorableQuote.quote")}
                   />
@@ -849,16 +909,12 @@ export default function EventForm({
               />
             </div>
 
-            {/* Submit Button */}
-            <div className="flex justify-end pt-4 border-t border-border/80">
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                isLoading={isSubmitting}
-              >
-                {isEdit ? "ذخیره تغییرات رویداد" : "ایجاد و ثبت رویداد"}
-              </Button>
+            {/* Submit Action Bar */}
+            <div className="pt-4 border-t border-border/80">
+              <FormActionBar
+                submitLabel={isEdit ? "ذخیره تغییرات رویداد" : "ایجاد و ثبت رویداد"}
+                isSubmitting={isSubmitting}
+              />
             </div>
           </form>
         </FormikProvider>

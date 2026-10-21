@@ -65,7 +65,7 @@ export default function SingleStudent() {
   const imageUrl = getImageUrl(student.img);
 
   return (
-    <div dir="rtl" className="p-6 md:p-8 w-full bg-background min-h-screen">
+    <div dir="rtl" className="p-4 sm:p-6 md:p-8 w-full bg-background min-h-dvh">
       {/* Top Header */}
       <div className="max-w-5xl mx-auto mb-6">
         <PageHeader
@@ -78,6 +78,7 @@ export default function SingleStudent() {
               size="md"
               onClick={() => navigate(`/student/update/${student._id}`)}
               icon={<EditIcon fontSize="small" />}
+              className="w-full sm:w-auto"
             >
               ویرایش پرونده
             </Button>
@@ -85,10 +86,11 @@ export default function SingleStudent() {
         />
       </div>
 
-      <div className="max-w-5xl mx-auto flex flex-col gap-8">
+      <div className="max-w-5xl mx-auto flex flex-col gap-6 md:gap-8">
         {/* Profile Summary Card */}
-        <Card className="p-6 md:p-8 border border-border shadow-sm">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+        <Card className="p-4 sm:p-6 md:p-8 border border-border shadow-sm">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6">
+
             {/* Avatar */}
             <div className="w-28 h-28 md:w-36 md:h-36 rounded-2xl overflow-hidden bg-bg-light border-2 border-border/80 shrink-0 shadow-sm flex items-center justify-center relative">
               {student.img ? (

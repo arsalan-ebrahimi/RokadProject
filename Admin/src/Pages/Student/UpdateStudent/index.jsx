@@ -9,7 +9,8 @@ import axiosInstance from "../../../Utils/axiosInstance";
 import Notify from "../../../Utils/notify";
 import { getImageUrl } from "../../../Utils/getImageUrl";
 import Loading from "../../../Components/Loading";
-import StudentForm, { toEnglishDigits } from "../components/StudentForm";
+import StudentForm from "../components/StudentForm";
+import { toEnglishDigits } from "../../../Utils/toEnglishDigits";
 
 export default function UpdateStudent() {
   const { id } = useParams();

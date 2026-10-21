@@ -3,7 +3,7 @@
 // Displays student alumni directory with filters by generation, school branch, and major
 // ==========================================
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import axiosInstance from "../../../Utils/axiosInstance";
@@ -14,9 +14,10 @@ import Filter from "../../../Components/Filter";
 import Search from "../../../Components/Search";
 import Loading from "../../../Components/Loading";
 import { Button, PageHeader, Card } from "../../../Components/UI";
+import { useUndoableDelete } from "../../../Hooks";
 
 /**
- * Student directory page with multi-field filters, search, and deletion handling.
+ * Student directory page with multi-field filters, search, and undoable delete workflow.
  */
 export default function StudentPage() {
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ export default function StudentPage() {
   const [hasMore, setHasMore] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({});
+  const isFetchingRef = useRef(false);
 
   const LIMIT = 12;
 
@@ -58,9 +60,27 @@ export default function StudentPage() {
     },
   ];
 
+  // Undoable Delete Hook: manages 5s countdown window and optimistic UI filtering
+  const {
+    visibleItems: visibleStudents,
+    requestDelete,
+  } = useUndoableDelete({
+    entity: "student",
+    entityLabel: "دانش‌آموز",
+    items: students,
+    getId: (item) => item?._id,
+    getLabel: (student) => student?.fullName || student?.name || "",
+    deleteFn: (id) => axiosInstance.delete(`student/${id}`),
+    onDeleted: (id) => {
+      setStudents((prev) => prev.filter((item) => item._id !== id));
+    },
+    duration: 5000,
+  });
+
   const fetchStudents = async (pageNumber, query, currentFilters = {}) => {
     if (pageNumber === 1) setLoading(true);
     else setLoadingMore(true);
+    isFetchingRef.current = true;
 
     try {
       let url = `student?limit=${LIMIT}&page=${pageNumber}&sort=-_id`;
@@ -97,13 +117,16 @@ export default function StudentPage() {
           });
         }
       } else {
+        setHasMore(false);
         Notify("error", data?.message || "خطا در دریافت اطلاعات");
       }
     } catch (error) {
+      setHasMore(false);
       Notify("error", error.message || "خطا در دریافت اطلاعات");
     } finally {
       setLoading(false);
       setLoadingMore(false);
+      isFetchingRef.current = false;
     }
   };
 
@@ -113,18 +136,22 @@ export default function StudentPage() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollHeight = document.documentElement.scrollHeight;
-      const scrollTop = document.documentElement.scrollTop;
-      const clientHeight = window.innerHeight;
+      if (!hasMore || loading || loadingMore || isFetchingRef.current) return;
 
-      if (scrollTop + clientHeight >= scrollHeight - 100) {
-        if (hasMore && !loading && !loadingMore) {
+      const scrollTop =
+        window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+      const clientHeight = window.innerHeight || document.documentElement.clientHeight;
+      const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+
+      if (scrollHeight > clientHeight + 100 && scrollTop > 60) {
+        if (scrollTop + clientHeight >= scrollHeight - 160) {
+          isFetchingRef.current = true;
           setPage((prevPage) => prevPage + 1);
         }
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [hasMore, loading, loadingMore]);
 
@@ -132,12 +159,14 @@ export default function StudentPage() {
     setSearchQuery(query);
     setPage(1);
     setHasMore(true);
+    isFetchingRef.current = false;
   };
 
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
     setPage(1);
     setHasMore(true);
+    isFetchingRef.current = false;
   };
 
   const handleEditStudent = (id) => {
@@ -155,22 +184,11 @@ export default function StudentPage() {
 
     if (!isConfirmed) return;
 
-    try {
-      const deleteData = await axiosInstance.delete(`student/${id}`);
-
-      if (deleteData && deleteData.success !== false) {
-        setStudents((prev) => prev.filter((item) => item._id !== id));
-        Notify("success", "دانش‌آموز با موفقیت حذف شد.");
-      } else {
-        Notify("error", deleteData?.message || "خطا در حذف اطلاعات");
-      }
-    } catch (error) {
-      Notify("error", error.message || "خطا در حذف اطلاعات");
-    }
+    requestDelete(id);
   };
 
   return (
-    <div dir="rtl" className="p-6 md:p-8 w-full bg-background min-h-screen">
+    <div dir="rtl" className="p-4 sm:p-6 md:p-8 w-full bg-background min-h-dvh">
       <PageHeader
         title="مدیریت دانش‌آموزان"
         action={
@@ -179,19 +197,18 @@ export default function StudentPage() {
             size="md"
             icon={<AddIcon fontSize="small" />}
             onClick={handleAddStudent}
+            className="w-full sm:w-auto"
           >
             افزودن دانش‌آموز
           </Button>
         }
       >
-        <Card className="flex flex-col md:flex-row justify-between items-center gap-4 p-4 shadow-xs">
-          <div className="w-full md:w-auto overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
-            <Filter
-              filterConfig={studentFilterConfig}
-              onFilterChange={handleFilterChange}
-            />
-          </div>
-          <Search onSearch={handleSearch} placeholder="جستجوی دانش‌آموز..." />
+        <Card className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3 md:gap-4 p-3 sm:p-4 shadow-xs">
+          <Filter
+            filterConfig={studentFilterConfig}
+            onFilterChange={handleFilterChange}
+          />
+          <Search onSearch={handleSearch} placeholder="جستجوی دانش‌آموز..." className="w-full md:w-80" />
         </Card>
       </PageHeader>
 
@@ -202,8 +219,8 @@ export default function StudentPage() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
-            {students.map((student) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 items-stretch">
+            {visibleStudents.map((student) => (
               <StudentCard
                 key={student._id}
                 student={student}
@@ -213,7 +230,7 @@ export default function StudentPage() {
             ))}
           </div>
 
-          {students.length === 0 && !loading && (
+          {visibleStudents.length === 0 && !loading && (
             <div className="col-span-full text-center text-text-secondary py-14">
               هیچ دانش‌آموزی یافت نشد.
             </div>

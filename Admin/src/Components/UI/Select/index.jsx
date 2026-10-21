@@ -1,6 +1,7 @@
 // ==========================================
 // UI Component: Select
 // Form dropdown selector with support for primitive options, key-value objects, custom children, and custom arrow icon
+// Styled mobile-first with >=16px font on mobile to prevent iOS auto-zoom, and >=44px tap target
 // ==========================================
 
 import React, { forwardRef } from "react";
@@ -37,7 +38,6 @@ export const Select = forwardRef(
   ) => {
     const selectId = id || name;
 
-
     return (
       <div className="flex flex-col gap-1.5 w-full text-right">
         {label && (
@@ -55,7 +55,7 @@ export const Select = forwardRef(
             id={selectId}
             name={name}
             className={`
-              w-full py-2.5 pl-9 pr-4 rounded-xl text-sm bg-surface text-text-primary
+              w-full min-h-[44px] py-2.5 pl-9 pr-4 rounded-xl text-base md:text-sm bg-surface text-text-primary
               border transition-all duration-200 outline-none appearance-none cursor-pointer
               disabled:bg-bg-subtle disabled:text-text-muted disabled:cursor-not-allowed
               ${

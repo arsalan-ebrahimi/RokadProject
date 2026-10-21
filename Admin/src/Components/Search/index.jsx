@@ -1,6 +1,7 @@
 // ==========================================
 // Component: Search
 // Debounced search input field with icon and customizable query delay
+// Styled mobile-first with >=16px font on mobile to prevent iOS auto-zoom, and >=44px tap target
 // ==========================================
 
 import React, { useState, useEffect } from "react";
@@ -30,7 +31,6 @@ export default function Search({
       }
     }, 400);
 
-
     return () => clearTimeout(timer);
   }, [searchTerm, onSearch]);
 
@@ -40,11 +40,12 @@ export default function Search({
         <SearchIcon fontSize="small" />
       </div>
       <input
-        type="text"
+        type="search"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         placeholder={placeholder}
-        className="w-full py-2.5 pr-10 pl-4 rounded-xl text-sm bg-surface text-text-primary placeholder:text-text-muted border border-border hover:border-border-hover focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all duration-200 outline-none shadow-xs"
+        aria-label={placeholder}
+        className="w-full min-h-[44px] py-2.5 pr-10 pl-4 rounded-xl text-base md:text-sm bg-surface text-text-primary placeholder:text-text-muted border border-border hover:border-border-hover focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all duration-200 outline-none shadow-xs"
       />
     </div>
   );

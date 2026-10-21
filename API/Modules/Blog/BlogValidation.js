@@ -1,4 +1,4 @@
-import Joi from "joi";
+﻿import Joi from "joi";
 
 const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/;
 
@@ -13,6 +13,17 @@ export const createBlogValidator = Joi.object({
       "string.empty": "عنوان نمی‌تواند خالی باشد",
       "string.max": "عنوان نمی‌تواند بیشتر از ۲۰۰ کاراکتر باشد",
       "any.required": "فیلد عنوان الزامی است",
+    }),
+  slug: Joi.string()
+    .trim()
+    .max(150)
+    .pattern(/^[a-z0-9\u0600-\u06FF]+(?:-[a-z0-9\u0600-\u06FF]+)*$/)
+    .allow("")
+    .optional()
+    .messages({
+      "string.base": "اسلاگ باید به صورت متن باشد",
+      "string.pattern.base": "اسلاگ فقط می‌تواند شامل حروف، اعداد و خط تیره (-) بدون فاصله یا کاراکترهای خاص باشد",
+      "string.max": "اسلاگ نمی‌تواند بیشتر از ۱۵۰ کاراکتر باشد",
     }),
   description: Joi.string()
     .pattern(safeTextRegex)
@@ -106,6 +117,17 @@ export const updateBlogValidator = Joi.object({
       "string.base": "عنوان باید یک متن باشد",
       "string.empty": "عنوان نمی‌تواند خالی باشد",
       "string.max": "عنوان نمی‌تواند بیشتر از ۲۰۰ کاراکتر باشد",
+    }),
+  slug: Joi.string()
+    .trim()
+    .max(150)
+    .pattern(/^[a-z0-9\u0600-\u06FF]+(?:-[a-z0-9\u0600-\u06FF]+)*$/)
+    .allow("")
+    .optional()
+    .messages({
+      "string.base": "اسلاگ باید به صورت متن باشد",
+      "string.pattern.base": "اسلاگ فقط می‌تواند شامل حروف، اعداد و خط تیره (-) بدون فاصله یا کاراکترهای خاص باشد",
+      "string.max": "اسلاگ نمی‌تواند بیشتر از ۱۵۰ کاراکتر باشد",
     }),
   description: Joi.string()
     .pattern(safeTextRegex)

@@ -1,4 +1,4 @@
-import Joi from "joi";
+﻿import Joi from "joi";
 
 const safeTextRegex = /^[\u0600-\u06FF\sA-Za-z0-9\-\_،؛؟!.:«»",;?()\u200c\u200d]+$/;
 
@@ -85,6 +85,17 @@ export const createEventValidator = Joi.object({
       "string.empty": "عنوان نمی‌تواند خالی باشد",
       "string.pattern.base": "عنوان شامل کاراکترهای غیرمجاز است",
       "any.required": "فیلد عنوان الزامی است",
+    }),
+  slug: Joi.string()
+    .trim()
+    .max(150)
+    .pattern(/^[a-z0-9\u0600-\u06FF]+(?:-[a-z0-9\u0600-\u06FF]+)*$/)
+    .allow("")
+    .optional()
+    .messages({
+      "string.base": "اسلاگ باید به صورت متن باشد",
+      "string.pattern.base": "اسلاگ فقط می‌تواند شامل حروف، اعداد و خط تیره (-) بدون فاصله یا کاراکترهای خاص باشد",
+      "string.max": "اسلاگ نمی‌تواند بیشتر از ۱۵۰ کاراکتر باشد",
     }),
   type: Joi.string()
     .pattern(safeTextRegex)
@@ -184,6 +195,12 @@ export const createEventValidator = Joi.object({
 
 export const updateEventValidator = Joi.object({
   title: Joi.string().pattern(safeTextRegex).max(200),
+  slug: Joi.string()
+    .trim()
+    .max(150)
+    .pattern(/^[a-z0-9\u0600-\u06FF]+(?:-[a-z0-9\u0600-\u06FF]+)*$/)
+    .allow("")
+    .optional(),
   type: Joi.string().pattern(safeTextRegex).max(100),
   date: Joi.string().pattern(safeTextRegex).max(100),
   description: Joi.string().pattern(safeTextRegex).min(10).max(5000),

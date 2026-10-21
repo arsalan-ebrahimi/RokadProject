@@ -1,4 +1,4 @@
-// ==========================================
+﻿// ==========================================
 // Component: BlogCard
 // Presentation card for an individual blog entry displaying thumbnail, metadata, and action buttons
 // ==========================================
@@ -26,11 +26,12 @@ export default function BlogCard({ blog, onEdit, onDelete }) {
   return (
     <Card hoverable className="overflow-hidden flex flex-col group h-full">
       {/* Blog Thumbnail */}
-      <div className="h-48 w-full bg-bg-light relative overflow-hidden border-b border-border/60">
+      <div className="h-48 w-full bg-bg-light relative overflow-hidden border-b border-border/60 aspect-video">
         {blog.img ? (
           <img
             src={imageUrl}
             alt={blog.title}
+            loading="lazy"
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             onError={(e) => {
               e.target.style.display = "none";
@@ -80,14 +81,14 @@ export default function BlogCard({ blog, onEdit, onDelete }) {
           {blog.description}
         </p>
 
-        {/* Action Buttons Toolbar */}
+        {/* Action Buttons Toolbar with >=40px touch targets */}
         <div className="flex justify-between items-center gap-1 mt-auto shrink-0 pt-3 border-t border-border-light">
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(`/blog/${blog._id}`)}
+            onClick={() => navigate(`/blog/${blog.slug || blog._id}`)}
             icon={<VisibilityIcon fontSize="inherit" />}
-            className="text-xs text-primary hover:text-primary-active"
+            className="text-xs text-primary hover:text-primary-active min-h-[40px]"
           >
             پیش‌نمایش
           </Button>
@@ -98,6 +99,8 @@ export default function BlogCard({ blog, onEdit, onDelete }) {
               size="icon-sm"
               onClick={() => onEdit(blog)}
               title="ویرایش"
+              aria-label="ویرایش مقاله"
+              className="min-h-[40px] min-w-[40px]"
             >
               <EditIcon fontSize="small" />
             </Button>
@@ -105,14 +108,17 @@ export default function BlogCard({ blog, onEdit, onDelete }) {
             <Button
               variant="danger-ghost"
               size="icon-sm"
-              onClick={() => onDelete(blog._id)}
+              onClick={() => onDelete(blog)}
               title="حذف"
+              aria-label="حذف مقاله"
+              className="min-h-[40px] min-w-[40px]"
             >
               <DeleteOutlineIcon fontSize="small" />
             </Button>
           </div>
         </div>
       </div>
+
     </Card>
   );
 }
