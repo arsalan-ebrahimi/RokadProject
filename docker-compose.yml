@@ -1,0 +1,120 @@
+name: rokad-project
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: rokad_project_mongodb
+    restart: unless-stopped
+    # Run MongoDB with a single-node replica set to support multi-document transactions and sessions
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    networks:
+      - rokad_network
+    healthcheck:
+      # Automatically initialize rs0 replica set on first run and verify PRIMARY status
+      test:
+        - "CMD-SHELL"
+        - "mongosh --quiet --eval \"try { if (db.hello().isWritablePrimary) { quit(0); } } catch(e) {} try { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'mongodb:27017' }] }); } catch(e) {} quit(1);\""
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  backend:
+    build:
+      context: ./API
+      dockerfile: Dockerfile
+      target: development
+    image: rokad-project-backend:latest
+    container_name: rokad_project_backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 5000
+      # Connect to MongoDB replica set with transactions enabled
+      DATA_BASE: mongodb://mongodb:27017/RokadProject?replicaSet=rs0&directConnection=true
+      JWT_SECRET: rokad_project_jwt_secret_key_2026_super_secure
+      SMS_KEY: 0518beab-29dc-493d-9a2c-aac2f1098cd1
+      CORS_ORIGIN: http://localhost:5173,http://localhost:3000,http://localhost:80,http://127.0.0.1:5173
+      ALLOWED_ORIGINS: http://localhost:5173,http://localhost:3000,http://localhost:80
+      TRUST_PROXY: 1
+      RATE_LIMIT_GLOBAL_MAX: 1000
+      RATE_LIMIT_AUTH_MAX: 50
+      RATE_LIMIT_WRITE_MAX: 300
+      RATE_LIMIT_UPLOAD_MAX: 60
+      MAX_UPLOAD_SIZE_BYTES: 5242880
+    ports:
+      - "5000:5000"
+    volumes:
+      # Bind mount API source code for hot reload
+      - ./API:/app
+      # Anonymous volume to preserve Linux node_modules inside container
+      - /app/node_modules
+      # Persistent storage for uploads
+      - ./API/Public:/app/Public
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:5000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - rokad_network
+
+  frontend:
+    build:
+      context: ./Admin
+      dockerfile: Dockerfile
+      target: development
+    image: rokad-project-frontend:latest
+    container_name: rokad_project_frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:5000/api/
+      - VITE_FILE_URL=http://localhost:5000/
+    volumes:
+      - ./Admin:/app
+      - /app/node_modules
+    networks:
+      - rokad_network
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  # Optional Web GUI for MongoDB (Mongo Express)
+  mongo-express:
+    image: mongo-express:latest
+    container_name: rokad_project_mongo_express
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: "true"
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: password123
+    networks:
+      - rokad_network
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    profiles:
+      - tools
+
+volumes:
+  mongodb_data:
+  mongodb_config:
+
+networks:
+  rokad_network:
+    driver: bridge

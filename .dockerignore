@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Frontend / Admin (when building backend alone)
+# Admin/
+
+# Internal agent and git directories
+.git/
+.agents/
+.specify/
+.vscode/
+.idea/
+
+# Secrets and environment configs
+.env
+config.env
+*.env
+**/*.env
+
+# Logs and scratch
+scratch/
+**/scratch/
+*.log
+
+# OS metadata
+.DS_Store
+Thumbs.db
